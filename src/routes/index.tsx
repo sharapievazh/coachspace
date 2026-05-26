@@ -112,7 +112,7 @@ ${notes || "—"}
         {tab === "session" && (
           <SessionPanel
             duration={duration}
-            setDuration={(d) => { setDuration(d); setRemaining(d); }}
+            setDuration={(d: number) => { setDuration(d); setRemaining(d); }}
             remaining={remaining}
             running={running}
             setRunning={setRunning}
