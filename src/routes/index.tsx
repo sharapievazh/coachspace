@@ -161,7 +161,7 @@ function SessionPanel(p: any) {
           </button>
         </div>
         <div className="flex gap-2 flex-wrap">
-          {[15, 30, 45, 60, 90].map((m) => (
+          {[20, 30, 45, 60, 90].map((m) => (
             <button key={m} onClick={() => p.setDuration(m*60)}
               className={`px-3 py-1.5 text-xs rounded-md border ${p.duration===m*60 ? "bg-primary text-primary-foreground border-primary" : "border-border hover:bg-secondary"}`}>
               {m} мин
