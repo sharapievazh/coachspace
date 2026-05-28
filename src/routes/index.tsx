@@ -1,23 +1,27 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   Play, Pause, RotateCcw, Download, Target, Search, Lightbulb, Rocket,
-  AlertTriangle, Heart, Triangle, Layers, MessageCircle, Sparkles,
+  AlertTriangle, Heart, Triangle, Layers, MessageCircle, Sparkles, Sandwich,
 } from "lucide-react";
+import burgerTop from "@/assets/burger-top.png";
+import burgerPatty from "@/assets/burger-patty.png";
+import burgerBottom from "@/assets/burger-bottom.png";
 
 export const Route = createFileRoute("/")({
   component: CoachSpace,
 });
 
-type TabId = "grow" | "swot" | "nlu" | "sos" | "rapport" | "session";
+type TabId = "session" | "grow" | "swot" | "rapport" | "burger" | "nlu" | "sos";
 
 const TABS: { id: TabId; label: string; icon: any }[] = [
   { id: "session", label: "Сессия", icon: Sparkles },
   { id: "grow", label: "GROW", icon: Target },
   { id: "swot", label: "SWOT", icon: Layers },
+  { id: "rapport", label: "Раппорт", icon: Heart },
+  { id: "burger", label: "Гамбургер", icon: Sandwich },
   { id: "nlu", label: "Пирамида НЛУ", icon: Triangle },
   { id: "sos", label: "SOS Карпман", icon: AlertTriangle },
-  { id: "rapport", label: "Раппорт / ОСВК", icon: MessageCircle },
 ];
 
 function CoachSpace() {
