@@ -1,23 +1,27 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   Play, Pause, RotateCcw, Download, Target, Search, Lightbulb, Rocket,
-  AlertTriangle, Heart, Triangle, Layers, MessageCircle, Sparkles,
+  AlertTriangle, Heart, Triangle, Layers, MessageCircle, Sparkles, Sandwich,
 } from "lucide-react";
+import burgerTop from "@/assets/burger-top.png";
+import burgerPatty from "@/assets/burger-patty.png";
+import burgerBottom from "@/assets/burger-bottom.png";
 
 export const Route = createFileRoute("/")({
   component: CoachSpace,
 });
 
-type TabId = "grow" | "swot" | "nlu" | "sos" | "rapport" | "session";
+type TabId = "session" | "grow" | "swot" | "rapport" | "burger" | "nlu" | "sos";
 
 const TABS: { id: TabId; label: string; icon: any }[] = [
   { id: "session", label: "Сессия", icon: Sparkles },
   { id: "grow", label: "GROW", icon: Target },
   { id: "swot", label: "SWOT", icon: Layers },
+  { id: "rapport", label: "Раппорт", icon: Heart },
+  { id: "burger", label: "Гамбургер", icon: Sandwich },
   { id: "nlu", label: "Пирамида НЛУ", icon: Triangle },
   { id: "sos", label: "SOS Карпман", icon: AlertTriangle },
-  { id: "rapport", label: "Раппорт / ОСВК", icon: MessageCircle },
 ];
 
 function CoachSpace() {
@@ -132,6 +136,7 @@ ${notes || "—"}
         {tab === "nlu" && <Nlu />}
         {tab === "sos" && <Sos />}
         {tab === "rapport" && <Rapport />}
+        {tab === "burger" && <Burger />}
       </main>
     </div>
   );
@@ -416,7 +421,7 @@ function Sos() {
   );
 }
 
-/* ---------- Rapport / OSVK ---------- */
+/* ---------- Rapport ---------- */
 function Rapport() {
   const steps = [
     { t: "1. Калибровка", d: "Замечай позу, темп речи, дыхание, ключевые слова. Без оценки." },
@@ -424,37 +429,53 @@ function Rapport() {
     { t: "3. Ведение", d: "Когда контакт установлен — задай новый темп / ракурс / вопрос." },
     { t: "4. Проверка", d: "Калибруй реакцию. Если ушёл контакт — вернись к подстройке." },
   ];
+  return (
+    <div className="space-y-6">
+      <SectionHead title="Раппорт" subtitle="Контакт с клиентом — 4 шага" />
+      <div className="bg-card rounded-2xl border border-border p-5 max-w-2xl">
+        <h3 className="font-semibold flex items-center gap-2 mb-4"><Heart size={18} className="text-primary"/> Раппорт · 4 шага</h3>
+        <ol className="space-y-3">
+          {steps.map((s,i)=>(
+            <li key={i} className="p-3 rounded-lg bg-secondary/60">
+              <div className="font-medium">{s.t}</div>
+              <div className="text-sm text-muted-foreground">{s.d}</div>
+            </li>
+          ))}
+        </ol>
+      </div>
+    </div>
+  );
+}
+
+/* ---------- Гамбургер (ОСВК) ---------- */
+function Burger() {
   const burger = [
-    { t: "🍞 Хлеб сверху — Признание", d: "Что конкретно сработало хорошо. Фактами, без лести." },
-    { t: "🥩 Начинка — Развивающая часть", d: "Что можно усилить. На поведении, не на личности. С конкретным примером." },
-    { t: "🍞 Хлеб снизу — Поддержка", d: "Вера в способности. Следующий шаг, ресурс или предложение." },
+    { img: burgerTop, t: "Верхняя булка — Признание", d: "Что конкретно сработало хорошо. Фактами, без лести." },
+    { img: burgerPatty, t: "Котлета — Развивающая часть", d: "Что можно усилить. На поведении, не на личности. С конкретным примером." },
+    { img: burgerBottom, t: "Нижняя булка — Поддержка", d: "Вера в способности. Следующий шаг, ресурс или предложение." },
   ];
   return (
     <div className="space-y-6">
-      <SectionHead title="Раппорт и ОСВК" subtitle="Контакт с клиентом и развивающая обратная связь" />
-      <div className="grid md:grid-cols-2 gap-6">
-        <div className="bg-card rounded-2xl border border-border p-5">
-          <h3 className="font-semibold flex items-center gap-2 mb-4"><Heart size={18} className="text-primary"/> Раппорт · 4 шага</h3>
-          <ol className="space-y-3">
-            {steps.map((s,i)=>(
-              <li key={i} className="p-3 rounded-lg bg-secondary/60">
-                <div className="font-medium">{s.t}</div>
-                <div className="text-sm text-muted-foreground">{s.d}</div>
-              </li>
-            ))}
-          </ol>
-        </div>
-        <div className="bg-card rounded-2xl border border-border p-5">
-          <h3 className="font-semibold flex items-center gap-2 mb-4"><MessageCircle size={18} className="text-primary"/> ОСВК · Правило гамбургера</h3>
-          <ol className="space-y-3">
-            {burger.map((s,i)=>(
-              <li key={i} className="p-3 rounded-lg bg-secondary/60">
-                <div className="font-medium">{s.t}</div>
-                <div className="text-sm text-muted-foreground">{s.d}</div>
-              </li>
-            ))}
-          </ol>
-        </div>
+      <SectionHead title="Гамбургер" subtitle="ОСВК · правило развивающей обратной связи" />
+      <div className="grid md:grid-cols-3 gap-4 max-w-4xl">
+        {burger.map((s, i) => (
+          <div key={i} className="bg-card rounded-2xl border border-border p-5 flex flex-col items-center text-center">
+            <img
+              src={s.img}
+              alt={s.t}
+              loading="lazy"
+              width={512}
+              height={512}
+              className="w-32 h-32 object-contain mb-3"
+            />
+            <div className="font-semibold mb-1">{s.t}</div>
+            <div className="text-sm text-muted-foreground">{s.d}</div>
+          </div>
+        ))}
+      </div>
+      <div className="bg-secondary/60 rounded-xl p-4 max-w-2xl text-sm text-muted-foreground">
+        <MessageCircle size={16} className="inline mr-2 text-primary" />
+        Структура «гамбургера» помогает давать обратную связь так, чтобы человек её услышал и смог использовать.
       </div>
     </div>
   );

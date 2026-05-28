@@ -72,7 +72,9 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Lovable App" },
+      { title: "Coach Space" },
+      { name: "apple-mobile-web-app-title", content: "Coach Space" },
+      { name: "apple-mobile-web-app-capable", content: "yes" },
       { name: "description", content: "Рабочее пространство коуча" },
       { name: "author", content: "Lovable" },
       { property: "og:title", content: "Lovable App" },
@@ -86,10 +88,11 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/d5797914-5129-41e0-9e83-a7b453e5076f/id-preview-9392fc4c--41ac4192-23ec-48f6-b19e-77ace94f0aff.lovable.app-1779788692679.png" },
     ],
     links: [
-      {
-        rel: "stylesheet",
-        href: appCss,
-      },
+      { rel: "stylesheet", href: appCss },
+      { rel: "icon", href: "/apple-touch-icon.png", type: "image/png" },
+      { rel: "apple-touch-icon", href: "/apple-touch-icon.png", sizes: "180x180" },
+      { rel: "apple-touch-icon", href: "/apple-touch-icon.png", sizes: "192x192" },
+      { rel: "apple-touch-icon", href: "/apple-touch-icon.png", sizes: "512x512" },
     ],
   }),
   shellComponent: RootShell,
