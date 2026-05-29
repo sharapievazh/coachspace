@@ -3,6 +3,7 @@ import { useEffect, useMemo, useState } from "react";
 import {
   Play, Pause, RotateCcw, Download, Target, Search, Lightbulb, Rocket,
   AlertTriangle, Heart, Triangle, Layers, MessageCircle, Sparkles, Sandwich,
+  MessageSquare, Send, ThumbsUp, ThumbsDown,
 } from "lucide-react";
 import burgerTop from "@/assets/burger-top.png";
 import burgerPatty from "@/assets/burger-patty.png";
