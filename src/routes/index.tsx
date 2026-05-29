@@ -492,3 +492,91 @@ function SectionHead({ title, subtitle }: { title: string; subtitle: string }) {
     </div>
   );
 }
+
+/* ---------- Feedback ---------- */
+const FEEDBACK_EMAIL = "sharapieva@gmail.com";
+
+function Feedback() {
+  const [liked, setLiked] = useState("");
+  const [disliked, setDisliked] = useState("");
+  const [name, setName] = useState("");
+  const [sent, setSent] = useState(false);
+
+  const canSend = liked.trim().length > 0 || disliked.trim().length > 0;
+
+  const send = () => {
+    const subject = `Coach Space — обратная связь${name ? ` от ${name}` : ""}`;
+    const body =
+`От: ${name || "Аноним"}
+Дата: ${new Date().toLocaleString()}
+
+Что нравится:
+${liked || "—"}
+
+Что не нравится / что улучшить:
+${disliked || "—"}
+`;
+    const url = `mailto:${FEEDBACK_EMAIL}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+    window.location.href = url;
+    setSent(true);
+  };
+
+  return (
+    <div className="space-y-6 max-w-3xl">
+      <SectionHead
+        title="Обратная связь по приложению"
+        subtitle="Поделитесь впечатлениями — это поможет сделать Coach Space лучше."
+      />
+      <div className="bg-card rounded-2xl border border-border p-5 space-y-4">
+        <div>
+          <label className="text-sm font-medium">Ваше имя (необязательно)</label>
+          <input
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            placeholder="Как к вам обращаться"
+            className="mt-1 w-full px-3 py-2 rounded-lg bg-secondary border border-border focus:outline-none focus:ring-2 focus:ring-primary"
+          />
+        </div>
+        <div>
+          <label className="text-sm font-medium flex items-center gap-2">
+            <ThumbsUp size={16} className="text-primary" /> Что нравится
+          </label>
+          <textarea
+            value={liked}
+            onChange={(e) => setLiked(e.target.value)}
+            rows={4}
+            placeholder="Что работает хорошо, что удобно, что радует…"
+            className="mt-1 w-full px-3 py-2 rounded-lg bg-secondary border border-border focus:outline-none focus:ring-2 focus:ring-primary resize-y"
+          />
+        </div>
+        <div>
+          <label className="text-sm font-medium flex items-center gap-2">
+            <ThumbsDown size={16} className="text-destructive" /> Что не нравится / что улучшить
+          </label>
+          <textarea
+            value={disliked}
+            onChange={(e) => setDisliked(e.target.value)}
+            rows={4}
+            placeholder="Что мешает, чего не хватает, что добавить…"
+            className="mt-1 w-full px-3 py-2 rounded-lg bg-secondary border border-border focus:outline-none focus:ring-2 focus:ring-primary resize-y"
+          />
+        </div>
+        <div className="flex items-center gap-3 pt-2">
+          <button
+            onClick={send}
+            disabled={!canSend}
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-primary text-primary-foreground hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <Send size={16} /> Отправить
+          </button>
+          <p className="text-xs text-muted-foreground">
+            Откроется ваш почтовый клиент с готовым письмом на {FEEDBACK_EMAIL}.
+          </p>
+        </div>
+        {sent && (
+          <p className="text-sm text-primary">Спасибо! Письмо подготовлено — отправьте его из почты ✉️</p>
+        )}
+      </div>
+    </div>
+  );
+}
