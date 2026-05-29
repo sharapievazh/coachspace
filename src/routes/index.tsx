@@ -13,7 +13,7 @@ export const Route = createFileRoute("/")({
   component: CoachSpace,
 });
 
-type TabId = "session" | "grow" | "swot" | "rapport" | "burger" | "nlu" | "sos";
+type TabId = "session" | "grow" | "swot" | "rapport" | "burger" | "nlu" | "sos" | "feedback";
 
 const TABS: { id: TabId; label: string; icon: any }[] = [
   { id: "session", label: "Сессия", icon: Sparkles },
@@ -23,6 +23,7 @@ const TABS: { id: TabId; label: string; icon: any }[] = [
   { id: "burger", label: "Гамбургер", icon: Sandwich },
   { id: "nlu", label: "Пирамида НЛУ", icon: Triangle },
   { id: "sos", label: "SOS Карпман", icon: AlertTriangle },
+  { id: "feedback", label: "Обратная связь", icon: MessageSquare },
 ];
 
 function CoachSpace() {
