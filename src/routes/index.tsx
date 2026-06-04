@@ -30,17 +30,52 @@ function CoachSpace() {
   const [tab, setTab] = useState<TabId>("session");
 
   // Session timer state (lives in parent so it persists between tabs)
-  const [duration, setDuration] = useState(45 * 60);
-  const [remaining, setRemaining] = useState(45 * 60);
+  const [duration, setDuration] = useState(20 * 60);
+  const [remaining, setRemaining] = useState(20 * 60);
   const [running, setRunning] = useState(false);
   const [clientName, setClientName] = useState("");
   const [topic, setTopic] = useState("");
   const [notes, setNotes] = useState("");
 
+  const playEndAlert = () => {
+    try {
+      const AC = (window.AudioContext || (window as any).webkitAudioContext);
+      const ctx = new AC();
+      const beep = (freq: number, start: number, dur: number) => {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = "sine";
+        osc.frequency.value = freq;
+        gain.gain.setValueAtTime(0.0001, ctx.currentTime + start);
+        gain.gain.exponentialRampToValueAtTime(0.4, ctx.currentTime + start + 0.02);
+        gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + start + dur);
+        osc.connect(gain).connect(ctx.destination);
+        osc.start(ctx.currentTime + start);
+        osc.stop(ctx.currentTime + start + dur + 0.05);
+      };
+      beep(880, 0, 0.35);
+      beep(1175, 0.45, 0.35);
+      beep(880, 0.9, 0.5);
+      setTimeout(() => ctx.close(), 2000);
+    } catch (e) {
+      console.warn("audio failed", e);
+    }
+    if (typeof navigator !== "undefined" && "vibrate" in navigator) {
+      navigator.vibrate?.([400, 150, 400, 150, 600]);
+    }
+  };
+
   useEffect(() => {
     if (!running) return;
     const id = setInterval(() => {
-      setRemaining((r) => (r > 0 ? r - 1 : 0));
+      setRemaining((r) => {
+        if (r <= 1) {
+          setRunning(false);
+          playEndAlert();
+          return 0;
+        }
+        return r - 1;
+      });
     }, 1000);
     return () => clearInterval(id);
   }, [running]);
