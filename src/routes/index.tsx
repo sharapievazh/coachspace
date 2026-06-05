@@ -26,6 +26,8 @@ const TABS: { id: TabId; label: string; icon: any }[] = [
   { id: "feedback", label: "Обратная связь", icon: MessageSquare },
 ];
 
+const TIMER_STORAGE_KEY = "coach-space-session-timer";
+
 function CoachSpace() {
   const [tab, setTab] = useState<TabId>("session");
 
@@ -78,8 +80,13 @@ function CoachSpace() {
   const startTimer = async () => {
     alertPlayedRef.current = false;
     await ensureAudioReady();
+    if ("Notification" in window && Notification.permission === "default") {
+      Notification.requestPermission().catch((e) => console.warn("notification permission failed", e));
+    }
     await requestWakeLock();
-    setEndsAt(Date.now() + remaining * 1000);
+    const nextEndsAt = Date.now() + remaining * 1000;
+    localStorage.setItem(TIMER_STORAGE_KEY, JSON.stringify({ endsAt: nextEndsAt, duration }));
+    setEndsAt(nextEndsAt);
     setRunning(true);
   };
 
@@ -87,6 +94,7 @@ function CoachSpace() {
     if (endsAt) setRemaining(Math.max(0, Math.ceil((endsAt - Date.now()) / 1000)));
     setRunning(false);
     setEndsAt(null);
+    localStorage.removeItem(TIMER_STORAGE_KEY);
     releaseWakeLock();
   };
 
@@ -103,6 +111,7 @@ function CoachSpace() {
     setRemaining(seconds);
     setRunning(false);
     setEndsAt(null);
+    localStorage.removeItem(TIMER_STORAGE_KEY);
     releaseWakeLock();
     alertPlayedRef.current = false;
   };
@@ -111,6 +120,7 @@ function CoachSpace() {
     setRunning(false);
     setRemaining(duration);
     setEndsAt(null);
+    localStorage.removeItem(TIMER_STORAGE_KEY);
     releaseWakeLock();
     alertPlayedRef.current = false;
   };
