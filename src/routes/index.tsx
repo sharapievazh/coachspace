@@ -213,7 +213,7 @@ ${notes || "—"}
           <div className="hidden sm:flex items-center gap-3 px-3 py-2 rounded-lg bg-secondary">
             <div className="font-mono text-xl tabular-nums">{mmss}</div>
             <button
-              onClick={() => setRunning((r) => !r)}
+              onClick={toggleTimer}
               className="p-2 rounded-md bg-primary text-primary-foreground hover:opacity-90"
               aria-label="toggle"
             >
@@ -247,11 +247,11 @@ ${notes || "—"}
         {tab === "session" && (
           <SessionPanel
             duration={duration}
-            setDuration={(d: number) => { setDuration(d); setRemaining(d); }}
+            setDuration={changeDuration}
             remaining={remaining}
             running={running}
-            setRunning={setRunning}
-            reset={() => { setRunning(false); setRemaining(duration); }}
+            setRunning={(next: boolean) => { next ? startTimer() : pauseTimer(); }}
+            reset={resetTimer}
             mmss={mmss}
             clientName={clientName}
             setClientName={setClientName}
