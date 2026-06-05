@@ -162,7 +162,11 @@ function CoachSpace() {
     }, 1000);
     document.addEventListener("visibilitychange", tick);
     window.addEventListener("focus", tick);
-    return () => clearInterval(id);
+    return () => {
+      clearInterval(id);
+      document.removeEventListener("visibilitychange", tick);
+      window.removeEventListener("focus", tick);
+    };
   }, [running, endsAt]);
 
   useEffect(() => {
