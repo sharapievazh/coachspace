@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   Play, Pause, RotateCcw, Download, Target, Search, Lightbulb, Rocket,
   AlertTriangle, Heart, Triangle, Layers, MessageCircle, Sparkles, Sandwich,
@@ -26,6 +26,8 @@ const TABS: { id: TabId; label: string; icon: any }[] = [
   { id: "feedback", label: "Обратная связь", icon: MessageSquare },
 ];
 
+const TIMER_STORAGE_KEY = "coach-space-session-timer";
+
 function CoachSpace() {
   const [tab, setTab] = useState<TabId>("session");
 
@@ -33,14 +35,102 @@ function CoachSpace() {
   const [duration, setDuration] = useState(20 * 60);
   const [remaining, setRemaining] = useState(20 * 60);
   const [running, setRunning] = useState(false);
+  const [endsAt, setEndsAt] = useState<number | null>(null);
   const [clientName, setClientName] = useState("");
   const [topic, setTopic] = useState("");
   const [notes, setNotes] = useState("");
+  const audioCtxRef = useRef<any>(null);
+  const wakeLockRef = useRef<any>(null);
+  const alertPlayedRef = useRef(false);
+
+  const ensureAudioReady = async () => {
+    try {
+      const AC = window.AudioContext || (window as any).webkitAudioContext;
+      const ctx = audioCtxRef.current || new AC();
+      audioCtxRef.current = ctx;
+      if (ctx.state === "suspended") await ctx.resume();
+      const buffer = ctx.createBuffer(1, 1, 22050);
+      const source = ctx.createBufferSource();
+      source.buffer = buffer;
+      source.connect(ctx.destination);
+      source.start(0);
+    } catch (e) {
+      console.warn("audio unlock failed", e);
+    }
+  };
+
+  const requestWakeLock = async () => {
+    try {
+      if ("wakeLock" in navigator && !wakeLockRef.current) {
+        wakeLockRef.current = await (navigator as any).wakeLock.request("screen");
+        wakeLockRef.current.addEventListener("release", () => {
+          wakeLockRef.current = null;
+        });
+      }
+    } catch (e) {
+      console.warn("wake lock failed", e);
+    }
+  };
+
+  const releaseWakeLock = () => {
+    wakeLockRef.current?.release?.();
+    wakeLockRef.current = null;
+  };
+
+  const startTimer = async () => {
+    alertPlayedRef.current = false;
+    await ensureAudioReady();
+    if ("Notification" in window && Notification.permission === "default") {
+      Notification.requestPermission().catch((e) => console.warn("notification permission failed", e));
+    }
+    await requestWakeLock();
+    const nextEndsAt = Date.now() + remaining * 1000;
+    localStorage.setItem(TIMER_STORAGE_KEY, JSON.stringify({ endsAt: nextEndsAt, duration }));
+    setEndsAt(nextEndsAt);
+    setRunning(true);
+  };
+
+  const pauseTimer = () => {
+    if (endsAt) setRemaining(Math.max(0, Math.ceil((endsAt - Date.now()) / 1000)));
+    setRunning(false);
+    setEndsAt(null);
+    localStorage.removeItem(TIMER_STORAGE_KEY);
+    releaseWakeLock();
+  };
+
+  const toggleTimer = () => {
+    if (running) {
+      pauseTimer();
+    } else if (remaining > 0) {
+      startTimer();
+    }
+  };
+
+  const changeDuration = (seconds: number) => {
+    setDuration(seconds);
+    setRemaining(seconds);
+    setRunning(false);
+    setEndsAt(null);
+    localStorage.removeItem(TIMER_STORAGE_KEY);
+    releaseWakeLock();
+    alertPlayedRef.current = false;
+  };
+
+  const resetTimer = () => {
+    setRunning(false);
+    setRemaining(duration);
+    setEndsAt(null);
+    localStorage.removeItem(TIMER_STORAGE_KEY);
+    releaseWakeLock();
+    alertPlayedRef.current = false;
+  };
 
   const playEndAlert = () => {
-    try {
-      const AC = (window.AudioContext || (window as any).webkitAudioContext);
-      const ctx = new AC();
+    const runAudio = async () => {
+      const AC = window.AudioContext || (window as any).webkitAudioContext;
+      const ctx = audioCtxRef.current || new AC();
+      audioCtxRef.current = ctx;
+      if (ctx.state === "suspended") await ctx.resume();
       const beep = (freq: number, start: number, dur: number) => {
         const osc = ctx.createOscillator();
         const gain = ctx.createGain();
@@ -56,28 +146,75 @@ function CoachSpace() {
       beep(880, 0, 0.35);
       beep(1175, 0.45, 0.35);
       beep(880, 0.9, 0.5);
-      setTimeout(() => ctx.close(), 2000);
-    } catch (e) {
-      console.warn("audio failed", e);
-    }
+    };
+    runAudio().catch((e) => console.warn("audio failed", e));
     if (typeof navigator !== "undefined" && "vibrate" in navigator) {
       navigator.vibrate?.([400, 150, 400, 150, 600]);
+    }
+    if ("Notification" in window && Notification.permission === "granted") {
+      new Notification("Сессия завершена", {
+        body: "Таймер Coach Space дошёл до конца.",
+        icon: "/apple-touch-icon.png",
+      });
     }
   };
 
   useEffect(() => {
-    if (!running) return;
+    const saved = localStorage.getItem(TIMER_STORAGE_KEY);
+    if (!saved) return;
+    try {
+      const parsed = JSON.parse(saved) as { endsAt?: number; duration?: number };
+      if (!parsed.endsAt || !parsed.duration) return;
+      const next = Math.max(0, Math.ceil((parsed.endsAt - Date.now()) / 1000));
+      setDuration(parsed.duration);
+      setRemaining(next);
+      if (next > 0) {
+        setEndsAt(parsed.endsAt);
+        setRunning(true);
+      } else {
+        localStorage.removeItem(TIMER_STORAGE_KEY);
+        playEndAlert();
+      }
+    } catch (e) {
+      console.warn("timer restore failed", e);
+      localStorage.removeItem(TIMER_STORAGE_KEY);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!running || !endsAt) return;
+    const tick = () => {
+      const next = Math.max(0, Math.ceil((endsAt - Date.now()) / 1000));
+      setRemaining(next);
+      if (next <= 0 && !alertPlayedRef.current) {
+        alertPlayedRef.current = true;
+        setRunning(false);
+        setEndsAt(null);
+        localStorage.removeItem(TIMER_STORAGE_KEY);
+        releaseWakeLock();
+        playEndAlert();
+      }
+    };
+    tick();
     const id = setInterval(() => {
-      setRemaining((r) => {
-        if (r <= 1) {
-          setRunning(false);
-          playEndAlert();
-          return 0;
-        }
-        return r - 1;
-      });
+      tick();
     }, 1000);
-    return () => clearInterval(id);
+    document.addEventListener("visibilitychange", tick);
+    window.addEventListener("focus", tick);
+    return () => {
+      clearInterval(id);
+      document.removeEventListener("visibilitychange", tick);
+      window.removeEventListener("focus", tick);
+    };
+  }, [running, endsAt]);
+
+  useEffect(() => {
+    if (!running) return;
+    const restoreWakeLock = () => {
+      if (document.visibilityState === "visible") requestWakeLock();
+    };
+    document.addEventListener("visibilitychange", restoreWakeLock);
+    return () => document.removeEventListener("visibilitychange", restoreWakeLock);
   }, [running]);
 
   const mmss = useMemo(() => {
@@ -119,7 +256,7 @@ ${notes || "—"}
           <div className="hidden sm:flex items-center gap-3 px-3 py-2 rounded-lg bg-secondary">
             <div className="font-mono text-xl tabular-nums">{mmss}</div>
             <button
-              onClick={() => setRunning((r) => !r)}
+              onClick={toggleTimer}
               className="p-2 rounded-md bg-primary text-primary-foreground hover:opacity-90"
               aria-label="toggle"
             >
@@ -153,11 +290,11 @@ ${notes || "—"}
         {tab === "session" && (
           <SessionPanel
             duration={duration}
-            setDuration={(d: number) => { setDuration(d); setRemaining(d); }}
+            setDuration={changeDuration}
             remaining={remaining}
             running={running}
-            setRunning={setRunning}
-            reset={() => { setRunning(false); setRemaining(duration); }}
+            setRunning={(next: boolean) => { next ? startTimer() : pauseTimer(); }}
+            reset={resetTimer}
             mmss={mmss}
             clientName={clientName}
             setClientName={setClientName}
