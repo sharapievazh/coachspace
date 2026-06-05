@@ -151,7 +151,35 @@ function CoachSpace() {
     if (typeof navigator !== "undefined" && "vibrate" in navigator) {
       navigator.vibrate?.([400, 150, 400, 150, 600]);
     }
+    if ("Notification" in window && Notification.permission === "granted") {
+      new Notification("Сессия завершена", {
+        body: "Таймер Coach Space дошёл до конца.",
+        icon: "/apple-touch-icon.png",
+      });
+    }
   };
+
+  useEffect(() => {
+    const saved = localStorage.getItem(TIMER_STORAGE_KEY);
+    if (!saved) return;
+    try {
+      const parsed = JSON.parse(saved) as { endsAt?: number; duration?: number };
+      if (!parsed.endsAt || !parsed.duration) return;
+      const next = Math.max(0, Math.ceil((parsed.endsAt - Date.now()) / 1000));
+      setDuration(parsed.duration);
+      setRemaining(next);
+      if (next > 0) {
+        setEndsAt(parsed.endsAt);
+        setRunning(true);
+      } else {
+        localStorage.removeItem(TIMER_STORAGE_KEY);
+        playEndAlert();
+      }
+    } catch (e) {
+      console.warn("timer restore failed", e);
+      localStorage.removeItem(TIMER_STORAGE_KEY);
+    }
+  }, []);
 
   useEffect(() => {
     if (!running || !endsAt) return;
@@ -162,6 +190,7 @@ function CoachSpace() {
         alertPlayedRef.current = true;
         setRunning(false);
         setEndsAt(null);
+        localStorage.removeItem(TIMER_STORAGE_KEY);
         releaseWakeLock();
         playEndAlert();
       }
