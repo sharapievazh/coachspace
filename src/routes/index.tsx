@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   Play, Pause, RotateCcw, Download, Target, Search, Lightbulb, Rocket,
   AlertTriangle, Heart, Triangle, Layers, MessageCircle, Sparkles, Sandwich,
@@ -33,14 +33,94 @@ function CoachSpace() {
   const [duration, setDuration] = useState(20 * 60);
   const [remaining, setRemaining] = useState(20 * 60);
   const [running, setRunning] = useState(false);
+  const [endsAt, setEndsAt] = useState<number | null>(null);
   const [clientName, setClientName] = useState("");
   const [topic, setTopic] = useState("");
   const [notes, setNotes] = useState("");
+  const audioCtxRef = useRef<any>(null);
+  const wakeLockRef = useRef<any>(null);
+  const alertPlayedRef = useRef(false);
+
+  const ensureAudioReady = async () => {
+    try {
+      const AC = window.AudioContext || (window as any).webkitAudioContext;
+      const ctx = audioCtxRef.current || new AC();
+      audioCtxRef.current = ctx;
+      if (ctx.state === "suspended") await ctx.resume();
+      const buffer = ctx.createBuffer(1, 1, 22050);
+      const source = ctx.createBufferSource();
+      source.buffer = buffer;
+      source.connect(ctx.destination);
+      source.start(0);
+    } catch (e) {
+      console.warn("audio unlock failed", e);
+    }
+  };
+
+  const requestWakeLock = async () => {
+    try {
+      if ("wakeLock" in navigator && !wakeLockRef.current) {
+        wakeLockRef.current = await (navigator as any).wakeLock.request("screen");
+        wakeLockRef.current.addEventListener("release", () => {
+          wakeLockRef.current = null;
+        });
+      }
+    } catch (e) {
+      console.warn("wake lock failed", e);
+    }
+  };
+
+  const releaseWakeLock = () => {
+    wakeLockRef.current?.release?.();
+    wakeLockRef.current = null;
+  };
+
+  const startTimer = async () => {
+    alertPlayedRef.current = false;
+    await ensureAudioReady();
+    await requestWakeLock();
+    setEndsAt(Date.now() + remaining * 1000);
+    setRunning(true);
+  };
+
+  const pauseTimer = () => {
+    if (endsAt) setRemaining(Math.max(0, Math.ceil((endsAt - Date.now()) / 1000)));
+    setRunning(false);
+    setEndsAt(null);
+    releaseWakeLock();
+  };
+
+  const toggleTimer = () => {
+    if (running) {
+      pauseTimer();
+    } else if (remaining > 0) {
+      startTimer();
+    }
+  };
+
+  const changeDuration = (seconds: number) => {
+    setDuration(seconds);
+    setRemaining(seconds);
+    setRunning(false);
+    setEndsAt(null);
+    releaseWakeLock();
+    alertPlayedRef.current = false;
+  };
+
+  const resetTimer = () => {
+    setRunning(false);
+    setRemaining(duration);
+    setEndsAt(null);
+    releaseWakeLock();
+    alertPlayedRef.current = false;
+  };
 
   const playEndAlert = () => {
-    try {
-      const AC = (window.AudioContext || (window as any).webkitAudioContext);
-      const ctx = new AC();
+    const runAudio = async () => {
+      const AC = window.AudioContext || (window as any).webkitAudioContext;
+      const ctx = audioCtxRef.current || new AC();
+      audioCtxRef.current = ctx;
+      if (ctx.state === "suspended") await ctx.resume();
       const beep = (freq: number, start: number, dur: number) => {
         const osc = ctx.createOscillator();
         const gain = ctx.createGain();
@@ -56,28 +136,42 @@ function CoachSpace() {
       beep(880, 0, 0.35);
       beep(1175, 0.45, 0.35);
       beep(880, 0.9, 0.5);
-      setTimeout(() => ctx.close(), 2000);
-    } catch (e) {
-      console.warn("audio failed", e);
-    }
+    };
+    runAudio().catch((e) => console.warn("audio failed", e));
     if (typeof navigator !== "undefined" && "vibrate" in navigator) {
       navigator.vibrate?.([400, 150, 400, 150, 600]);
     }
   };
 
   useEffect(() => {
-    if (!running) return;
+    if (!running || !endsAt) return;
+    const tick = () => {
+      const next = Math.max(0, Math.ceil((endsAt - Date.now()) / 1000));
+      setRemaining(next);
+      if (next <= 0 && !alertPlayedRef.current) {
+        alertPlayedRef.current = true;
+        setRunning(false);
+        setEndsAt(null);
+        releaseWakeLock();
+        playEndAlert();
+      }
+    };
+    tick();
     const id = setInterval(() => {
-      setRemaining((r) => {
-        if (r <= 1) {
-          setRunning(false);
-          playEndAlert();
-          return 0;
-        }
-        return r - 1;
-      });
+      tick();
     }, 1000);
+    document.addEventListener("visibilitychange", tick);
+    window.addEventListener("focus", tick);
     return () => clearInterval(id);
+  }, [running, endsAt]);
+
+  useEffect(() => {
+    if (!running) return;
+    const restoreWakeLock = () => {
+      if (document.visibilityState === "visible") requestWakeLock();
+    };
+    document.addEventListener("visibilitychange", restoreWakeLock);
+    return () => document.removeEventListener("visibilitychange", restoreWakeLock);
   }, [running]);
 
   const mmss = useMemo(() => {
