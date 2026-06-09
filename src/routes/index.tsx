@@ -18,7 +18,6 @@ import burgerBottom from "@/assets/burger-bottom.png";
 import {
   GrowIcon,
   BalanceRadar,
-  DiltsPyramidSvg,
   KarpmanTriangleSvg,
   RadarChartIcon,
 } from "@/components/coach/CoachVisuals";
