@@ -27,7 +27,7 @@ export const Route = createFileRoute("/")({
   component: CoachSpace,
 });
 
-type TabId = "session" | "erickson" | "grow" | "swot" | "rapport" | "smart" | "eisenhower" | "burger" | "rules" | "nlu" | "sos" | "balance" | "supervision" | "values" | "feedback";
+type TabId = "session" | "erickson" | "grow" | "swot" | "rapport" | "smart" | "eisenhower" | "burger" | "rules" | "nlu" | "sos" | "balance" | "supervision" | "values" | "feedback" | "competencies";
 
 const SMART_STORAGE = "coach-space-smart-goal";
 type SmartData = { s: string; m: string; a: string; r: string; t: string; positive: boolean; balanced: boolean };
