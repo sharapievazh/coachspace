@@ -408,7 +408,6 @@ ${notes || "—"}
             setNotes={setNotes}
             exportSession={exportSession}
             testSound={testSound}
-            balanceScores={balanceScores}
           />
         )}
         {tab === "grow" && <Grow />}
