@@ -814,37 +814,53 @@ function Nlu() {
     <div className="space-y-6">
       <SectionHead title="Пирамида Дилтса" subtitle="Неврологические уровни изменений" />
 
-      <div className="space-y-2">
-        {DILTS.map((lv, idx) => {
-          const width = 40 + idx * 10;
-          const isOpen = open === lv.n;
-          const I = lv.icon;
-          return (
-            <div key={lv.n} className="flex flex-col items-center">
+      <div className="grid md:grid-cols-2 gap-6 items-start">
+        <DiltsPyramidSvg
+          levels={DILTS.map((lv) => {
+            // map tailwind bg class to hex for SVG fill
+            const hex: Record<string, string> = {
+              "bg-violet-500 text-white": "#8b5cf6",
+              "bg-blue-500 text-white": "#3b82f6",
+              "bg-teal-500 text-white": "#14b8a6",
+              "bg-green-500 text-white": "#22c55e",
+              "bg-yellow-500 text-white": "#eab308",
+              "bg-orange-500 text-white": "#f97316",
+            };
+            return { n: lv.n, name: lv.name, q: lv.q, desc: lv.desc, focus: lv.focus, color: hex[lv.color] ?? "#64748b" };
+          })}
+          active={open ?? 0}
+          onSelect={(n) => setOpen(open === n ? null : n)}
+        />
+        <div className="space-y-2">
+          {DILTS.map((lv) => {
+            const isOpen = open === lv.n;
+            const I = lv.icon;
+            return (
               <button
+                key={lv.n}
                 onClick={() => setOpen(isOpen ? null : lv.n)}
-                style={{ width: `${width}%` }}
-                className={`min-w-[70%] sm:min-w-[60%] px-4 py-3 rounded-lg border transition-all flex items-center gap-3 ${isOpen ? "ring-2 ring-primary" : "hover:border-primary/40"} ${lv.color} border-transparent`}
+                className={`w-full text-left px-3 py-2 rounded-lg border transition-all flex items-start gap-3 ${
+                  isOpen ? "ring-2 ring-primary border-transparent " + lv.color : "bg-card border-border hover:border-primary/40"
+                }`}
               >
-                <span className="w-8 h-8 rounded-full bg-white/20 grid place-items-center font-bold shrink-0">{lv.n}</span>
-                <I size={20} className="shrink-0"/>
-                <div className="text-left flex-1">
-                  <div className="font-bold text-sm">{lv.name}</div>
-                  <div className="text-xs opacity-90">{lv.q}</div>
+                <span className={`w-7 h-7 rounded-full grid place-items-center font-bold text-xs shrink-0 ${isOpen ? "bg-white/25" : "bg-secondary"}`}>{lv.n}</span>
+                <I size={18} className="mt-0.5 shrink-0" />
+                <div className="flex-1">
+                  <div className="font-bold text-sm leading-tight">{lv.name}</div>
+                  <div className={`text-xs ${isOpen ? "opacity-90" : "text-muted-foreground"}`}>{lv.q}</div>
+                  {isOpen && (
+                    <div className={`mt-2 text-xs ${isOpen ? "opacity-95" : ""}`}>
+                      <div className="mb-1">{lv.desc}</div>
+                      <div className="font-semibold">▸ {lv.focus}</div>
+                    </div>
+                  )}
                 </div>
               </button>
-              {isOpen && (
-                <div className="mt-2 mb-2 w-full max-w-2xl bg-card rounded-xl border border-border p-4">
-                  <div className="text-xs text-muted-foreground mb-1 uppercase tracking-wide">Описание</div>
-                  <p className="text-sm mb-3">{lv.desc}</p>
-                  <div className="text-xs text-muted-foreground mb-1 uppercase tracking-wide">Фокус вопросов</div>
-                  <p className="text-sm font-medium text-primary">▸ {lv.focus}</p>
-                </div>
-              )}
-            </div>
-          );
-        })}
+            );
+          })}
+        </div>
       </div>
+
 
       <div className="bg-card rounded-2xl border border-border p-5">
         <h3 className="font-semibold mb-4">Как работать с пирамидой Дилтса</h3>
