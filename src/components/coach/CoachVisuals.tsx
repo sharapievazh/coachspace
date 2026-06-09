@@ -304,7 +304,7 @@ export function BalanceRadar({
           </path>
         ))}
       {/* user points */}
-      {values.map((v, i) => {
+      {safeValues.map((v, i) => {
         const [x, y] = point(i, (R * v) / 10);
         return (
           <circle
