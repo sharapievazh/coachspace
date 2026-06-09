@@ -455,6 +455,7 @@ ${notes || "—"}
         {tab === "nlu" && <Nlu />}
         {tab === "sos" && <Sos />}
         {tab === "rapport" && <Rapport />}
+        {tab === "smart" && <SmartGoal notes={notes} setNotes={setNotes} />}
         {tab === "eisenhower" && <Eisenhower notes={notes} setNotes={setNotes} />}
         {tab === "burger" && <Burger />}
         {tab === "erickson" && <EricksonStar />}
