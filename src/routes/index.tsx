@@ -516,6 +516,75 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
   );
 }
 
+/* ---------- Visual helpers for rich block cards ---------- */
+const BLOCK_ICON_MAP: Array<{ match: RegExp; icon: any; tone: string }> = [
+  { match: /цель сессии/i,                 icon: Target,      tone: "from-emerald-500 to-teal-500" },
+  { match: /долгосрочн/i,                  icon: Mountain,    tone: "from-emerald-600 to-green-500" },
+  { match: /smart/i,                       icon: ListChecks,  tone: "from-lime-500 to-emerald-500" },
+  { match: /колесо баланса/i,              icon: Circle,      tone: "from-amber-500 to-orange-500" },
+  { match: /шкалирован/i,                  icon: TrendingUp,  tone: "from-cyan-500 to-sky-500" },
+  { match: /идеальн/i,                     icon: Sun,         tone: "from-yellow-400 to-amber-500" },
+  { match: /путешеств/i,                   icon: Telescope,   tone: "from-indigo-500 to-violet-500" },
+  { match: /коучинговые вопросы/i,         icon: HelpCircle,  tone: "from-sky-500 to-blue-500" },
+  { match: /что происходит/i,              icon: ClipboardList, tone: "from-blue-500 to-sky-500" },
+  { match: /что уже работает/i,            icon: ThumbsUp,    tone: "from-emerald-500 to-sky-500" },
+  { match: /что мешает/i,                  icon: AlertOctagon, tone: "from-rose-500 to-orange-500" },
+  { match: /swot/i,                        icon: Layers,      tone: "from-indigo-500 to-blue-600" },
+  { match: /5 почему/i,                    icon: HelpCircle,  tone: "from-violet-500 to-fuchsia-500" },
+  { match: /линия времени/i,               icon: Hourglass,   tone: "from-sky-500 to-cyan-500" },
+  { match: /ресурс/i,                      icon: Coins,       tone: "from-amber-500 to-yellow-500" },
+  { match: /мозгов|штурм|генерац/i,        icon: Zap,         tone: "from-amber-500 to-orange-500" },
+  { match: /дисне/i,                       icon: Sparkles,    tone: "from-pink-500 to-rose-500" },
+  { match: /шляп/i,                        icon: Brain,       tone: "from-violet-500 to-indigo-500" },
+  { match: /реверсивн/i,                   icon: RotateCcw,   tone: "from-fuchsia-500 to-purple-500" },
+  { match: /а что ещё|ещe/i,               icon: Sparkles,    tone: "from-amber-500 to-orange-500" },
+  { match: /план действ|smart-шаги/i,      icon: ListChecks,  tone: "from-violet-500 to-indigo-500" },
+  { match: /90 дн/i,                       icon: Calendar,    tone: "from-violet-500 to-purple-500" },
+  { match: /30.60.90/i,                    icon: Calendar,    tone: "from-indigo-500 to-violet-500" },
+  { match: /accountab|ответствен/i,        icon: ShieldCheck, tone: "from-emerald-500 to-teal-500" },
+  { match: /препятств/i,                   icon: AlertOctagon, tone: "from-rose-500 to-red-500" },
+  { match: /план б/i,                      icon: Compass,     tone: "from-sky-500 to-indigo-500" },
+];
+
+function pickBlockIcon(head: string) {
+  return BLOCK_ICON_MAP.find((m) => m.match.test(head)) ?? { icon: Sparkles, tone: "from-primary to-primary/60" };
+}
+
+const ITEM_BULLETS = [CheckCircle2, Zap, Star, ChevronRight, Sparkles];
+function getItemIcon(i: number) { return ITEM_BULLETS[i % ITEM_BULLETS.length]; }
+
+function BlockCard({ head, items }: { head: string; items: string[] }) {
+  const meta = pickBlockIcon(head);
+  const I = meta.icon;
+  return (
+    <div className="relative overflow-hidden bg-card rounded-2xl border border-border p-4 group hover:border-primary/40 transition-colors">
+      {/* glow watermark */}
+      <I
+        size={140}
+        className={`absolute -right-6 -bottom-8 text-foreground/[0.04] pointer-events-none`}
+        strokeWidth={1.2}
+      />
+      <div className="relative flex items-center gap-3 mb-3">
+        <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${meta.tone} text-white grid place-items-center shadow-md shadow-primary/20`}>
+          <I size={20} />
+        </div>
+        <div className="text-[11px] font-bold uppercase tracking-wider text-foreground/80 leading-tight">{head}</div>
+      </div>
+      <ul className="relative space-y-1.5 text-sm">
+        {items.map((it, j) => {
+          const B = getItemIcon(j);
+          return (
+            <li key={j} className="flex items-start gap-2">
+              <B size={14} className="text-primary mt-0.5 shrink-0" />
+              <span className="text-foreground/90">{it}</span>
+            </li>
+          );
+        })}
+      </ul>
+    </div>
+  );
+}
+
 /* ---------- GROW (Полная модель из материалов обучения) ---------- */
 const GROW_STEPS = [
   {
