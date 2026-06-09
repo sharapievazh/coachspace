@@ -185,6 +185,7 @@ function CoachSpace() {
     setEndsAt(null);
     localStorage.removeItem(TIMER_STORAGE_KEY);
     releaseWakeLock();
+    stopSilentKeepAlive();
     getWorker()?.postMessage({ type: "stop" });
   };
 
