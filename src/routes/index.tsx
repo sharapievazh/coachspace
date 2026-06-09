@@ -901,24 +901,14 @@ const BALANCE_AREAS = [
     desc: "Обучение, личностный рост, навыки, цели, вдохновение, новые знания и опыт.",
     q: "Насколько вы развиваетесь и двигаетесь к своим целям?" },
 ];
-      <div className="bg-card rounded-2xl border border-border p-4 sm:p-6 flex flex-col items-center">
-        <div className="text-xs uppercase tracking-wide text-muted-foreground mb-1">Ваше колесо баланса</div>
-        <p className="text-xs text-muted-foreground mb-3 text-center max-w-md">
-          Оранжевый полигон — ваши текущие оценки. Серый пунктирный круг — идеальный баланс.
-          Чем «круглее» полигон — тем гармоничнее жизнь.
-        </p>
-        <BalanceRadar
-          values={BALANCE_AREAS.map((a) => scores[a.n])}
-          labels={BALANCE_AREAS.map((a) => a.name)}
-          colors={["#10b981", "#e11d48", "#f59e0b", "#14b8a6", "#8b5cf6", "#6366f1", "#d97706", "#a855f7"]}
-        />
-      </div>
-
 
 function Balance() {
   const [scores, setScores] = useState<Record<number, number>>(() =>
     Object.fromEntries(BALANCE_AREAS.map((a) => [a.n, 5]))
   );
+  const average = (
+    BALANCE_AREAS.reduce((s, a) => s + scores[a.n], 0) / BALANCE_AREAS.length
+  ).toFixed(1);
   return (
     <div className="space-y-6">
       <SectionHead
@@ -955,6 +945,21 @@ function Balance() {
           );
         })}
       </div>
+
+      <div className="bg-card rounded-2xl border border-border p-4 sm:p-6 flex flex-col items-center">
+        <div className="text-xs uppercase tracking-wide text-muted-foreground mb-1">Ваше колесо баланса</div>
+        <p className="text-xs text-muted-foreground mb-3 text-center max-w-md">
+          Оранжевый полигон — ваши текущие оценки. Серый пунктирный круг — идеальный баланс.
+          Чем «круглее» полигон — тем гармоничнее жизнь. Средний балл:{" "}
+          <span className="font-bold text-foreground">{average} / 10</span>.
+        </p>
+        <BalanceRadar
+          values={BALANCE_AREAS.map((a) => scores[a.n])}
+          labels={BALANCE_AREAS.map((a) => a.name)}
+          colors={["#10b981", "#e11d48", "#f59e0b", "#14b8a6", "#8b5cf6", "#6366f1", "#d97706", "#a855f7"]}
+        />
+      </div>
+
 
       <div className="bg-card rounded-2xl border border-border p-5">
         <h3 className="font-semibold flex items-center gap-2 mb-3"><Lightbulb size={18} className="text-primary"/> Как работать с колесом</h3>
