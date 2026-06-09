@@ -162,7 +162,10 @@ function CoachSpace() {
   };
 
   const releaseWakeLock = () => {
-    wakeLockRef.current?.release?.();
+    const sentinel = wakeLockRef.current;
+    if (sentinel) {
+      sentinel.release().catch(() => {});
+    }
     wakeLockRef.current = null;
   };
   releaseWakeLockRef.current = releaseWakeLock;
