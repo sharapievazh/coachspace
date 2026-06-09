@@ -84,6 +84,8 @@ function CoachSpace() {
   const alertPlayedRef = useRef(false);
   const workerRef = useRef<Worker | null>(null);
   const silentAudioRef = useRef<HTMLAudioElement | null>(null);
+  const releaseWakeLockRef = useRef<(() => void) | null>(null);
+  const stopSilentKeepAliveRef = useRef<(() => void) | null>(null);
   const [timeUp, setTimeUp] = useState(false);
 
   const getWorker = () => {
@@ -144,6 +146,7 @@ function CoachSpace() {
       silentAudioRef.current?.pause();
     } catch {}
   };
+  stopSilentKeepAliveRef.current = stopSilentKeepAlive;
 
   const requestWakeLock = async () => {
     try {
@@ -162,6 +165,7 @@ function CoachSpace() {
     wakeLockRef.current?.release?.();
     wakeLockRef.current = null;
   };
+  releaseWakeLockRef.current = releaseWakeLock;
 
   const startTimer = async () => {
     alertPlayedRef.current = false;
@@ -319,11 +323,11 @@ function CoachSpace() {
         setEndsAt(null);
         setRemaining(0);
         localStorage.removeItem(TIMER_STORAGE_KEY);
-        releaseWakeLock();
+        releaseWakeLockRef.current?.();
         // Keep silent loop alive briefly so the bell can play through the
         // suspended audio session, then release it.
         playEndAlert();
-        setTimeout(stopSilentKeepAlive, 4000);
+        setTimeout(() => stopSilentKeepAliveRef.current?.(), 4000);
       }
     };
     w.addEventListener("message", onMessage);
