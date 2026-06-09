@@ -271,8 +271,8 @@ function CoachSpace() {
     }
   };
 
-  const playEndAlert = () => {
-    playBell(false);
+  const playEndAlert = async () => {
+    await playBell(false);
     setTimeUp(true);
     if (typeof navigator !== "undefined" && "vibrate" in navigator) {
       navigator.vibrate?.([400, 150, 400, 150, 600]);
