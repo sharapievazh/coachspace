@@ -408,6 +408,7 @@ ${notes || "—"}
             setNotes={setNotes}
             exportSession={exportSession}
             testSound={testSound}
+            balanceScores={balanceScores}
           />
         )}
         {tab === "grow" && <Grow />}
@@ -416,7 +417,7 @@ ${notes || "—"}
         {tab === "sos" && <Sos />}
         {tab === "rapport" && <Rapport />}
         {tab === "burger" && <Burger />}
-        {tab === "balance" && <Balance />}
+        {tab === "balance" && <Balance scores={balanceScores} onChange={setBalanceScores} />}
         {tab === "values" && <Values />}
         {tab === "supervision" && <Supervision />}
         {tab === "feedback" && <Feedback />}
