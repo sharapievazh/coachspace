@@ -905,33 +905,35 @@ function Grow() {
         <Star className="absolute right-32 top-20 text-amber-400/40 animate-pulse" size={16} />
         <Sparkles className="absolute right-20 bottom-10 text-primary/20 animate-pulse" size={18} />
 
-        <div className="relative flex items-start justify-between flex-wrap gap-3">
-          <div className="flex items-center gap-3">
-            <div className="w-20 h-20 rounded-2xl bg-card grid place-items-center shadow-xl ring-2 ring-white/40">
-              <GrowIcon step={step.id as "G" | "R" | "O" | "W"} size={64} />
-            </div>
-            <div>
-              <div className="text-xs uppercase tracking-wide opacity-80 font-semibold">{step.label}</div>
-              <h3 className="text-3xl font-extrabold text-foreground tracking-tight">{step.title}</h3>
-              <p className="text-sm text-foreground/70">{step.subtitle}</p>
-            </div>
-          </div>
-          <span className="px-3 py-1 rounded-full bg-card text-foreground text-xs font-medium shadow flex items-center gap-1.5">
-            <Timer size={12} className="text-primary" /> {step.time}
-          </span>
-        </div>
-
         {(() => {
           const meta = GROW_STRUCTURE.find((g) => g.code.startsWith(step.id));
-          return meta ? (
-            <div className="relative mt-4 rounded-xl bg-card/70 border border-border/60 px-3 py-2 flex items-center gap-3 text-xs sm:text-sm">
-              <span className="w-6 h-6 rounded-full bg-primary text-primary-foreground grid place-items-center text-[11px] font-bold shrink-0">{meta.n}</span>
-              <span className="font-semibold text-foreground">{meta.code}</span>
-              <span className="text-muted-foreground">· {meta.time}</span>
-              <span className="text-foreground/80 leading-tight">— {meta.text}</span>
+          return (
+            <div className="relative flex items-stretch gap-4 flex-wrap sm:flex-nowrap">
+              {/* Big G/R/O/W tile with time + phase label inside */}
+              <div className="flex items-center gap-4 rounded-2xl bg-card shadow-xl ring-2 ring-white/40 p-4 min-w-0 flex-1">
+                <div className="w-20 h-20 rounded-2xl bg-background/60 grid place-items-center shrink-0">
+                  <GrowIcon step={step.id as "G" | "R" | "O" | "W"} size={64} />
+                </div>
+                <div className="min-w-0">
+                  <div className="text-xs uppercase tracking-wide opacity-80 font-semibold">{step.label}</div>
+                  <h3 className="text-3xl font-extrabold text-foreground tracking-tight leading-none">{step.title}</h3>
+                  {meta && (
+                    <div className="mt-2 flex flex-wrap items-center gap-2">
+                      <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-primary text-primary-foreground text-[11px] font-bold">
+                        <Timer size={12} /> {meta.time}
+                      </span>
+                      <span className="text-sm font-semibold text-foreground/90 leading-tight">
+                        {meta.text}
+                      </span>
+                    </div>
+                  )}
+                </div>
+              </div>
             </div>
-          ) : null;
+          );
         })()}
+
+
 
         <div className="relative mt-4 grid sm:grid-cols-2 gap-3">
           {step.blocks.map((b, i) => (
