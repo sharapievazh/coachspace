@@ -409,6 +409,35 @@ ${notes || "—"}
         {tab === "supervision" && <Supervision />}
         {tab === "feedback" && <Feedback />}
       </main>
+
+      {timeUp && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in">
+          <div className="relative max-w-md w-full rounded-2xl border border-primary/40 bg-card p-6 sm:p-8 text-center shadow-2xl">
+            <div className="absolute inset-0 rounded-2xl ring-2 ring-primary/60 animate-ping pointer-events-none" />
+            <div className="relative">
+              <div className="mx-auto mb-4 w-16 h-16 rounded-full bg-primary/15 text-primary grid place-items-center animate-pulse">
+                <Timer size={32} />
+              </div>
+              <h3 className="text-xl font-semibold mb-2">Время сессии истекло</h3>
+              <p className="text-muted-foreground mb-6">Пора подводить итоги!</p>
+              <div className="flex gap-2 justify-center">
+                <button
+                  onClick={() => { setTimeUp(false); resetTimer(); }}
+                  className="px-4 py-2 rounded-lg bg-primary text-primary-foreground hover:opacity-90"
+                >
+                  Закрыть
+                </button>
+                <button
+                  onClick={() => playBell(false)}
+                  className="px-4 py-2 rounded-lg bg-secondary hover:bg-muted"
+                >
+                  Повторить звук
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
