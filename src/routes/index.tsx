@@ -230,6 +230,16 @@ function CoachSpace() {
     getWorker()?.postMessage({ type: "stop" });
   };
 
+  // Stable refs so memoized SessionPanel callbacks don't change identity each render.
+  const startTimerRef = useRef(startTimer);
+  const pauseTimerRef = useRef(pauseTimer);
+  startTimerRef.current = startTimer;
+  pauseTimerRef.current = pauseTimer;
+  const handleSetRunning = useCallback((next: boolean) => {
+    if (next) startTimerRef.current();
+    else pauseTimerRef.current();
+  }, []);
+
   const playBell = async (short = false) => {
     try {
       const AC = window.AudioContext || (window as any).webkitAudioContext;
