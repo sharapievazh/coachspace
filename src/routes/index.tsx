@@ -3355,11 +3355,11 @@ function Competencies() {
         <h2 className="text-lg font-bold">16 Компетенций Коуча</h2>
       </div>
 
-      <div className="grid grid-cols-2 gap-1.5 p-1 rounded-xl bg-slate-900/60 border border-white/10">
+      <div className="grid grid-cols-2 gap-1.5 p-1 rounded-xl bg-secondary border border-border">
         <button
           onClick={() => { setTab("leonard"); setOpen(null); }}
           className={`px-3 py-2 rounded-lg text-xs sm:text-sm font-semibold transition-colors ${
-            tab === "leonard" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-white/5"
+            tab === "leonard" ? "bg-primary text-primary-foreground shadow" : "text-muted-foreground hover:bg-background/40"
           }`}
         >
           11 Компетенций<br className="sm:hidden" /><span className="opacity-80"> Т. Леонарда</span>
@@ -3367,7 +3367,7 @@ function Competencies() {
         <button
           onClick={() => { setTab("icu"); setOpen(null); }}
           className={`px-3 py-2 rounded-lg text-xs sm:text-sm font-semibold transition-colors ${
-            tab === "icu" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-white/5"
+            tab === "icu" ? "bg-primary text-primary-foreground shadow" : "text-muted-foreground hover:bg-background/40"
           }`}
         >
           5 Компетенций<br className="sm:hidden" /><span className="opacity-80"> ICU</span>
