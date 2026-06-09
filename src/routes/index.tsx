@@ -43,6 +43,7 @@ const buildSmartParagraph = (d: SmartData) => {
 };
 
 const TABS: { id: TabId; label: string; icon: any }[] = [
+  { id: "competencies", label: "16 Компетенций", icon: GraduationCap },
   { id: "session", label: "Вести Сессию", icon: Sparkles },
   { id: "erickson", label: "Звезда Эриксона", icon: Star },
   { id: "rapport", label: "Раппорт", icon: Heart },
@@ -57,7 +58,6 @@ const TABS: { id: TabId; label: string; icon: any }[] = [
   { id: "burger", label: "Гамбургер ОСВК", icon: Sandwich },
   { id: "rules", label: "8 Правил ОСВК", icon: Award },
   { id: "sos", label: "SOS Карпман", icon: AlertTriangle },
-  { id: "competencies", label: "16 Компетенций", icon: GraduationCap },
   { id: "feedback", label: "Обратная связь", icon: MessageSquare },
 ];
 
