@@ -625,7 +625,7 @@ const GROW_CLOSE = [
 function Grow() {
   const [active, setActive] = useState("G");
   const step = GROW_STEPS.find((s) => s.id === active)!;
-  const Icon = step.icon;
+  void step.icon;
   return (
     <div className="space-y-6">
       <SectionHead title="Модель GROW" subtitle="Структура эффективной коуч-сессии (60 мин)" />
