@@ -198,7 +198,7 @@ export function BalanceRadar({
 
   return (
     <svg
-      viewBox={`0 0 ${size} ${size}`}
+      viewBox={`${-pad} ${-pad / 2} ${size + pad * 2} ${size + pad}`}
       width="100%"
       height="100%"
       className="max-w-full"
