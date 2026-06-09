@@ -9,7 +9,7 @@ import {
   Eye, Timer, Brain, Flag, Calendar, CheckCircle2, Wrench, Home, User, Bell,
   ChevronRight, Zap, ListChecks, Compass, Sun, Hourglass, TrendingUp, Scale,
   HelpCircle, AlertOctagon, Hand, Mountain, Telescope, Glasses,
-  Ear, Crown, Palette, Calculator, Smile, Wind, ChevronDown,
+  Ear, Crown, Palette, Calculator, Smile, Wind, ChevronDown, Briefcase,
 } from "lucide-react";
 import burgerTop from "@/assets/burger-top.png";
 import burgerPatty from "@/assets/burger-patty.png";
@@ -54,6 +54,9 @@ function CoachSpace() {
   const [clientName, setClientName] = useState("");
   const [topic, setTopic] = useState("");
   const [notes, setNotes] = useState("");
+  const [balanceScores, setBalanceScores] = useState<Record<number, number>>(() =>
+    Object.fromEntries(Array.from({ length: 8 }, (_, i) => [i + 1, 5]))
+  );
   const audioCtxRef = useRef<any>(null);
   const wakeLockRef = useRef<any>(null);
   const alertPlayedRef = useRef(false);
@@ -319,11 +322,17 @@ function CoachSpace() {
   }, [remaining]);
 
   const exportSession = () => {
+    const balanceLines = BALANCE_AREAS.map(
+      (a) => `  ${a.n}. ${a.name}: ${balanceScores[a.n] ?? 5}/10`
+    ).join("\n");
     const txt = `Coach Space — Протокол сессии
 Дата: ${new Date().toLocaleString()}
 Клиент: ${clientName || "—"}
 Запрос: ${topic || "—"}
 Остаток времени: ${mmss}
+
+Колесо баланса (оценки):
+${balanceLines}
 
 Заметки коуча:
 ${notes || "—"}
@@ -407,7 +416,7 @@ ${notes || "—"}
         {tab === "sos" && <Sos />}
         {tab === "rapport" && <Rapport />}
         {tab === "burger" && <Burger />}
-        {tab === "balance" && <Balance />}
+        {tab === "balance" && <Balance scores={balanceScores} onChange={setBalanceScores} />}
         {tab === "values" && <Values />}
         {tab === "supervision" && <Supervision />}
         {tab === "feedback" && <Feedback />}
@@ -1107,43 +1116,43 @@ function Nlu() {
   );
 }
 
-/* ---------- Колесо баланса жизни (Пола Майера) ---------- */
+/* ---------- Колесо баланса жизни (8 классических сфер) ---------- */
 const BALANCE_AREAS = [
-  { n: 1, name: "Здоровье и энергия", icon: HeartPulse, color: "text-emerald-600 bg-emerald-500/10 border-emerald-500/30",
-    desc: "Физическое здоровье, спорт, питание, режим дня, восстановление и забота о себе.",
-    tips: ["физическое здоровье", "спорт", "питание", "режим дня", "восстановление", "забота о себе"],
-    q: "Насколько вы полны энергии и сил?" },
-  { n: 2, name: "Муж и отношения", icon: Heart, color: "text-rose-600 bg-rose-500/10 border-rose-500/30",
-    desc: "Близость, поддержка, гармония в паре и совместное время.",
-    tips: ["близость", "поддержка", "гармония в паре", "совместное время"],
-    q: "Насколько вы счастливы в отношениях?" },
-  { n: 3, name: "Дети и материнство", icon: Baby, color: "text-orange-600 bg-orange-500/10 border-orange-500/30",
-    desc: "Отношения с детьми, воспитание, радость материнства и развитие.",
-    tips: ["отношения с детьми", "воспитание", "радость материнства", "развитие"],
-    q: "Насколько вы довольны этой сферой?" },
-  { n: 4, name: "Особенный ребёнок и развитие семьи", icon: HandHeart, color: "text-teal-600 bg-teal-500/10 border-teal-500/30",
-    desc: "Забота, реабилитация, эмоциональное состояние ребёнка, ресурсы и поддержка.",
-    tips: ["забота", "реабилитация", "эмоциональное состояние ребёнка", "ресурсы", "поддержка"],
-    q: "Чувствуете ли вы, что у вас достаточно поддержки и ресурсов?" },
-  { n: 5, name: "Фонд и социальное влияние", icon: HandHeart, color: "text-violet-600 bg-violet-500/10 border-violet-500/30",
-    desc: "Помощь людям, реализация миссии, социальное влияние и проекты.",
-    tips: ["помощь людям", "реализация миссии", "социальное влияние", "проекты"],
-    q: "Насколько вы реализованы в своём деле и чувствуете свой вклад?" },
-  { n: 6, name: "Личный бренд и блог", icon: Laptop, color: "text-indigo-600 bg-indigo-500/10 border-indigo-500/30",
-    desc: "Публичность, самовыражение, создание контента и признание.",
-    tips: ["публичность", "самовыражение", "создание контента", "признание"],
-    q: "Насколько вы довольны своей реализацией в публичном поле?" },
-  { n: 7, name: "Финансы и капитал", icon: Coins, color: "text-amber-600 bg-amber-500/10 border-amber-500/30",
-    desc: "Доходы, накопления, инвестиции, финансовая грамотность и стабильность.",
+  { n: 1, name: "Семья", icon: Home, color: "text-emerald-600 bg-emerald-500/10 border-emerald-500/30",
+    desc: "Отношения с родителями, родственниками, семейные традиции, создание комфорта и теплой атмосферы в доме.",
+    tips: ["отношения с родителями", "родственники", "семейные традиции", "комфорт", "теплая атмосфера"],
+    q: "Насколько вы довольны отношениями в семье и атмосферой дома?" },
+  { n: 2, name: "Отношения", icon: Heart, color: "text-rose-600 bg-rose-500/10 border-rose-500/30",
+    desc: "Наличие любви, близости, взаимной поддержки и гармонии с партнёром, а также качественное общение с близкими друзьями.",
+    tips: ["любовь", "близость", "взаимная поддержка", "гармония с партнёром", "друзья"],
+    q: "Насколько вы ощущаете любовь, близость и гармонию в паре?" },
+  { n: 3, name: "Дети", icon: Baby, color: "text-orange-600 bg-orange-500/10 border-orange-500/30",
+    desc: "Радость родительства, совместное времяпрепровождение, участие в воспитании, поддержка и гармоничное развитие детей.",
+    tips: ["радость родительства", "совместное время", "воспитание", "поддержка", "развитие детей"],
+    q: "Насколько вы довольны родительством и развитием детей?" },
+  { n: 4, name: "Карьера", icon: Briefcase, color: "text-blue-600 bg-blue-500/10 border-blue-500/30",
+    desc: "Удовлетворённость своей профессиональной деятельностью, карьерный рост, рабочие достижения и признание в коллективе.",
+    tips: ["профессиональная деятельность", "карьерный рост", "достижения", "признание", "коллектив"],
+    q: "Насколько вы удовлетворены своей профессиональной деятельностью?" },
+  { n: 5, name: "Финансы", icon: Coins, color: "text-amber-600 bg-amber-500/10 border-amber-500/30",
+    desc: "Уровень доходов, накопления, инвестиции, финансовая грамотность и общее чувство материальной стабильности.",
     tips: ["доходы", "накопления", "инвестиции", "финансовая грамотность", "стабильность"],
     q: "Насколько вы чувствуете финансовую стабильность и уверенность?" },
-  { n: 8, name: "Самореализация и обучение", icon: GraduationCap, color: "text-purple-600 bg-purple-500/10 border-purple-500/30",
-    desc: "Личностный рост, новые навыки, знания, опыт и вдохновение.",
-    tips: ["личностный рост", "новые навыки", "знания", "опыт", "вдохновение"],
-    q: "Насколько вы развиваетесь и двигаетесь к своим целям?" },
+  { n: 6, name: "Здоровье", icon: HeartPulse, color: "text-red-600 bg-red-500/10 border-red-500/30",
+    desc: "Физическое самочувствие, уровень жизненной энергии, занятия спортом, правильное питание, режим дня и регулярное восстановление сил.",
+    tips: ["самочувствие", "энергия", "спорт", "питание", "восстановление"],
+    q: "Насколько вы полны энергии и заботитесь о своём здоровье?" },
+  { n: 7, name: "Самореализация", icon: GraduationCap, color: "text-purple-600 bg-purple-500/10 border-purple-500/30",
+    desc: "Личностный рост, обучение, освоение новых навыков, хобби, вдохновение и реализация своего глубинного потенциала.",
+    tips: ["личностный рост", "обучение", "новые навыки", "хобби", "потенциал"],
+    q: "Насколько вы развиваетесь и реализуете свой потенциал?" },
+  { n: 8, name: "Отдых", icon: Sun, color: "text-sky-600 bg-sky-500/10 border-sky-500/30",
+    desc: "Качество досуга, активный отдых на природе, путешествия, способность отключаться от рабочих задач и уделять время себе.",
+    tips: ["досуг", "природа", "путешествия", "отключение от задач", "время для себя"],
+    q: "Насколько вы умеете отдыхать и восстанавливать силы?" },
 ];
 
-const BALANCE_COLORS = ["#10b981", "#e11d48", "#f59e0b", "#14b8a6", "#8b5cf6", "#6366f1", "#d97706", "#a855f7"];
+const BALANCE_COLORS = ["#10b981", "#f43f5e", "#f97316", "#3b82f6", "#d97706", "#ef4444", "#a855f7", "#0ea5e9"];
 
 function RadarWithTooltip({ scores }: { scores: Record<number, number> }) {
   const [active, setActive] = useState<number | null>(null);
@@ -1210,17 +1219,14 @@ function RadarWithTooltip({ scores }: { scores: Record<number, number> }) {
   );
 }
 
-function Balance() {
-  const [scores, setScores] = useState<Record<number, number>>(() =>
-    Object.fromEntries(BALANCE_AREAS.map((a) => [a.n, 5]))
-  );
+function Balance({ scores, onChange }: { scores: Record<number, number>; onChange: (s: Record<number, number>) => void }) {
   const average = (
     BALANCE_AREAS.reduce((s, a) => s + scores[a.n], 0) / BALANCE_AREAS.length
   ).toFixed(1);
   return (
     <div className="space-y-6">
       <SectionHead
-        title="Колесо баланса жизни Пола Майера"
+        title="Колесо баланса жизни"
         subtitle="Оцените каждую сферу вашей жизни по шкале от 1 до 10 и создайте свою гармоничную и наполненную жизнь"
       />
 
@@ -1245,7 +1251,7 @@ function Balance() {
                 </div>
                 <input
                   type="range" min={1} max={10} value={v}
-                  onChange={(e) => setScores({ ...scores, [a.n]: Number(e.target.value) })}
+                  onChange={(e) => onChange({ ...scores, [a.n]: Number(e.target.value) })}
                   className="w-full accent-primary"
                 />
               </div>
