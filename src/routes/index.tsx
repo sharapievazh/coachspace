@@ -146,6 +146,7 @@ function CoachSpace() {
       silentAudioRef.current?.pause();
     } catch {}
   };
+  stopSilentKeepAliveRef.current = stopSilentKeepAlive;
 
   const requestWakeLock = async () => {
     try {
