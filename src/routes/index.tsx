@@ -1196,11 +1196,7 @@ function Balance() {
           Чем «круглее» полигон — тем гармоничнее жизнь. Средний балл:{" "}
           <span className="font-bold text-foreground">{average} / 10</span>.
         </p>
-        <BalanceRadar
-          values={BALANCE_AREAS.map((a) => scores[a.n])}
-          labels={BALANCE_AREAS.map((a) => a.name)}
-          colors={["#10b981", "#e11d48", "#f59e0b", "#14b8a6", "#8b5cf6", "#6366f1", "#d97706", "#a855f7"]}
-        />
+        <RadarWithTooltip scores={scores} />
       </div>
 
 
