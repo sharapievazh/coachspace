@@ -54,6 +54,9 @@ function CoachSpace() {
   const [clientName, setClientName] = useState("");
   const [topic, setTopic] = useState("");
   const [notes, setNotes] = useState("");
+  const [balanceScores, setBalanceScores] = useState<Record<number, number>>(() =>
+    Object.fromEntries(Array.from({ length: 8 }, (_, i) => [i + 1, 5]))
+  );
   const audioCtxRef = useRef<any>(null);
   const wakeLockRef = useRef<any>(null);
   const alertPlayedRef = useRef(false);
