@@ -1,6 +1,46 @@
 import { useState } from "react";
 
 /* ============================================================
+   RadarChartIcon — миниатюра "колеса баланса" для табов
+   ============================================================ */
+export function RadarChartIcon({
+  size = 18,
+  className = "",
+  color = "currentColor",
+}: {
+  size?: number;
+  className?: string;
+  color?: string;
+}) {
+  // 8-axis radar mini chart
+  const cx = 12, cy = 12, R = 9;
+  const n = 8;
+  const ang = (i: number) => (Math.PI * 2 * i) / n - Math.PI / 2;
+  const ringR = [R * 0.33, R * 0.66, R];
+  const sample = [7, 4, 6, 5, 8, 6, 4, 7]; // varied silhouette
+  const poly = sample
+    .map((v, i) => {
+      const r = (R * v) / 10;
+      return `${(cx + Math.cos(ang(i)) * r).toFixed(1)},${(cy + Math.sin(ang(i)) * r).toFixed(1)}`;
+    })
+    .join(" ");
+  return (
+    <svg viewBox="0 0 24 24" width={size} height={size} className={className} fill="none">
+      {ringR.map((r, i) => (
+        <circle key={i} cx={cx} cy={cy} r={r} stroke={color} strokeWidth="1" opacity={0.45} />
+      ))}
+      {Array.from({ length: n }).map((_, i) => {
+        const x = cx + Math.cos(ang(i)) * R;
+        const y = cy + Math.sin(ang(i)) * R;
+        return <line key={i} x1={cx} y1={cy} x2={x} y2={y} stroke={color} strokeWidth="0.8" opacity={0.5} />;
+      })}
+      <polygon points={poly} fill={color} fillOpacity={0.35} stroke={color} strokeWidth="1.3" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
+
+/* ============================================================
    GROW — 4 уникальные SVG-иконки (G / R / O / W)
    ============================================================ */
 
