@@ -125,6 +125,7 @@ function CoachSpace() {
     setEndsAt(null);
     localStorage.removeItem(TIMER_STORAGE_KEY);
     releaseWakeLock();
+    getWorker()?.postMessage({ type: "stop" });
   };
 
   const toggleTimer = () => {
@@ -143,6 +144,8 @@ function CoachSpace() {
     localStorage.removeItem(TIMER_STORAGE_KEY);
     releaseWakeLock();
     alertPlayedRef.current = false;
+    setTimeUp(false);
+    getWorker()?.postMessage({ type: "stop" });
   };
 
   const resetTimer = () => {
@@ -152,6 +155,8 @@ function CoachSpace() {
     localStorage.removeItem(TIMER_STORAGE_KEY);
     releaseWakeLock();
     alertPlayedRef.current = false;
+    setTimeUp(false);
+    getWorker()?.postMessage({ type: "stop" });
   };
 
   const playBell = async (short = false) => {
