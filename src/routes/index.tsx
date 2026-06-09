@@ -395,6 +395,7 @@ ${notes || "—"}
             notes={notes}
             setNotes={setNotes}
             exportSession={exportSession}
+            testSound={testSound}
           />
         )}
         {tab === "grow" && <Grow />}
