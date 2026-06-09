@@ -3445,3 +3445,22 @@ function Competencies() {
     </div>
   );
 }
+
+// Memoized tab components — prevents re-renders during timer ticks.
+const SessionPanelMemo = memo(SessionPanel);
+const GrowMemo = memo(Grow);
+const SwotMemo = memo(Swot);
+const NluMemo = memo(Nlu);
+const SosMemo = memo(Sos);
+const RapportMemo = memo(Rapport);
+const SmartGoalMemo = memo(SmartGoal);
+const EisenhowerMemo = memo(Eisenhower);
+const BurgerMemo = memo(Burger);
+const EricksonStarMemo = memo(EricksonStar);
+const BurgerRulesMemo = memo(BurgerRules);
+const BalanceMemo = memo(Balance);
+const ValuesMemo = memo(Values);
+const SupervisionMemo = memo(Supervision);
+const FeedbackMemo = memo(Feedback);
+const CompetenciesMemo = memo(Competencies);
+
