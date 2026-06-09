@@ -3304,16 +3304,16 @@ const ICU_COMPS: Comp[] = [
 function CompetencyItem({ c, open, onToggle }: { c: Comp; open: boolean; onToggle: () => void }) {
   const Icon = c.icon;
   return (
-    <div className="rounded-lg border border-white/10 bg-slate-900/40 overflow-hidden">
+    <div className="rounded-lg border border-border bg-card overflow-hidden shadow-sm">
       <button
         onClick={onToggle}
-        className="w-full flex items-center gap-2.5 px-3 py-2.5 text-left hover:bg-white/5 transition-colors"
+        className="w-full flex items-center gap-2.5 px-3 py-2.5 text-left hover:bg-secondary/60 transition-colors"
       >
-        <span className="shrink-0 w-7 h-7 rounded-md bg-primary/15 text-primary grid place-items-center text-xs font-bold tabular-nums">
+        <span className="shrink-0 w-7 h-7 rounded-md bg-primary text-primary-foreground grid place-items-center text-xs font-bold tabular-nums">
           {c.n}
         </span>
-        <Icon size={16} className="shrink-0 text-primary/80" />
-        <span className="flex-1 text-sm font-semibold leading-snug">{c.title}</span>
+        <Icon size={16} className="shrink-0 text-primary" />
+        <span className="flex-1 text-sm font-semibold leading-snug text-foreground">{c.title}</span>
         <ChevronDown
           size={16}
           className={`shrink-0 text-muted-foreground transition-transform ${open ? "rotate-180" : ""}`}
@@ -3324,17 +3324,17 @@ function CompetencyItem({ c, open, onToggle }: { c: Comp; open: boolean; onToggl
       >
         <div className="overflow-hidden">
           <div className="px-3 pb-3 pt-1 space-y-2">
-            <div className="rounded-md bg-slate-800/50 border border-white/5 p-2.5">
-              <div className="text-[10px] uppercase tracking-wider font-semibold text-slate-400 mb-1 flex items-center gap-1">
+            <div className="rounded-md bg-secondary border border-border p-2.5">
+              <div className="text-[10px] uppercase tracking-wider font-semibold text-muted-foreground mb-1 flex items-center gap-1">
                 <Lightbulb size={11} /> Пример
               </div>
-              <p className="text-xs leading-relaxed text-slate-200">{c.example}</p>
+              <p className="text-xs leading-relaxed text-foreground">{c.example}</p>
             </div>
-            <div className="rounded-md bg-emerald-500/10 border border-emerald-400/30 p-2.5">
-              <div className="text-[10px] uppercase tracking-wider font-semibold text-emerald-300 mb-1 flex items-center gap-1">
+            <div className="rounded-md bg-primary/10 border border-primary/40 p-2.5">
+              <div className="text-[10px] uppercase tracking-wider font-semibold text-primary mb-1 flex items-center gap-1">
                 <HelpCircle size={11} /> Сильные вопросы
               </div>
-              <p className="text-xs leading-relaxed text-emerald-50">{c.questions}</p>
+              <p className="text-xs leading-relaxed text-foreground">{c.questions}</p>
             </div>
           </div>
         </div>
