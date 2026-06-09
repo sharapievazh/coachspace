@@ -7,6 +7,8 @@ import {
   Gem, Users, BookOpen, ClipboardList, UserCheck, ShieldCheck, Footprints, Star,
   Circle, HeartPulse, Coins, Baby, HandHeart, Laptop, GraduationCap, Activity,
   Eye, Timer, Brain, Flag, Calendar, CheckCircle2, Wrench, Home, User, Bell,
+  ChevronRight, Zap, ListChecks, Compass, Sun, Hourglass, TrendingUp, Scale,
+  HelpCircle, AlertOctagon, Hand, Mountain, Telescope, Glasses,
 } from "lucide-react";
 import burgerTop from "@/assets/burger-top.png";
 import burgerPatty from "@/assets/burger-patty.png";
