@@ -10,7 +10,7 @@ import {
   ChevronRight, Zap, ListChecks, Compass, Sun, Hourglass, TrendingUp, Scale,
   HelpCircle, AlertOctagon, Hand, Mountain, Telescope, Glasses,
   Ear, Crown, Palette, Calculator, Smile, Wind, ChevronDown, Briefcase,
-  Award, Handshake, ArrowRight, Plus, Minus, BadgePlus,
+  Award, Handshake, ArrowRight, Plus, Minus, BadgePlus, Grid2x2, Trash2, CheckSquare, Square, Clock, Flame, CalendarCheck, UserPlus, X,
 } from "lucide-react";
 import burgerTop from "@/assets/burger-top.png";
 import burgerPatty from "@/assets/burger-patty.png";
@@ -26,7 +26,7 @@ export const Route = createFileRoute("/")({
   component: CoachSpace,
 });
 
-type TabId = "session" | "erickson" | "grow" | "swot" | "rapport" | "burger" | "rules" | "nlu" | "sos" | "balance" | "supervision" | "values" | "feedback";
+type TabId = "session" | "erickson" | "grow" | "swot" | "rapport" | "eisenhower" | "burger" | "rules" | "nlu" | "sos" | "balance" | "supervision" | "values" | "feedback";
 
 const TABS: { id: TabId; label: string; icon: any }[] = [
   { id: "session", label: "Вести Сессию", icon: Sparkles },
@@ -38,6 +38,7 @@ const TABS: { id: TabId; label: string; icon: any }[] = [
   { id: "balance", label: "Колесо баланса", icon: Circle },
   { id: "values", label: "Ценности", icon: Gem },
   { id: "supervision", label: "Супервизия", icon: Users },
+  { id: "eisenhower", label: "Матрица Эйзенхауэра", icon: Grid2x2 },
   { id: "burger", label: "Гамбургер ОСВК", icon: Sandwich },
   { id: "rules", label: "8 Правил ОСВК", icon: Award },
   { id: "sos", label: "SOS Карпман", icon: AlertTriangle },
@@ -420,6 +421,7 @@ ${notes || "—"}
         {tab === "nlu" && <Nlu />}
         {tab === "sos" && <Sos />}
         {tab === "rapport" && <Rapport />}
+        {tab === "eisenhower" && <Eisenhower notes={notes} setNotes={setNotes} />}
         {tab === "burger" && <Burger />}
         {tab === "erickson" && <EricksonStar />}
         {tab === "rules" && <BurgerRules />}
@@ -2386,6 +2388,251 @@ function EricksonStar() {
             <div className="font-mono text-[10px] opacity-70 mb-0.5">0{i + 1}</div>
             <div className="font-semibold leading-tight">{p.short}</div>
           </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// ============ EISENHOWER MATRIX ============
+type EisenTask = { id: string; text: string; important: boolean; urgent: boolean; done: boolean };
+const EISEN_STORAGE = "coach-space-eisenhower-tasks";
+
+const QUADRANTS = [
+  {
+    key: "do", important: true, urgent: true,
+    title: "Важные и срочные", action: "Сделай немедленно",
+    en: "DO", icon: Flame,
+    bg: "from-red-600/20 via-orange-600/15 to-red-900/30",
+    ring: "border-red-500/60", chip: "bg-red-500/20 text-red-200 border-red-500/40",
+    dot: "bg-red-500",
+  },
+  {
+    key: "schedule", important: true, urgent: false,
+    title: "Важные и несрочные", action: "Запланируй",
+    en: "SCHEDULE", icon: CalendarCheck,
+    bg: "from-emerald-600/20 via-green-600/15 to-emerald-900/30",
+    ring: "border-emerald-500/60", chip: "bg-emerald-500/20 text-emerald-200 border-emerald-500/40",
+    dot: "bg-emerald-500",
+  },
+  {
+    key: "delegate", important: false, urgent: true,
+    title: "Неважные и срочные", action: "Делегируй",
+    en: "DELEGATE", icon: UserPlus,
+    bg: "from-indigo-600/20 via-violet-600/15 to-indigo-900/30",
+    ring: "border-indigo-500/60", chip: "bg-indigo-500/20 text-indigo-200 border-indigo-500/40",
+    dot: "bg-indigo-500",
+  },
+  {
+    key: "delete", important: false, urgent: false,
+    title: "Неважные и несрочные", action: "Удали / минимизируй",
+    en: "DELETE", icon: Trash2,
+    bg: "from-slate-700/30 via-slate-800/20 to-slate-900/40",
+    ring: "border-slate-500/50", chip: "bg-slate-500/20 text-slate-200 border-slate-500/40",
+    dot: "bg-slate-400",
+  },
+] as const;
+
+function Eisenhower({ notes, setNotes }: { notes: string; setNotes: (v: string) => void }) {
+  const [tasks, setTasks] = useState<EisenTask[]>([]);
+  const [text, setText] = useState("");
+  const [important, setImportant] = useState(true);
+  const [urgent, setUrgent] = useState(false);
+  const [mobileTab, setMobileTab] = useState<typeof QUADRANTS[number]["key"]>("do");
+
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem(EISEN_STORAGE);
+      if (raw) setTasks(JSON.parse(raw));
+    } catch {}
+  }, []);
+  useEffect(() => {
+    try { localStorage.setItem(EISEN_STORAGE, JSON.stringify(tasks)); } catch {}
+  }, [tasks]);
+
+  const add = () => {
+    const t = text.trim();
+    if (!t) return;
+    setTasks((arr) => [
+      { id: Math.random().toString(36).slice(2), text: t, important, urgent, done: false },
+      ...arr,
+    ]);
+    setText("");
+  };
+  const toggleDone = (id: string) =>
+    setTasks((arr) => arr.map((t) => (t.id === id ? { ...t, done: !t.done } : t)));
+  const remove = (id: string) => setTasks((arr) => arr.filter((t) => t.id !== id));
+
+  const byQuad = (q: typeof QUADRANTS[number]) =>
+    tasks.filter((t) => t.important === q.important && t.urgent === q.urgent);
+
+  const sendToNotes = () => {
+    const lines = ["", "[Матрица Эйзенхауэра]"];
+    for (const q of QUADRANTS) {
+      const items = byQuad(q);
+      if (!items.length) continue;
+      lines.push(`\n— ${q.title} · ${q.action}:`);
+      for (const t of items) lines.push(`   ${t.done ? "✓" : "•"} ${t.text}`);
+    }
+    setNotes((notes ? notes + "\n" : "") + lines.join("\n") + "\n");
+  };
+
+  return (
+    <div className="max-w-5xl mx-auto rounded-2xl border border-border bg-gradient-to-br from-slate-900 via-slate-950 to-black p-3 sm:p-5 space-y-4">
+      <div className="flex items-start gap-3">
+        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-500 to-rose-600 grid place-items-center shadow-lg shrink-0">
+          <Grid2x2 size={22} className="text-white" />
+        </div>
+        <div className="min-w-0">
+          <h2 className="text-lg sm:text-xl font-bold leading-tight">Матрица Эйзенхауэра</h2>
+          <p className="text-xs text-muted-foreground">Таск-менеджер с автосортировкой по важности и срочности</p>
+        </div>
+      </div>
+
+      {/* Add form */}
+      <div className="rounded-xl border border-border bg-card/60 p-3 space-y-2">
+        <div className="flex gap-2">
+          <input
+            value={text}
+            onChange={(e) => setText(e.target.value)}
+            onKeyDown={(e) => e.key === "Enter" && add()}
+            placeholder="Новая задача…"
+            className="flex-1 bg-background border border-border rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-primary"
+          />
+          <button
+            onClick={add}
+            className="px-3 py-2 rounded-lg bg-primary text-primary-foreground text-sm font-medium flex items-center gap-1 hover:opacity-90"
+          >
+            <Plus size={16} /> <span className="hidden sm:inline">Добавить</span>
+          </button>
+        </div>
+        <div className="flex flex-wrap gap-2">
+          <button
+            onClick={() => setImportant((v) => !v)}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs border transition-colors ${
+              important
+                ? "bg-rose-500/20 border-rose-500/60 text-rose-100"
+                : "bg-card border-border text-muted-foreground"
+            }`}
+          >
+            <Flame size={13} /> Важно {important ? "✓" : ""}
+          </button>
+          <button
+            onClick={() => setUrgent((v) => !v)}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs border transition-colors ${
+              urgent
+                ? "bg-amber-500/20 border-amber-500/60 text-amber-100"
+                : "bg-card border-border text-muted-foreground"
+            }`}
+          >
+            <Clock size={13} /> Срочно {urgent ? "✓" : ""}
+          </button>
+          <button
+            onClick={sendToNotes}
+            className="ml-auto flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs border border-primary/40 bg-primary/10 text-primary hover:bg-primary/20"
+            title="Скопировать матрицу в блокнот сессии"
+          >
+            <BadgePlus size={13} /> В блокнот
+          </button>
+        </div>
+      </div>
+
+      {/* Mobile tabs */}
+      <div className="sm:hidden flex gap-1 overflow-x-auto -mx-1 px-1 pb-1">
+        {QUADRANTS.map((q) => (
+          <button
+            key={q.key}
+            onClick={() => setMobileTab(q.key)}
+            className={`shrink-0 flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[11px] border ${
+              mobileTab === q.key ? q.chip : "bg-card border-border text-muted-foreground"
+            }`}
+          >
+            <span className={`w-2 h-2 rounded-full ${q.dot}`} />
+            {q.en}
+            <span className="opacity-70">({byQuad(q).length})</span>
+          </button>
+        ))}
+      </div>
+
+      {/* Matrix with axes (desktop) */}
+      <div className="hidden sm:grid grid-cols-[auto_1fr] gap-2">
+        <div className="flex items-center justify-center">
+          <div className="rotate-180 [writing-mode:vertical-rl] text-[10px] uppercase tracking-widest text-muted-foreground flex items-center gap-2">
+            <ArrowRight size={12} className="rotate-90" /> Важность
+          </div>
+        </div>
+        <div>
+          <div className="grid grid-cols-2 grid-rows-2 gap-2">
+            {QUADRANTS.map((q) => (
+              <QuadrantCard key={q.key} q={q} items={byQuad(q)} onToggle={toggleDone} onRemove={remove} />
+            ))}
+          </div>
+          <div className="mt-2 text-center text-[10px] uppercase tracking-widest text-muted-foreground flex items-center justify-center gap-2">
+            Срочность <ArrowRight size={12} />
+          </div>
+        </div>
+      </div>
+
+      {/* Mobile: single quadrant */}
+      <div className="sm:hidden">
+        {QUADRANTS.filter((q) => q.key === mobileTab).map((q) => (
+          <QuadrantCard key={q.key} q={q} items={byQuad(q)} onToggle={toggleDone} onRemove={remove} />
+        ))}
+      </div>
+
+      <div className="text-[11px] text-muted-foreground text-center">
+        Всего задач: <b className="text-foreground">{tasks.length}</b> · сохраняется локально на устройстве
+      </div>
+    </div>
+  );
+}
+
+function QuadrantCard({
+  q, items, onToggle, onRemove,
+}: {
+  q: typeof QUADRANTS[number];
+  items: EisenTask[];
+  onToggle: (id: string) => void;
+  onRemove: (id: string) => void;
+}) {
+  const Icon = q.icon;
+  return (
+    <div className={`rounded-xl border ${q.ring} bg-gradient-to-br ${q.bg} p-2.5 sm:p-3 min-h-[180px] flex flex-col`}>
+      <div className="flex items-center gap-2 mb-2">
+        <div className="w-7 h-7 rounded-lg bg-black/30 grid place-items-center">
+          <Icon size={14} className="text-white" />
+        </div>
+        <div className="min-w-0 flex-1">
+          <div className="text-[10px] font-mono uppercase tracking-widest opacity-70">{q.en}</div>
+          <div className="text-xs font-semibold leading-tight truncate">{q.title}</div>
+        </div>
+        <span className={`text-[10px] px-1.5 py-0.5 rounded-full border ${q.chip}`}>{items.length}</span>
+      </div>
+      <div className={`text-[11px] mb-2 px-2 py-1 rounded-md border ${q.chip} self-start`}>
+        → {q.action}
+      </div>
+      <div className="flex-1 space-y-1.5 overflow-auto">
+        {items.length === 0 && (
+          <div className="text-[11px] text-muted-foreground italic py-2 text-center">пусто</div>
+        )}
+        {items.map((t) => (
+          <div
+            key={t.id}
+            className="group flex items-center gap-2 bg-black/30 border border-white/10 rounded-lg px-2 py-1.5"
+          >
+            <button onClick={() => onToggle(t.id)} className="shrink-0 text-white/80 hover:text-white">
+              {t.done ? <CheckSquare size={14} /> : <Square size={14} />}
+            </button>
+            <span className={`text-xs flex-1 ${t.done ? "line-through text-muted-foreground" : "text-foreground"}`}>
+              {t.text}
+            </span>
+            <button
+              onClick={() => onRemove(t.id)}
+              className="shrink-0 text-muted-foreground hover:text-red-400 opacity-0 group-hover:opacity-100 transition-opacity"
+            >
+              <X size={13} />
+            </button>
+          </div>
         ))}
       </div>
     </div>
