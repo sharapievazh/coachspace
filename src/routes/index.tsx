@@ -1491,47 +1491,92 @@ function Values() {
     <div className="space-y-6">
       <SectionHead title="Ценности" subtitle="Опоры, которые двигают вперёд" />
 
-      <div className="rounded-2xl bg-[#0f1b3d] text-white p-5 flex items-center gap-3">
-        <Gem size={28} className="text-amber-300"/>
-        <div>
-          <div className="text-2xl font-bold tracking-wide">ЦЕННОСТИ</div>
-          <div className="text-xs text-white/70">Внутренние опоры профессионала</div>
-        </div>
+      {/* ===== ROOT NODE ===== */}
+      <div className="mx-auto max-w-md rounded-2xl bg-[#0f1b3d] text-white px-5 py-4 flex items-center justify-center gap-3 shadow-lg">
+        <Gem size={26} className="text-amber-300" />
+        <div className="text-2xl font-extrabold tracking-[0.15em]">ЦЕННОСТИ</div>
       </div>
 
-      <div className="grid lg:grid-cols-2 gap-6">
-        <div className="bg-blue-500/5 rounded-2xl border border-blue-500/30 p-5 space-y-3">
-          <div className="flex items-center gap-2">
-            <div className="w-10 h-10 rounded-full bg-blue-500/10 grid place-items-center"><Rocket size={20} className="text-blue-600"/></div>
-            <h3 className="font-bold text-blue-700">ВЕРА В ПРОЕКТ</h3>
+      {/* trunk + split to two parent branches */}
+      <div className="relative mx-auto" style={{ height: 32 }}>
+        <div className="absolute left-1/2 top-0 w-px h-3 bg-border" />
+        <div className="absolute left-[25%] right-[25%] top-3 h-px bg-border" />
+        <div className="absolute left-[25%] top-3 w-px h-4 bg-blue-500/60" />
+        <div className="absolute left-[75%] top-3 w-px h-4 bg-emerald-500/60" />
+        <ArrowDownTip className="absolute left-[25%] -translate-x-1/2 top-6" color="#3b82f6" />
+        <ArrowDownTip className="absolute left-[75%] -translate-x-1/2 top-6" color="#10b981" />
+      </div>
+
+      {/* ===== TWO PARENT BRANCHES ===== */}
+      <div className="grid md:grid-cols-2 gap-4">
+        {/* LEFT — ВЕРА В ПРОЕКТ */}
+        <div className="space-y-3">
+          <div className="rounded-full bg-blue-500/10 border-2 border-blue-500/40 px-5 py-3 flex items-center gap-3">
+            <div className="w-10 h-10 rounded-full bg-white dark:bg-blue-500/15 border border-blue-500/30 grid place-items-center shrink-0">
+              <Rocket size={20} className="text-blue-600" />
+            </div>
+            <h3 className="font-extrabold text-blue-700 dark:text-blue-300 tracking-wide">ВЕРА В ПРОЕКТ</h3>
           </div>
-          <div className="grid sm:grid-cols-3 gap-3">
+
+          {/* split into 3 children */}
+          <div className="relative h-7">
+            <div className="absolute left-1/2 top-0 w-px h-3 bg-blue-500/40" />
+            <div className="absolute left-[16.66%] right-[16.66%] top-3 h-px bg-blue-500/40" />
+            <div className="absolute left-[16.66%] top-3 w-px h-3 bg-blue-500/40" />
+            <div className="absolute left-1/2 -translate-x-1/2 top-3 w-px h-3 bg-blue-500/40" />
+            <div className="absolute left-[83.33%] top-3 w-px h-3 bg-blue-500/40" />
+            <ArrowDownTip className="absolute left-[16.66%] -translate-x-1/2 top-5" color="#3b82f6" />
+            <ArrowDownTip className="absolute left-1/2 -translate-x-1/2 top-5" color="#3b82f6" />
+            <ArrowDownTip className="absolute left-[83.33%] -translate-x-1/2 top-5" color="#3b82f6" />
+          </div>
+
+          <div className="grid grid-cols-3 gap-2">
             {VALUES_PROJECT.map((v) => {
               const I = v.icon;
               return (
-                <div key={v.name} className="bg-card rounded-xl border border-blue-500/20 p-4 text-center">
-                  <div className="w-12 h-12 rounded-full bg-blue-500/10 grid place-items-center mx-auto mb-2"><I size={22} className="text-blue-600"/></div>
-                  <div className="font-bold text-sm mb-1">{v.name}</div>
-                  <p className="text-xs text-muted-foreground">{v.d}</p>
+                <div key={v.name} className="bg-blue-500/5 rounded-xl border-2 border-blue-500/30 p-3 text-center flex flex-col items-center">
+                  <div className="w-11 h-11 rounded-full bg-blue-500/10 grid place-items-center mb-2">
+                    <I size={22} className="text-blue-600" />
+                  </div>
+                  <div className="font-extrabold text-[11px] sm:text-xs text-blue-700 dark:text-blue-300 mb-1 leading-tight">{v.name}</div>
+                  <p className="text-[10px] sm:text-[11px] text-muted-foreground leading-snug">{v.d}</p>
                 </div>
               );
             })}
           </div>
         </div>
 
-        <div className="bg-emerald-500/5 rounded-2xl border border-emerald-500/30 p-5 space-y-3">
-          <div className="flex items-center gap-2">
-            <div className="w-10 h-10 rounded-full bg-emerald-500/10 grid place-items-center"><Heart size={20} className="text-emerald-600"/></div>
-            <h3 className="font-bold text-emerald-700">ВЕРА В СЕБЯ</h3>
+        {/* RIGHT — ВЕРА В СЕБЯ */}
+        <div className="space-y-3">
+          <div className="rounded-full bg-emerald-500/10 border-2 border-emerald-500/40 px-5 py-3 flex items-center gap-3">
+            <div className="w-10 h-10 rounded-full bg-white dark:bg-emerald-500/15 border border-emerald-500/30 grid place-items-center shrink-0">
+              <Heart size={20} className="text-emerald-600" />
+            </div>
+            <h3 className="font-extrabold text-emerald-700 dark:text-emerald-300 tracking-wide">ВЕРА В СЕБЯ</h3>
           </div>
-          <div className="grid sm:grid-cols-2 gap-3">
+
+          {/* split into 4 children */}
+          <div className="relative h-7">
+            <div className="absolute left-1/2 top-0 w-px h-3 bg-emerald-500/40" />
+            <div className="absolute left-[12.5%] right-[12.5%] top-3 h-px bg-emerald-500/40" />
+            {[12.5, 37.5, 62.5, 87.5].map((p) => (
+              <div key={p} className="absolute top-3 w-px h-3 bg-emerald-500/40" style={{ left: `${p}%` }} />
+            ))}
+            {[12.5, 37.5, 62.5, 87.5].map((p) => (
+              <ArrowDownTip key={p} className="absolute -translate-x-1/2 top-5" color="#10b981" style={{ left: `${p}%` } as React.CSSProperties} />
+            ))}
+          </div>
+
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
             {VALUES_SELF.map((v) => {
               const I = v.icon;
               return (
-                <div key={v.name} className="bg-card rounded-xl border border-emerald-500/20 p-4 text-center">
-                  <div className="w-12 h-12 rounded-full bg-emerald-500/10 grid place-items-center mx-auto mb-2"><I size={22} className="text-emerald-600"/></div>
-                  <div className="font-bold text-sm mb-1">{v.name}</div>
-                  <p className="text-xs text-muted-foreground">{v.d}</p>
+                <div key={v.name} className="bg-emerald-500/5 rounded-xl border-2 border-emerald-500/30 p-3 text-center flex flex-col items-center">
+                  <div className="w-11 h-11 rounded-full bg-emerald-500/10 grid place-items-center mb-2">
+                    <I size={22} className="text-emerald-600" />
+                  </div>
+                  <div className="font-extrabold text-[11px] sm:text-xs text-emerald-700 dark:text-emerald-300 mb-1 leading-tight">{v.name}</div>
+                  <p className="text-[10px] sm:text-[11px] text-muted-foreground leading-snug">{v.d}</p>
                 </div>
               );
             })}
@@ -1539,11 +1584,16 @@ function Values() {
         </div>
       </div>
 
-      <div className="rounded-2xl border border-violet-500/30 bg-violet-500/10 p-5 flex items-start gap-3">
-        <Target size={22} className="text-violet-600 mt-1"/>
+      {/* ===== ИТОГ ===== */}
+      <div className="rounded-2xl border-2 border-violet-500/30 bg-violet-500/10 p-4 flex items-start gap-3">
+        <div className="w-11 h-11 rounded-full bg-violet-500/15 grid place-items-center shrink-0">
+          <Target size={22} className="text-violet-600" />
+        </div>
         <div>
-          <div className="text-xs uppercase tracking-wide text-violet-700 font-bold mb-1">ИТОГ</div>
-          <p className="text-sm">Сочетание веры в проект и веры в себя создаёт внутреннюю опору, двигает вперёд и помогает достигать больших целей.</p>
+          <div className="text-xs uppercase tracking-widest text-violet-700 dark:text-violet-300 font-extrabold mb-1">ИТОГ</div>
+          <p className="text-sm leading-relaxed">
+            Сочетание <span className="text-blue-600 dark:text-blue-300 font-semibold">веры в проект</span> и <span className="text-emerald-600 dark:text-emerald-300 font-semibold">веры в себя</span> создаёт внутреннюю опору, двигает вперёд и помогает достигать больших целей.
+          </p>
         </div>
       </div>
     </div>
@@ -1812,9 +1862,9 @@ function Supervision() {
 }
 
 /* Small downward-arrow tip used in hierarchy diagrams */
-function ArrowDownTip({ className = "", color = "hsl(var(--border))" }: { className?: string; color?: string }) {
+function ArrowDownTip({ className = "", color = "hsl(var(--border))", style }: { className?: string; color?: string; style?: React.CSSProperties }) {
   return (
-    <svg width="10" height="8" viewBox="0 0 10 8" className={className} aria-hidden>
+    <svg width="10" height="8" viewBox="0 0 10 8" className={className} style={style} aria-hidden>
       <path d="M5 8 L0 0 L10 0 Z" fill={color} />
     </svg>
   );
