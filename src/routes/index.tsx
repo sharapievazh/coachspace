@@ -152,38 +152,64 @@ function CoachSpace() {
     alertPlayedRef.current = false;
   };
 
-  const playEndAlert = () => {
-    const runAudio = async () => {
+  const playBell = async (short = false) => {
+    try {
       const AC = window.AudioContext || (window as any).webkitAudioContext;
       const ctx = audioCtxRef.current || new AC();
       audioCtxRef.current = ctx;
       if (ctx.state === "suspended") await ctx.resume();
-      const beep = (freq: number, start: number, dur: number) => {
-        const osc = ctx.createOscillator();
-        const gain = ctx.createGain();
-        osc.type = "sine";
-        osc.frequency.value = freq;
-        gain.gain.setValueAtTime(0.0001, ctx.currentTime + start);
-        gain.gain.exponentialRampToValueAtTime(0.4, ctx.currentTime + start + 0.02);
-        gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + start + dur);
-        osc.connect(gain).connect(ctx.destination);
-        osc.start(ctx.currentTime + start);
-        osc.stop(ctx.currentTime + start + dur + 0.05);
+      const strike = (when: number, base: number) => {
+        // Bell = fundamental + inharmonic partials with exponential decay
+        const partials = [
+          { mult: 1, gain: 0.5, decay: 2.6 },
+          { mult: 2.0, gain: 0.32, decay: 1.8 },
+          { mult: 3.01, gain: 0.22, decay: 1.2 },
+          { mult: 4.2, gain: 0.14, decay: 0.9 },
+          { mult: 5.4, gain: 0.08, decay: 0.6 },
+        ];
+        partials.forEach((p) => {
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.type = "sine";
+          osc.frequency.value = base * p.mult;
+          const t0 = ctx.currentTime + when;
+          gain.gain.setValueAtTime(0.0001, t0);
+          gain.gain.exponentialRampToValueAtTime(p.gain, t0 + 0.005);
+          gain.gain.exponentialRampToValueAtTime(0.0001, t0 + p.decay);
+          osc.connect(gain).connect(ctx.destination);
+          osc.start(t0);
+          osc.stop(t0 + p.decay + 0.05);
+        });
       };
-      beep(880, 0, 0.35);
-      beep(1175, 0.45, 0.35);
-      beep(880, 0.9, 0.5);
-    };
-    runAudio().catch((e) => console.warn("audio failed", e));
+      if (short) {
+        strike(0, 880);
+      } else {
+        strike(0, 880);
+        strike(0.6, 1175);
+        strike(1.25, 880);
+      }
+    } catch (e) {
+      console.warn("audio failed", e);
+    }
+  };
+
+  const playEndAlert = () => {
+    playBell(false);
+    setTimeUp(true);
     if (typeof navigator !== "undefined" && "vibrate" in navigator) {
       navigator.vibrate?.([400, 150, 400, 150, 600]);
     }
     if ("Notification" in window && Notification.permission === "granted") {
       new Notification("Сессия завершена", {
-        body: "Таймер Coach Space дошёл до конца.",
+        body: "Время сессии истекло. Пора подводить итоги!",
         icon: "/apple-touch-icon.png",
       });
     }
+  };
+
+  const testSound = async () => {
+    await ensureAudioReady();
+    playBell(true);
   };
 
   useEffect(() => {
