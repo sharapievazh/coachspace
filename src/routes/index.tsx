@@ -11,6 +11,12 @@ import {
 import burgerTop from "@/assets/burger-top.png";
 import burgerPatty from "@/assets/burger-patty.png";
 import burgerBottom from "@/assets/burger-bottom.png";
+import {
+  GrowIcon,
+  BalanceRadar,
+  DiltsPyramidSvg,
+  KarpmanTriangleSvg,
+} from "@/components/coach/CoachVisuals";
 
 export const Route = createFileRoute("/")({
   component: CoachSpace,
