@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   Play, Pause, RotateCcw, Download, Target, Search, Lightbulb, Rocket,
   AlertTriangle, Heart, Triangle, Layers, MessageCircle, Sparkles, Sandwich,
@@ -229,6 +229,16 @@ function CoachSpace() {
     setTimeUp(false);
     getWorker()?.postMessage({ type: "stop" });
   };
+
+  // Stable refs so memoized SessionPanel callbacks don't change identity each render.
+  const startTimerRef = useRef(startTimer);
+  const pauseTimerRef = useRef(pauseTimer);
+  startTimerRef.current = startTimer;
+  pauseTimerRef.current = pauseTimer;
+  const handleSetRunning = useCallback((next: boolean) => {
+    if (next) startTimerRef.current();
+    else pauseTimerRef.current();
+  }, []);
 
   const playBell = async (short = false) => {
     try {
@@ -492,12 +502,12 @@ ${notes || "—"}
 
       <main className="max-w-6xl mx-auto px-4 sm:px-6 py-6">
         {tab === "session" && (
-          <SessionPanel
+          <SessionPanelMemo
             duration={duration}
             setDuration={changeDuration}
             remaining={remaining}
             running={running}
-            setRunning={(next: boolean) => { next ? startTimer() : pauseTimer(); }}
+            setRunning={handleSetRunning}
             reset={resetTimer}
             mmss={mmss}
             clientName={clientName}
@@ -510,21 +520,22 @@ ${notes || "—"}
             testSound={testSound}
           />
         )}
-        {tab === "grow" && <Grow />}
-        {tab === "swot" && <Swot />}
-        {tab === "nlu" && <Nlu />}
-        {tab === "sos" && <Sos />}
-        {tab === "rapport" && <Rapport />}
-        {tab === "smart" && <SmartGoal notes={notes} setNotes={setNotes} />}
-        {tab === "eisenhower" && <Eisenhower notes={notes} setNotes={setNotes} />}
-        {tab === "burger" && <Burger />}
-        {tab === "erickson" && <EricksonStar />}
-        {tab === "rules" && <BurgerRules />}
-        {tab === "balance" && <Balance scores={balanceScores} onChange={setBalanceScores} />}
-        {tab === "values" && <Values />}
-        {tab === "supervision" && <Supervision />}
-        {tab === "feedback" && <Feedback />}
-        {tab === "competencies" && <Competencies />}
+        {tab === "grow" && <GrowMemo />}
+        {tab === "swot" && <SwotMemo />}
+        {tab === "nlu" && <NluMemo />}
+        {tab === "sos" && <SosMemo />}
+        {tab === "rapport" && <RapportMemo />}
+        {tab === "smart" && <SmartGoalMemo notes={notes} setNotes={setNotes} />}
+        {tab === "eisenhower" && <EisenhowerMemo notes={notes} setNotes={setNotes} />}
+        {tab === "burger" && <BurgerMemo />}
+        {tab === "erickson" && <EricksonStarMemo />}
+        {tab === "rules" && <BurgerRulesMemo />}
+        {tab === "balance" && <BalanceMemo scores={balanceScores} onChange={setBalanceScores} />}
+        {tab === "values" && <ValuesMemo />}
+        {tab === "supervision" && <SupervisionMemo />}
+        {tab === "feedback" && <FeedbackMemo />}
+        {tab === "competencies" && <CompetenciesMemo />}
+
       </main>
 
       {timeUp && (
@@ -3445,3 +3456,22 @@ function Competencies() {
     </div>
   );
 }
+
+// Memoized tab components — prevents re-renders during timer ticks.
+const SessionPanelMemo = memo(SessionPanel);
+const GrowMemo = memo(Grow);
+const SwotMemo = memo(Swot);
+const NluMemo = memo(Nlu);
+const SosMemo = memo(Sos);
+const RapportMemo = memo(Rapport);
+const SmartGoalMemo = memo(SmartGoal);
+const EisenhowerMemo = memo(Eisenhower);
+const BurgerMemo = memo(Burger);
+const EricksonStarMemo = memo(EricksonStar);
+const BurgerRulesMemo = memo(BurgerRules);
+const BalanceMemo = memo(Balance);
+const ValuesMemo = memo(Values);
+const SupervisionMemo = memo(Supervision);
+const FeedbackMemo = memo(Feedback);
+const CompetenciesMemo = memo(Competencies);
+
