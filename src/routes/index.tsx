@@ -26,7 +26,7 @@ export const Route = createFileRoute("/")({
   component: CoachSpace,
 });
 
-type TabId = "session" | "erickson" | "grow" | "swot" | "rapport" | "smartinfo" | "smart" | "eisenhower" | "burger" | "rules" | "nlu" | "sos" | "balance" | "supervision" | "values" | "feedback";
+type TabId = "session" | "erickson" | "grow" | "swot" | "rapport" | "smart" | "eisenhower" | "burger" | "rules" | "nlu" | "sos" | "balance" | "supervision" | "values" | "feedback";
 
 const SMART_STORAGE = "coach-space-smart-goal";
 type SmartData = { s: string; m: string; a: string; r: string; t: string; positive: boolean; balanced: boolean };
@@ -51,7 +51,6 @@ const TABS: { id: TabId; label: string; icon: any }[] = [
   { id: "balance", label: "Колесо баланса", icon: Circle },
   { id: "values", label: "Ценности", icon: Gem },
   { id: "supervision", label: "Супервизия", icon: Users },
-  { id: "smartinfo", label: "Критерии SMART", icon: Lightbulb },
   { id: "smart", label: "SMART-цель", icon: CheckCircle2 },
   { id: "eisenhower", label: "Матрица Эйзенхауэра", icon: LayoutGrid },
   { id: "burger", label: "Гамбургер ОСВК", icon: Sandwich },
@@ -456,7 +455,6 @@ ${notes || "—"}
         {tab === "nlu" && <Nlu />}
         {tab === "sos" && <Sos />}
         {tab === "rapport" && <Rapport />}
-        {tab === "smartinfo" && <SmartInfo />}
         {tab === "smart" && <SmartGoal notes={notes} setNotes={setNotes} />}
         {tab === "eisenhower" && <Eisenhower notes={notes} setNotes={setNotes} />}
         {tab === "burger" && <Burger />}
@@ -2671,129 +2669,6 @@ function QuadrantCard({
             </button>
           </div>
         ))}
-      </div>
-    </div>
-  );
-}
-
-/* ============================================================
-   Критерии SMART — информационный справочник (аккордеон)
-   ============================================================ */
-
-const SMART_CRITERIA = [
-  {
-    key: "s",
-    letter: "S",
-    title: "Specific — Конкретная",
-    meaning: "Каких именно результатов необходимо достичь? Каковы характеристики ожидаемого результата?",
-    example: "«Я создаю личное веб-приложение для тайм-менеджмента, в котором можно создавать задачи и распределять их по 4 квадратам матрицы Эйзенхауэра».",
-    bg: "from-rose-500 to-rose-600",
-    glow: "shadow-rose-500/40",
-  },
-  {
-    key: "m",
-    letter: "M",
-    title: "Measurable — Измеримая",
-    meaning: "Что даст вам возможность судить о достижении цели? В чем это будет измеряться?",
-    example: "«Приложение готово, когда я могу открыть его в браузере, добавить задачу с галочками \"важно/срочно\", и она автоматически попадает в нужный визуальный блок».",
-    bg: "from-amber-500 to-orange-500",
-    glow: "shadow-amber-500/40",
-  },
-  {
-    key: "a",
-    letter: "A",
-    title: "Achievable — Достижимая",
-    meaning: "За счет чего цель будет достигнута? Какие шаги и усилия потребуются?",
-    example: "«Я достигну этого, используя ИИ-конструктор (например, Lovable) и уделяя разработке и составлению промтов по 1 часу каждый вечер».",
-    bg: "from-emerald-500 to-teal-500",
-    glow: "shadow-emerald-500/40",
-  },
-  {
-    key: "r",
-    letter: "R",
-    title: "Realistic / Relevant — Актуальная",
-    meaning: "Является ли поставленная цель важной для вашего успеха? Почему это актуально именно сейчас?",
-    example: "«Это приложение поможет мне структурировать свои собственные дела в период обучения коучингу и снизит мой уровень стресса».",
-    bg: "from-sky-500 to-cyan-500",
-    glow: "shadow-sky-500/40",
-  },
-  {
-    key: "t",
-    letter: "T",
-    title: "Time-framed — Определенная во времени",
-    meaning: "Когда, к какому моменту времени необходимо достичь поставленной цели?",
-    example: "«Первая рабочая версия для моего личного использования будет готова через 14 дней, к 23 июня 2026 года».",
-    bg: "from-violet-500 to-fuchsia-600",
-    glow: "shadow-violet-500/40",
-  },
-];
-
-function SmartInfo() {
-  const [open, setOpen] = useState<string | null>(null);
-
-  return (
-    <div className="max-w-3xl mx-auto space-y-4">
-      <SectionHead title="Критерии SMART цели" subtitle="Информационный справочник для коуча и клиента" />
-
-      <div className="grid gap-2">
-        {SMART_CRITERIA.map((c) => {
-          const isOpen = open === c.key;
-          return (
-            <button
-              key={c.key}
-              onClick={() => setOpen(isOpen ? null : c.key)}
-              className={`text-left rounded-xl border border-slate-700 bg-gradient-to-br from-slate-800 to-slate-900 p-3 transition-all ${
-                isOpen ? "ring-1 ring-slate-600" : "hover:border-slate-600"
-              }`}
-            >
-              <div className="flex items-center gap-3">
-                <div
-                  className={`w-11 h-11 rounded-lg bg-gradient-to-br ${c.bg} grid place-items-center shadow-lg ${c.glow} text-white font-black text-xl`}
-                >
-                  {c.letter}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="font-semibold text-slate-100 text-sm">{c.title}</div>
-                </div>
-                <ChevronDown
-                  size={16}
-                  className={`shrink-0 text-slate-400 transition-transform ${isOpen ? "rotate-180" : ""}`}
-                />
-              </div>
-              {isOpen && (
-                <div className="mt-3 space-y-2 text-sm text-slate-300 animate-in fade-in slide-in-from-top-1">
-                  <div>
-                    <span className="font-semibold text-slate-100">Смысл:</span> {c.meaning}
-                  </div>
-                  <div className="rounded-lg bg-slate-950/50 border border-slate-700/50 p-2.5 text-slate-200">
-                    <span className="font-semibold text-amber-400">Пример:</span> {c.example}
-                  </div>
-                </div>
-              )}
-            </button>
-          );
-        })}
-      </div>
-
-      {/* Whitmore callout */}
-      <div className="rounded-xl border border-emerald-500/30 bg-gradient-to-br from-emerald-950/60 to-slate-900 p-4">
-        <h3 className="text-sm font-bold text-emerald-300 mb-3 flex items-center gap-2">
-          <ShieldCheck size={16} /> Два правила от Джона Уитмора
-        </h3>
-        <div className="grid sm:grid-cols-2 gap-3">
-          <div className="rounded-lg bg-slate-950/40 border border-slate-700/50 p-3">
-            <div className="font-semibold text-slate-100 text-xs mb-1">Позитивная формулировка</div>
-            <div className="text-xs text-slate-400 leading-relaxed">
-              Цель должна быть сформулирована позитивно, без частицы «НЕ». Вместо «чтобы не забывать задачи» пишем «для точной организации и выполнения приоритетных задач».
-            </div>
-          </div>
-          <div className="rounded-lg bg-slate-950/40 border border-slate-700/50 p-3">
-            <div className="font-semibold text-slate-100 text-xs mb-1">Баланс вызова и реальности</div>
-            <div className="text-xs text-slate-400 leading-relaxed">
-              Цель обязана бросать вызов (быть сложной для мотивации), но оставаться реалистичной (сохранять надежду на успех).
-            </div>
-          </div>
-        </div>
       </div>
     </div>
   );
