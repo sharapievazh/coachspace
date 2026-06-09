@@ -1862,7 +1862,7 @@ function Supervision() {
 }
 
 /* Small downward-arrow tip used in hierarchy diagrams */
-function ArrowDownTip({ className = "", color = "hsl(var(--border))" }: { className?: string; color?: string }) {
+function ArrowDownTip({ className = "", color = "hsl(var(--border))", style }: { className?: string; color?: string; style?: React.CSSProperties }) {
   return (
     <svg width="10" height="8" viewBox="0 0 10 8" className={className} aria-hidden>
       <path d="M5 8 L0 0 L10 0 Z" fill={color} />
