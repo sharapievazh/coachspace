@@ -28,14 +28,14 @@ export const Route = createFileRoute("/")({
 type TabId = "session" | "grow" | "swot" | "rapport" | "burger" | "nlu" | "sos" | "balance" | "supervision" | "values" | "feedback";
 
 const TABS: { id: TabId; label: string; icon: any }[] = [
-  { id: "session", label: "Сессия", icon: Sparkles },
+  { id: "session", label: "Вести Сессию", icon: Sparkles },
+  { id: "rapport", label: "Раппорт", icon: Heart },
   { id: "grow", label: "GROW", icon: Target },
   { id: "swot", label: "SWOT", icon: Layers },
-  { id: "balance", label: "Колесо баланса", icon: Circle },
   { id: "nlu", label: "Пирамида Дилтса", icon: Triangle },
+  { id: "balance", label: "Колесо баланса", icon: Circle },
   { id: "values", label: "Ценности", icon: Gem },
   { id: "supervision", label: "Супервизия", icon: Users },
-  { id: "rapport", label: "Раппорт", icon: Heart },
   { id: "burger", label: "Гамбургер", icon: Sandwich },
   { id: "sos", label: "SOS Карпман", icon: AlertTriangle },
   { id: "feedback", label: "Обратная связь", icon: MessageSquare },
