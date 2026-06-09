@@ -901,6 +901,19 @@ const BALANCE_AREAS = [
     desc: "Обучение, личностный рост, навыки, цели, вдохновение, новые знания и опыт.",
     q: "Насколько вы развиваетесь и двигаетесь к своим целям?" },
 ];
+      <div className="bg-card rounded-2xl border border-border p-4 sm:p-6 flex flex-col items-center">
+        <div className="text-xs uppercase tracking-wide text-muted-foreground mb-1">Ваше колесо баланса</div>
+        <p className="text-xs text-muted-foreground mb-3 text-center max-w-md">
+          Оранжевый полигон — ваши текущие оценки. Серый пунктирный круг — идеальный баланс.
+          Чем «круглее» полигон — тем гармоничнее жизнь.
+        </p>
+        <BalanceRadar
+          values={BALANCE_AREAS.map((a) => scores[a.n])}
+          labels={BALANCE_AREAS.map((a) => a.name)}
+          colors={["#10b981", "#e11d48", "#f59e0b", "#14b8a6", "#8b5cf6", "#6366f1", "#d97706", "#a855f7"]}
+        />
+      </div>
+
 
 function Balance() {
   const [scores, setScores] = useState<Record<number, number>>(() =>
