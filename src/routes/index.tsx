@@ -877,21 +877,8 @@ function Grow() {
     <div className="space-y-6">
       <SectionHead title="Модель GROW" subtitle="Структура эффективной коуч-сессии (60 мин)" />
 
-      <div className="bg-card rounded-2xl border border-border p-5">
-        <h3 className="font-semibold mb-3 flex items-center gap-2"><Timer size={18} className="text-primary"/> Структура сессии (60 мин)</h3>
-        <div className="grid sm:grid-cols-4 gap-2">
-          {GROW_STRUCTURE.map((s) => (
-            <div key={s.n} className="p-3 rounded-xl bg-secondary/60">
-              <div className="flex items-center gap-2 text-primary font-semibold">
-                <span className="w-6 h-6 rounded-full bg-primary text-primary-foreground grid place-items-center text-xs">{s.n}</span>
-                {s.code}
-              </div>
-              <div className="text-xs text-muted-foreground mt-1">{s.time}</div>
-              <div className="text-sm mt-1">{s.text}</div>
-            </div>
-          ))}
-        </div>
-      </div>
+      {/* верхняя дублирующая панель убрана — структура встроена в каждую карточку шага */}
+
 
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
         {GROW_STEPS.map((s) => {
