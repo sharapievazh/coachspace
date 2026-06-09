@@ -920,7 +920,19 @@ function Grow() {
           </span>
         </div>
 
-        <div className="relative mt-6 grid sm:grid-cols-2 gap-3">
+        {(() => {
+          const meta = GROW_STRUCTURE.find((g) => g.code.startsWith(step.id));
+          return meta ? (
+            <div className="relative mt-4 rounded-xl bg-card/70 border border-border/60 px-3 py-2 flex items-center gap-3 text-xs sm:text-sm">
+              <span className="w-6 h-6 rounded-full bg-primary text-primary-foreground grid place-items-center text-[11px] font-bold shrink-0">{meta.n}</span>
+              <span className="font-semibold text-foreground">{meta.code}</span>
+              <span className="text-muted-foreground">· {meta.time}</span>
+              <span className="text-foreground/80 leading-tight">— {meta.text}</span>
+            </div>
+          ) : null;
+        })()}
+
+        <div className="relative mt-4 grid sm:grid-cols-2 gap-3">
           {step.blocks.map((b, i) => (
             <BlockCard key={i} head={b.head} items={b.items} />
           ))}
