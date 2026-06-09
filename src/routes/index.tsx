@@ -10,7 +10,7 @@ import {
   ChevronRight, Zap, ListChecks, Compass, Sun, Hourglass, TrendingUp, Scale,
   HelpCircle, AlertOctagon, Hand, Mountain, Telescope, Glasses,
   Ear, Crown, Palette, Calculator, Smile, Wind, ChevronDown, Briefcase,
-  Award, Handshake, ArrowRight, Plus, Minus, BadgePlus,
+  Award, Handshake, ArrowRight, Plus, Minus, BadgePlus, Grid2x2, Trash2, CheckSquare, Square, Clock, Flame, CalendarCheck, UserPlus, X,
 } from "lucide-react";
 import burgerTop from "@/assets/burger-top.png";
 import burgerPatty from "@/assets/burger-patty.png";
