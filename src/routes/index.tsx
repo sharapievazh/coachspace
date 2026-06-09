@@ -83,6 +83,7 @@ function CoachSpace() {
   const wakeLockRef = useRef<any>(null);
   const alertPlayedRef = useRef(false);
   const workerRef = useRef<Worker | null>(null);
+  const silentAudioRef = useRef<HTMLAudioElement | null>(null);
   const [timeUp, setTimeUp] = useState(false);
 
   const getWorker = () => {
@@ -114,6 +115,36 @@ function CoachSpace() {
     }
   };
 
+  // Keep the audio session alive on mobile (iOS/Android suspend WebAudio when
+  // the screen locks). Looping a tiny silent media element prevents that so
+  // the end-of-session bell still plays when the phone is locked.
+  const startSilentKeepAlive = () => {
+    try {
+      if (silentAudioRef.current) {
+        silentAudioRef.current.play().catch(() => {});
+        return;
+      }
+      // 1s of silent WAV
+      const silentWav =
+        "data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQAAAAA=";
+      const el = new Audio(silentWav);
+      el.loop = true;
+      el.volume = 0.001;
+      (el as any).playsInline = true;
+      el.setAttribute("playsinline", "true");
+      silentAudioRef.current = el;
+      el.play().catch((e) => console.warn("silent keepalive failed", e));
+    } catch (e) {
+      console.warn("silent keepalive init failed", e);
+    }
+  };
+
+  const stopSilentKeepAlive = () => {
+    try {
+      silentAudioRef.current?.pause();
+    } catch {}
+  };
+
   const requestWakeLock = async () => {
     try {
       if ("wakeLock" in navigator && !wakeLockRef.current) {
@@ -140,6 +171,7 @@ function CoachSpace() {
       Notification.requestPermission().catch((e) => console.warn("notification permission failed", e));
     }
     await requestWakeLock();
+    startSilentKeepAlive();
     const nextEndsAt = Date.now() + remaining * 1000;
     localStorage.setItem(TIMER_STORAGE_KEY, JSON.stringify({ endsAt: nextEndsAt, duration }));
     setEndsAt(nextEndsAt);
@@ -153,6 +185,7 @@ function CoachSpace() {
     setEndsAt(null);
     localStorage.removeItem(TIMER_STORAGE_KEY);
     releaseWakeLock();
+    stopSilentKeepAlive();
     getWorker()?.postMessage({ type: "stop" });
   };
 
@@ -171,6 +204,7 @@ function CoachSpace() {
     setEndsAt(null);
     localStorage.removeItem(TIMER_STORAGE_KEY);
     releaseWakeLock();
+    stopSilentKeepAlive();
     alertPlayedRef.current = false;
     setTimeUp(false);
     getWorker()?.postMessage({ type: "stop" });
@@ -182,6 +216,7 @@ function CoachSpace() {
     setEndsAt(null);
     localStorage.removeItem(TIMER_STORAGE_KEY);
     releaseWakeLock();
+    stopSilentKeepAlive();
     alertPlayedRef.current = false;
     setTimeUp(false);
     getWorker()?.postMessage({ type: "stop" });
@@ -285,7 +320,10 @@ function CoachSpace() {
         setRemaining(0);
         localStorage.removeItem(TIMER_STORAGE_KEY);
         releaseWakeLock();
+        // Keep silent loop alive briefly so the bell can play through the
+        // suspended audio session, then release it.
         playEndAlert();
+        setTimeout(stopSilentKeepAlive, 4000);
       }
     };
     w.addEventListener("message", onMessage);
@@ -313,6 +351,7 @@ function CoachSpace() {
         localStorage.removeItem(TIMER_STORAGE_KEY);
         releaseWakeLock();
         playEndAlert();
+        setTimeout(stopSilentKeepAlive, 4000);
       }
     };
     tick();
@@ -399,14 +438,14 @@ ${notes || "—"}
               <p className="text-xs text-muted-foreground">Рабочее пространство коуча</p>
             </div>
           </div>
-          <div className="hidden sm:flex items-center gap-3 px-3 py-2 rounded-lg bg-secondary">
-            <div className="font-mono text-xl tabular-nums">{mmss}</div>
+          <div className="flex items-center gap-2 sm:gap-3 px-2 sm:px-3 py-1.5 sm:py-2 rounded-lg bg-secondary">
+            <div className="font-mono text-base sm:text-xl tabular-nums">{mmss}</div>
             <button
               onClick={toggleTimer}
-              className="p-2 rounded-md bg-primary text-primary-foreground hover:opacity-90"
+              className="p-1.5 sm:p-2 rounded-md bg-primary text-primary-foreground hover:opacity-90"
               aria-label="toggle"
             >
-              {running ? <Pause size={16} /> : <Play size={16} />}
+              {running ? <Pause size={14} /> : <Play size={14} />}
             </button>
           </div>
         </div>
