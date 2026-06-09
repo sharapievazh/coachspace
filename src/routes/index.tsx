@@ -753,46 +753,451 @@ function Bridge({ title, text }: { title: string; text: string }) {
   );
 }
 
-/* ---------- NLU ---------- */
-const NLU = [
-  { name: "Окружение", desc: "Где? Когда? С кем? — контекст и условия.", q: ["Где и когда это происходит?", "Кто рядом с тобой?", "Что в твоём окружении влияет на ситуацию?"] },
-  { name: "Поведение", desc: "Что я делаю? — конкретные действия.", q: ["Что именно ты делаешь?", "Как ты действуешь в этой ситуации?", "Что ты делаешь иначе, когда получается?"] },
-  { name: "Способности", desc: "Как? — навыки, стратегии, состояния.", q: ["Какие навыки тебе нужны?", "Как ты это делаешь?", "Чему тебе нужно научиться?"] },
-  { name: "Ценности и убеждения", desc: "Почему? — что важно и во что верю.", q: ["Почему это важно для тебя?", "Во что ты веришь относительно этой ситуации?", "Что для тебя по-настоящему ценно?"] },
-  { name: "Идентичность", desc: "Кто я? — самоопределение.", q: ["Кто ты в этой роли?", "Какой человек так поступает?", "Каким ты хочешь быть?"] },
-  { name: "Миссия", desc: "Ради чего? Ради кого? — смысл за пределами себя.", q: ["Ради чего большего ты это делаешь?", "Какой вклад ты вносишь?", "Что останется после тебя?"] },
+/* ---------- Пирамида Дилтса ---------- */
+const DILTS = [
+  {
+    n: 6, name: "МИССИЯ", q: "Ради чего?",
+    icon: Flag, color: "bg-violet-500 text-white",
+    desc: "Ваш вклад в мир. Высшая цель и смысл существования.",
+    focus: "Ради чего я живу? Какой след я хочу оставить?",
+  },
+  {
+    n: 5, name: "ИДЕНТИЧНОСТЬ", q: "Кто я?",
+    icon: User, color: "bg-blue-500 text-white",
+    desc: "Кем вы себя видите. Ценности, убеждения, самоощущение.",
+    focus: "Кто я? Во что верю? Что для меня важно?",
+  },
+  {
+    n: 4, name: "УБЕЖДЕНИЯ И ЦЕННОСТИ", q: "Почему?",
+    icon: Gem, color: "bg-teal-500 text-white",
+    desc: "Ваши убеждения, принципы и ценности, которые управляют поведением.",
+    focus: "Почему я это делаю? Что для меня важно?",
+  },
+  {
+    n: 3, name: "СПОСОБНОСТИ", q: "Как?",
+    icon: Wrench, color: "bg-green-500 text-white",
+    desc: "Ваши навыки, умения, таланты. То, что вы умеете делать.",
+    focus: "Как я могу это сделать? Какие навыки мне нужны?",
+  },
+  {
+    n: 2, name: "ПОВЕДЕНИЕ", q: "Что делаю?",
+    icon: Footprints, color: "bg-yellow-500 text-white",
+    desc: "Ваши действия и поступки. Конкретные шаги и поведение.",
+    focus: "Что я делаю? Что я могу изменить в своих действиях?",
+  },
+  {
+    n: 1, name: "ОКРУЖЕНИЕ", q: "Где? Когда? С кем?",
+    icon: Home, color: "bg-orange-500 text-white",
+    desc: "Ваше окружение и контекст. Место, время, люди, ресурсы.",
+    focus: "Где я? С кем я? Какие ресурсы у меня есть?",
+  },
 ];
+
+const DILTS_HOW = [
+  { n: 1, t: "Определите уровень", d: "На каком уровне находится ваш запрос сейчас?" },
+  { n: 2, t: "Идите снизу вверх", d: "Начинайте изменения с нижних уровней и поднимайтесь вверх." },
+  { n: 3, t: "Проверяйте согласованность", d: "Все уровни должны быть согласованы между собой." },
+  { n: 4, t: "Меняйте глубинные уровни", d: "Устойчивые изменения происходят при работе с верхними уровнями." },
+];
+
 function Nlu() {
-  const [open, setOpen] = useState<number | null>(5);
+  const [open, setOpen] = useState<number | null>(6);
   return (
     <div className="space-y-6">
-      <SectionHead title="Пирамида логических уровней" subtitle="Роберт Дилтс · от окружения к миссии" />
+      <SectionHead title="Пирамида Дилтса" subtitle="Неврологические уровни изменений" />
+
       <div className="space-y-2">
-        {NLU.slice().reverse().map((lv, idx) => {
-          const realIdx = NLU.length - 1 - idx;
-          const width = 40 + realIdx * 10; // narrow at top
-          const isOpen = open === realIdx;
+        {DILTS.map((lv, idx) => {
+          const width = 40 + idx * 10;
+          const isOpen = open === lv.n;
+          const I = lv.icon;
           return (
-            <div key={realIdx} className="flex flex-col items-center">
+            <div key={lv.n} className="flex flex-col items-center">
               <button
-                onClick={() => setOpen(isOpen ? null : realIdx)}
+                onClick={() => setOpen(isOpen ? null : lv.n)}
                 style={{ width: `${width}%` }}
-                className={`min-w-[60%] px-4 py-3 rounded-lg border transition-all ${isOpen ? "bg-primary text-primary-foreground border-primary" : "bg-card border-border hover:border-primary/40"}`}
+                className={`min-w-[70%] sm:min-w-[60%] px-4 py-3 rounded-lg border transition-all flex items-center gap-3 ${isOpen ? "ring-2 ring-primary" : "hover:border-primary/40"} ${lv.color} border-transparent`}
               >
-                <div className="font-semibold">{lv.name}</div>
-                <div className={`text-xs ${isOpen ? "opacity-90" : "text-muted-foreground"}`}>{lv.desc}</div>
+                <span className="w-8 h-8 rounded-full bg-white/20 grid place-items-center font-bold shrink-0">{lv.n}</span>
+                <I size={20} className="shrink-0"/>
+                <div className="text-left flex-1">
+                  <div className="font-bold text-sm">{lv.name}</div>
+                  <div className="text-xs opacity-90">{lv.q}</div>
+                </div>
               </button>
               {isOpen && (
-                <div className="mt-2 w-full max-w-2xl bg-card rounded-xl border border-border p-4">
-                  <div className="text-xs text-muted-foreground mb-2 uppercase tracking-wide">Системные вопросы</div>
-                  <ul className="space-y-1.5 text-sm">
-                    {lv.q.map((q,i)=><li key={i}>· {q}</li>)}
-                  </ul>
+                <div className="mt-2 mb-2 w-full max-w-2xl bg-card rounded-xl border border-border p-4">
+                  <div className="text-xs text-muted-foreground mb-1 uppercase tracking-wide">Описание</div>
+                  <p className="text-sm mb-3">{lv.desc}</p>
+                  <div className="text-xs text-muted-foreground mb-1 uppercase tracking-wide">Фокус вопросов</div>
+                  <p className="text-sm font-medium text-primary">▸ {lv.focus}</p>
                 </div>
               )}
             </div>
           );
         })}
+      </div>
+
+      <div className="bg-card rounded-2xl border border-border p-5">
+        <h3 className="font-semibold mb-4">Как работать с пирамидой Дилтса</h3>
+        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3">
+          {DILTS_HOW.map((s) => (
+            <div key={s.n} className="p-3 rounded-xl bg-secondary/60">
+              <div className="flex items-center gap-2 mb-1">
+                <span className="w-6 h-6 rounded-full bg-primary text-primary-foreground grid place-items-center text-xs font-bold">{s.n}</span>
+                <div className="font-semibold text-sm">{s.t}</div>
+              </div>
+              <p className="text-xs text-muted-foreground">{s.d}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div className="rounded-2xl border border-primary/30 bg-primary/10 p-5">
+        <div className="text-xs uppercase tracking-wide text-primary font-bold mb-2">Принцип</div>
+        <p className="font-medium mb-2">«Чтобы изменить результат, начните с изменения себя»</p>
+        <p className="text-sm text-muted-foreground">
+          Изменение окружения влияет на поведение. Изменение поведения развивает способности.
+          Изменение способностей формирует убеждения. Изменение убеждений меняет идентичность.
+          Изменение идентичности определяет вашу миссию.
+        </p>
+      </div>
+    </div>
+  );
+}
+
+/* ---------- Колесо баланса жизни (Пола Майера) ---------- */
+const BALANCE_AREAS = [
+  { n: 1, name: "ЗДОРОВЬЕ И ЭНЕРГИЯ", icon: HeartPulse, color: "text-emerald-600 bg-emerald-500/10 border-emerald-500/30",
+    desc: "Физическое здоровье, энергия, спорт, питание, режим дня, восстановление, забота о себе.",
+    q: "Насколько вы полны энергии и сил?" },
+  { n: 2, name: "МУЖ И ОТНОШЕНИЯ", icon: Heart, color: "text-rose-600 bg-rose-500/10 border-rose-500/30",
+    desc: "Отношения с мужем, любовь, близость, поддержка, гармония в паре, совместное время.",
+    q: "Насколько вы счастливы в отношениях?" },
+  { n: 3, name: "ДЕТИ И МАТЕРИНСТВО", icon: Baby, color: "text-orange-600 bg-orange-500/10 border-orange-500/30",
+    desc: "Отношения с детьми, воспитание, время вместе, радость материнства, поддержка и развитие.",
+    q: "Насколько вы довольны этой сферой?" },
+  { n: 4, name: "ОСОБЕННЫЙ РЕБЁНОК И РАЗВИТИЕ СЕМЬИ", icon: HandHeart, color: "text-teal-600 bg-teal-500/10 border-teal-500/30",
+    desc: "Забота, развитие, реабилитация, эмоциональное состояние ребёнка, баланс в семье, ресурсы и поддержка.",
+    q: "Чувствуете ли вы, что у вас достаточно поддержки и ресурсов?" },
+  { n: 5, name: "ФОНД И СОЦИАЛЬНОЕ ВЛИЯНИЕ", icon: HandHeart, color: "text-violet-600 bg-violet-500/10 border-violet-500/30",
+    desc: "Ваш фонд, помощь людям, реализация миссии, социальное влияние, проекты, команда.",
+    q: "Насколько вы реализованы в своём деле и чувствуете свой вклад?" },
+  { n: 6, name: "ЛИЧНЫЙ БРЕНД И БЛОГ", icon: Laptop, color: "text-indigo-600 bg-indigo-500/10 border-indigo-500/30",
+    desc: "Ваш блог, личный бренд, публичность, самовыражение, контент, вдохновение и признание.",
+    q: "Насколько вы довольны своей реализацией в публичном поле?" },
+  { n: 7, name: "ФИНАНСЫ И КАПИТАЛ", icon: Coins, color: "text-amber-600 bg-amber-500/10 border-amber-500/30",
+    desc: "Доходы, накопления, инвестиции, финансовая грамотность, стабильность и рост.",
+    q: "Насколько вы чувствуете финансовую стабильность и уверенность?" },
+  { n: 8, name: "САМОРЕАЛИЗАЦИЯ И ОБУЧЕНИЕ", icon: GraduationCap, color: "text-purple-600 bg-purple-500/10 border-purple-500/30",
+    desc: "Обучение, личностный рост, навыки, цели, вдохновение, новые знания и опыт.",
+    q: "Насколько вы развиваетесь и двигаетесь к своим целям?" },
+];
+
+function Balance() {
+  const [scores, setScores] = useState<Record<number, number>>(() =>
+    Object.fromEntries(BALANCE_AREAS.map((a) => [a.n, 5]))
+  );
+  return (
+    <div className="space-y-6">
+      <SectionHead
+        title="Колесо баланса жизни Пола Майера"
+        subtitle="Оцените каждую сферу вашей жизни по шкале от 1 до 10 и создайте свою гармоничную и наполненную жизнь"
+      />
+
+      <div className="grid sm:grid-cols-2 gap-3">
+        {BALANCE_AREAS.map((a) => {
+          const I = a.icon;
+          const v = scores[a.n];
+          return (
+            <div key={a.n} className={`rounded-2xl border p-4 ${a.color}`}>
+              <div className="flex items-start gap-3">
+                <div className="w-10 h-10 rounded-full bg-card grid place-items-center shrink-0"><I size={20}/></div>
+                <div className="flex-1 min-w-0">
+                  <div className="font-bold text-foreground text-sm">{a.n}. {a.name}</div>
+                  <p className="text-xs text-foreground/70 mt-1">{a.desc}</p>
+                  <p className="text-xs italic mt-2">{a.q}</p>
+                </div>
+              </div>
+              <div className="mt-3">
+                <div className="flex items-center justify-between text-xs mb-1">
+                  <span className="text-muted-foreground">Оценка</span>
+                  <span className="font-mono font-bold text-foreground">{v} / 10</span>
+                </div>
+                <input
+                  type="range" min={1} max={10} value={v}
+                  onChange={(e) => setScores({ ...scores, [a.n]: Number(e.target.value) })}
+                  className="w-full accent-primary"
+                />
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      <div className="bg-card rounded-2xl border border-border p-5">
+        <h3 className="font-semibold flex items-center gap-2 mb-3"><Lightbulb size={18} className="text-primary"/> Как работать с колесом</h3>
+        <ol className="space-y-1.5 text-sm list-decimal pl-5">
+          <li>Оцените каждую сферу от 1 (совсем не удовлетворены) до 10 (полностью удовлетворены).</li>
+          <li>Отметьте баллы на шкале и соедините точки по кругу.</li>
+          <li>Посмотрите, какие сферы «проседают» и требуют внимания.</li>
+          <li>Определите конкретные шаги для улучшения баланса в жизни.</li>
+        </ol>
+      </div>
+
+      <div className="rounded-2xl border border-emerald-500/30 bg-emerald-500/10 p-5">
+        <div className="text-xs uppercase tracking-wide text-emerald-700 font-bold mb-1">Гармоничная жизнь — это баланс</div>
+        <p className="text-sm">Когда все сферы развиваются вместе, вы чувствуете радость, лёгкость и наполненность.</p>
+        <p className="text-sm mt-3 italic text-foreground/70">♥ Баланс — это не совершенство, а осознанный выбор каждый день. ♥</p>
+      </div>
+    </div>
+  );
+}
+
+/* ---------- Ценности ---------- */
+const VALUES_PROJECT = [
+  { name: "ЗНАНИЕ", icon: BookOpen, d: "Постоянное обучение и развитие, погружение в тему, расширение компетенций." },
+  { name: "ЭКСПЕРТНОСТЬ", icon: UserCheck, d: "Глубокое понимание своего дела, опыт и навыки, высокое качество результатов." },
+  { name: "ДЕТАЛЬНЫЙ ПЛАН", icon: ClipboardList, d: "Чёткая стратегия, пошаговый план действий, организация и контроль." },
+];
+const VALUES_SELF = [
+  { name: "ОПЫТ", icon: Footprints, d: "Прошитые ситуации, достижения и преодоления, которые создают уверенность и опору на себя." },
+  { name: "ОЦЕНКА ЗНАЧИМЫХ ЛЮДЕЙ", icon: Users, d: "Поддержка, признание и обратная связь от людей, чьё мнение важно." },
+  { name: "РОЛЕВАЯ МОДЕЛЬ", icon: Star, d: "Пример человека, на которого хочется равняться и у которого можно учиться." },
+  { name: "ВЕРА В СВОИ СПОСОБНОСТИ", icon: ShieldCheck, d: "Уверенность в своих силах, вера в то, что могу справиться с любыми задачами." },
+];
+
+function Values() {
+  return (
+    <div className="space-y-6">
+      <SectionHead title="Ценности" subtitle="Опоры, которые двигают вперёд" />
+
+      <div className="rounded-2xl bg-[#0f1b3d] text-white p-5 flex items-center gap-3">
+        <Gem size={28} className="text-amber-300"/>
+        <div>
+          <div className="text-2xl font-bold tracking-wide">ЦЕННОСТИ</div>
+          <div className="text-xs text-white/70">Внутренние опоры профессионала</div>
+        </div>
+      </div>
+
+      <div className="grid lg:grid-cols-2 gap-6">
+        <div className="bg-blue-500/5 rounded-2xl border border-blue-500/30 p-5 space-y-3">
+          <div className="flex items-center gap-2">
+            <div className="w-10 h-10 rounded-full bg-blue-500/10 grid place-items-center"><Rocket size={20} className="text-blue-600"/></div>
+            <h3 className="font-bold text-blue-700">ВЕРА В ПРОЕКТ</h3>
+          </div>
+          <div className="grid sm:grid-cols-3 gap-3">
+            {VALUES_PROJECT.map((v) => {
+              const I = v.icon;
+              return (
+                <div key={v.name} className="bg-card rounded-xl border border-blue-500/20 p-4 text-center">
+                  <div className="w-12 h-12 rounded-full bg-blue-500/10 grid place-items-center mx-auto mb-2"><I size={22} className="text-blue-600"/></div>
+                  <div className="font-bold text-sm mb-1">{v.name}</div>
+                  <p className="text-xs text-muted-foreground">{v.d}</p>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        <div className="bg-emerald-500/5 rounded-2xl border border-emerald-500/30 p-5 space-y-3">
+          <div className="flex items-center gap-2">
+            <div className="w-10 h-10 rounded-full bg-emerald-500/10 grid place-items-center"><Heart size={20} className="text-emerald-600"/></div>
+            <h3 className="font-bold text-emerald-700">ВЕРА В СЕБЯ</h3>
+          </div>
+          <div className="grid sm:grid-cols-2 gap-3">
+            {VALUES_SELF.map((v) => {
+              const I = v.icon;
+              return (
+                <div key={v.name} className="bg-card rounded-xl border border-emerald-500/20 p-4 text-center">
+                  <div className="w-12 h-12 rounded-full bg-emerald-500/10 grid place-items-center mx-auto mb-2"><I size={22} className="text-emerald-600"/></div>
+                  <div className="font-bold text-sm mb-1">{v.name}</div>
+                  <p className="text-xs text-muted-foreground">{v.d}</p>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+
+      <div className="rounded-2xl border border-violet-500/30 bg-violet-500/10 p-5 flex items-start gap-3">
+        <Target size={22} className="text-violet-600 mt-1"/>
+        <div>
+          <div className="text-xs uppercase tracking-wide text-violet-700 font-bold mb-1">ИТОГ</div>
+          <p className="text-sm">Сочетание веры в проект и веры в себя создаёт внутреннюю опору, двигает вперёд и помогает достигать больших целей.</p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ---------- Супервизия ---------- */
+const SUP_TYPES = [
+  {
+    name: "IN VITRO («В ПРОЦЕССЕ»)", icon: Timer, color: "border-amber-500/40 bg-amber-500/10",
+    desc: "Обсуждение во время сессии (онлайн или в отдельной комнате).",
+    when: ["При сложных ситуациях", "Когда нужно быстрое вмешательство", "Для новичков", "При острых эмоциях"],
+  },
+  {
+    name: "IN VIVO («В ЖИВУЮ»)", icon: Eye, color: "border-emerald-500/40 bg-emerald-500/10",
+    desc: "Наблюдение супервизора за работой специалиста с клиентом.",
+    when: ["Для развития навыков", "Для объективной оценки", "При обучении новичков", "Для работы с телом, голосом, невербаликой"],
+  },
+  {
+    name: "ОБСУЖДЕНИЕ (DEBRIEFING)", icon: MessageSquare, color: "border-sky-500/40 bg-sky-500/10",
+    desc: "Структурированное обсуждение прошедшей работы.",
+    when: ["После завершения сессии/проекта", "Для анализа результатов", "Для планирования дальнейших шагов", "Для работы с долгосрочными случаями"],
+  },
+];
+
+const SUP_PROCESS = [
+  { n: 1, t: "ЗАПРОС", icon: Search, q: ["Какой кейс вы хотите разобрать?", "Что вызывает затруднение?", "Какой результат вы ожидаете от супервизии?"] },
+  { n: 2, t: "КОНТЕКСТ", icon: User, q: ["С каким запросом пришёл/а клиент?", "Какова цель работы?", "На каком этапе вы сейчас?"] },
+  { n: 3, t: "ЧТО ПРОИСХОДИЛО", icon: ClipboardList, q: ["Что происходило на сессии/в работе?", "Какие техники использовали?", "Что сработало хорошо?", "Что вызвало трудности?"] },
+  { n: 4, t: "РЕФЛЕКСИЯ СПЕЦИАЛИСТА", icon: Brain, q: ["Что вы чувствовали?", "Что вас зацепило?", "Какие ваши реакции могли повлиять на процесс?"] },
+  { n: 5, t: "АНАЛИЗ И ИНСАЙТЫ", icon: Lightbulb, q: ["Что происходит с клиентом глубже?", "Какие потребности и ограничения есть?", "Какие есть ресурсы?", "Что вы не замечаете?"] },
+  { n: 6, t: "РЕШЕНИЯ И ПЛАН", icon: Target, q: ["Какие варианты работы возможны?", "Какой следующий шаг будет полезным?", "Что вы сделаете по-другому?"] },
+  { n: 7, t: "ЗАВЕРШЕНИЕ", icon: Flag, q: ["Что было самым ценным?", "Какие инсайты вы получили?", "Что возьмёте в работу?", "Какой конкретный шаг сделаете?"] },
+];
+
+function Supervision() {
+  const [step, setStep] = useState(1);
+  const cur = SUP_PROCESS.find((s) => s.n === step)!;
+  const CurI = cur.icon;
+  return (
+    <div className="space-y-6">
+      <SectionHead title="Виды супервизии" subtitle="Система профессиональной поддержки и развития специалиста" />
+
+      <div className="rounded-2xl bg-[#1e3a6e] text-white p-5 flex items-start gap-3">
+        <Users size={28} className="shrink-0"/>
+        <div>
+          <div className="text-lg font-bold">СУПЕРВИЗИЯ</div>
+          <p className="text-sm text-white/80 mt-1">
+            Профессиональное обсуждение работы специалиста для повышения компетентности и качества помощи клиенту.
+          </p>
+        </div>
+      </div>
+
+      <div className="grid md:grid-cols-2 gap-4">
+        <div className="bg-emerald-500/5 rounded-2xl border border-emerald-500/30 p-4">
+          <h3 className="font-bold text-emerald-700 mb-1">НЕПОСРЕДСТВЕННАЯ СУПЕРВИЗИЯ</h3>
+          <p className="text-xs text-muted-foreground mb-3">Проводится в реальном времени или сразу после работы с клиентом.</p>
+          <div className="space-y-2">
+            {SUP_TYPES.slice(0, 2).map((s) => {
+              const I = s.icon;
+              return (
+                <div key={s.name} className={`rounded-xl border p-3 ${s.color}`}>
+                  <div className="flex items-center gap-2 mb-1"><I size={16}/><div className="font-bold text-sm">{s.name}</div></div>
+                  <p className="text-xs mb-2">{s.desc}</p>
+                  <div className="text-xs font-semibold mb-1">Когда использовать:</div>
+                  <ul className="text-xs space-y-0.5">{s.when.map((w, i) => <li key={i}>· {w}</li>)}</ul>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+        <div className="bg-sky-500/5 rounded-2xl border border-sky-500/30 p-4">
+          <h3 className="font-bold text-sky-700 mb-1">УДАЛЁННАЯ СУПЕРВИЗИЯ</h3>
+          <p className="text-xs text-muted-foreground mb-3">Проводится после завершения работы (сессии, проекта, периода).</p>
+          {(() => {
+            const s = SUP_TYPES[2]; const I = s.icon;
+            return (
+              <div className={`rounded-xl border p-3 ${s.color}`}>
+                <div className="flex items-center gap-2 mb-1"><I size={16}/><div className="font-bold text-sm">{s.name}</div></div>
+                <p className="text-xs mb-2">{s.desc}</p>
+                <div className="text-xs font-semibold mb-1">Когда использовать:</div>
+                <ul className="text-xs space-y-0.5">{s.when.map((w, i) => <li key={i}>· {w}</li>)}</ul>
+              </div>
+            );
+          })()}
+        </div>
+      </div>
+
+      <div className="bg-card rounded-2xl border border-border p-5 space-y-4">
+        <h3 className="font-semibold">Когда какой вид выбирать?</h3>
+        <div className="grid md:grid-cols-3 gap-3 text-sm">
+          <div className="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/30">
+            <div className="font-bold text-emerald-700 mb-2">НЕПОСРЕДСТВЕННАЯ (IN VITRO / IN VIVO)</div>
+            <ul className="space-y-1 text-xs">
+              <li>✓ Ситуация сложная и важна поддержка здесь и сейчас</li>
+              <li>✓ Эмоции мешают работе</li>
+              <li>✓ Нужна обратная связь в реальном времени</li>
+              <li>✓ Вы развиваете новые навыки</li>
+            </ul>
+          </div>
+          <div className="p-3 rounded-xl bg-sky-500/10 border border-sky-500/30">
+            <div className="font-bold text-sky-700 mb-2">УДАЛЁННАЯ (ОБСУЖДЕНИЕ)</div>
+            <ul className="space-y-1 text-xs">
+              <li>✓ Ситуация уже завершена</li>
+              <li>✓ Нужно глубоко проанализировать</li>
+              <li>✓ Есть время на рефлексию</li>
+              <li>✓ Нужно увидеть картину целиком</li>
+            </ul>
+          </div>
+          <div className="p-3 rounded-xl bg-violet-500/10 border border-violet-500/30">
+            <div className="font-bold text-violet-700 mb-2">ЧТО ДАЁТ СУПЕРВИЗИЯ?</div>
+            <ul className="space-y-1 text-xs">
+              <li>✓ Профессиональный рост специалиста</li>
+              <li>✓ Повышение качества работы с клиентами</li>
+              <li>✓ Поддержка и снижение выгорания</li>
+              <li>✓ Развитие осознанности и уверенности</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div className="bg-card rounded-2xl border border-border p-5">
+        <h3 className="font-semibold mb-3">Как должна проходить супервизия?</h3>
+        <div className="grid grid-cols-3 sm:grid-cols-7 gap-1 mb-4">
+          {SUP_PROCESS.map((s) => {
+            const I = s.icon; const act = step === s.n;
+            return (
+              <button key={s.n} onClick={() => setStep(s.n)}
+                className={`p-2 rounded-lg border text-center transition-all ${act ? "bg-primary text-primary-foreground border-primary" : "bg-secondary/60 border-border hover:border-primary/40"}`}>
+                <div className="text-[10px] opacity-80">{s.n}</div>
+                <I size={16} className="mx-auto my-1"/>
+                <div className="text-[10px] font-semibold leading-tight">{s.t}</div>
+              </button>
+            );
+          })}
+        </div>
+        <div className="bg-secondary/40 rounded-xl p-4">
+          <div className="flex items-center gap-2 mb-3">
+            <div className="w-9 h-9 rounded-lg bg-primary/10 text-primary grid place-items-center"><CurI size={18}/></div>
+            <div className="font-bold">{cur.n}. {cur.t}</div>
+          </div>
+          <ul className="space-y-1.5 text-sm">
+            {cur.q.map((q, i) => (
+              <li key={i} className="flex gap-2"><span className="text-primary">·</span><span>{q}</span></li>
+            ))}
+          </ul>
+        </div>
+      </div>
+
+      <div className="grid md:grid-cols-3 gap-3">
+        <div className="bg-card rounded-2xl border border-border p-4">
+          <div className="flex items-center gap-2 mb-2"><ShieldCheck size={18} className="text-primary"/><h4 className="font-bold text-sm">Правила эффективной супервизии</h4></div>
+          <ul className="text-xs space-y-1">
+            <li>· Конфиденциальность</li>
+            <li>· Уважение и безопасность</li>
+            <li>· Открытость и честность</li>
+            <li>· Фокус на клиенте и профессиональном росте</li>
+            <li>· Конструктивная обратная связь</li>
+          </ul>
+        </div>
+        <div className="bg-card rounded-2xl border border-border p-4">
+          <div className="flex items-center gap-2 mb-2"><Target size={18} className="text-primary"/><h4 className="font-bold text-sm">Формула GROW для супервизии</h4></div>
+          <div className="grid grid-cols-4 gap-1 text-center text-xs">
+            <div className="p-2 rounded-lg bg-emerald-500/10"><div className="font-bold text-emerald-700">G</div><div>Какова цель клиента?</div></div>
+            <div className="p-2 rounded-lg bg-sky-500/10"><div className="font-bold text-sky-700">R</div><div>Что происходит сейчас?</div></div>
+            <div className="p-2 rounded-lg bg-amber-500/10"><div className="font-bold text-amber-700">O</div><div>Какие есть варианты?</div></div>
+            <div className="p-2 rounded-lg bg-violet-500/10"><div className="font-bold text-violet-700">W</div><div>Что будет сделано дальше?</div></div>
+          </div>
+        </div>
+        <div className="bg-emerald-500/10 border border-emerald-500/30 rounded-2xl p-4">
+          <div className="flex items-center gap-2 mb-2"><Star size={18} className="text-emerald-600"/><h4 className="font-bold text-sm text-emerald-700">ИТОГ</h4></div>
+          <p className="text-xs">Ясность в действиях, уверенность в решениях, рост профессионализма и результат для клиента.</p>
+        </div>
       </div>
     </div>
   );
