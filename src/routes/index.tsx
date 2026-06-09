@@ -2982,14 +2982,14 @@ function QuadrantCard({
 }) {
   const Icon = q.icon;
   return (
-    <div className={`rounded-xl border ${q.ring} bg-gradient-to-br ${q.bg} p-2.5 sm:p-3 min-h-[180px] flex flex-col`}>
+    <div className={`rounded-xl border ${q.ring} bg-gradient-to-br ${q.bg} text-slate-900 p-2.5 sm:p-3 min-h-[180px] flex flex-col`}>
       <div className="flex items-center gap-2 mb-2">
-        <div className="w-7 h-7 rounded-lg bg-black/30 grid place-items-center">
+        <div className="w-7 h-7 rounded-lg bg-slate-900/80 grid place-items-center">
           <Icon size={14} className="text-white" />
         </div>
         <div className="min-w-0 flex-1">
-          <div className="text-[10px] font-mono uppercase tracking-widest opacity-70">{q.en}</div>
-          <div className="text-xs font-semibold leading-tight truncate">{q.title}</div>
+          <div className="text-[10px] font-mono uppercase tracking-widest text-slate-600">{q.en}</div>
+          <div className="text-xs font-semibold leading-tight truncate text-slate-900">{q.title}</div>
         </div>
         <span className={`text-[10px] px-1.5 py-0.5 rounded-full border ${q.chip}`}>{items.length}</span>
       </div>
@@ -2998,22 +2998,22 @@ function QuadrantCard({
       </div>
       <div className="flex-1 space-y-1.5 overflow-auto">
         {items.length === 0 && (
-          <div className="text-[11px] text-muted-foreground italic py-2 text-center">пусто</div>
+          <div className="text-[11px] text-slate-500 italic py-2 text-center">пусто</div>
         )}
         {items.map((t) => (
           <div
             key={t.id}
-            className="group flex items-center gap-2 bg-black/30 border border-white/10 rounded-lg px-2 py-1.5"
+            className="group flex items-center gap-2 bg-white/80 border border-slate-300 rounded-lg px-2 py-1.5"
           >
-            <button onClick={() => onToggle(t.id)} className="shrink-0 text-white/80 hover:text-white">
+            <button onClick={() => onToggle(t.id)} className="shrink-0 text-slate-700 hover:text-slate-900">
               {t.done ? <CheckSquare size={14} /> : <Square size={14} />}
             </button>
-            <span className={`text-xs flex-1 ${t.done ? "line-through text-muted-foreground" : "text-foreground"}`}>
+            <span className={`text-xs flex-1 ${t.done ? "line-through text-slate-400" : "text-slate-900"}`}>
               {t.text}
             </span>
             <button
               onClick={() => onRemove(t.id)}
-              className="shrink-0 text-muted-foreground hover:text-red-400 opacity-0 group-hover:opacity-100 transition-opacity"
+              className="shrink-0 text-slate-500 hover:text-red-600 opacity-0 group-hover:opacity-100 transition-opacity"
             >
               <X size={13} />
             </button>
