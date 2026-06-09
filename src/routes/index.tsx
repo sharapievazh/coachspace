@@ -165,6 +165,7 @@ function CoachSpace() {
     wakeLockRef.current?.release?.();
     wakeLockRef.current = null;
   };
+  releaseWakeLockRef.current = releaseWakeLock;
 
   const startTimer = async () => {
     alertPlayedRef.current = false;
