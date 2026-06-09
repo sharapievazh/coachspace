@@ -43,6 +43,7 @@ const buildSmartParagraph = (d: SmartData) => {
 };
 
 const TABS: { id: TabId; label: string; icon: any }[] = [
+  { id: "competencies", label: "16 Компетенций", icon: GraduationCap },
   { id: "session", label: "Вести Сессию", icon: Sparkles },
   { id: "erickson", label: "Звезда Эриксона", icon: Star },
   { id: "rapport", label: "Раппорт", icon: Heart },
@@ -57,7 +58,6 @@ const TABS: { id: TabId; label: string; icon: any }[] = [
   { id: "burger", label: "Гамбургер ОСВК", icon: Sandwich },
   { id: "rules", label: "8 Правил ОСВК", icon: Award },
   { id: "sos", label: "SOS Карпман", icon: AlertTriangle },
-  { id: "competencies", label: "16 Компетенций", icon: GraduationCap },
   { id: "feedback", label: "Обратная связь", icon: MessageSquare },
 ];
 
@@ -2788,33 +2788,33 @@ const QUADRANTS = [
     key: "do", important: true, urgent: true,
     title: "Важные и срочные", action: "Сделай немедленно",
     en: "DO", icon: Flame,
-    bg: "from-red-600/20 via-orange-600/15 to-red-900/30",
-    ring: "border-red-500/60", chip: "bg-red-500/20 text-red-200 border-red-500/40",
+    bg: "from-red-100 via-orange-100 to-red-200",
+    ring: "border-red-400", chip: "bg-red-200 text-red-900 border-red-400",
     dot: "bg-red-500",
   },
   {
     key: "schedule", important: true, urgent: false,
     title: "Важные и несрочные", action: "Запланируй",
     en: "SCHEDULE", icon: CalendarCheck,
-    bg: "from-emerald-600/20 via-green-600/15 to-emerald-900/30",
-    ring: "border-emerald-500/60", chip: "bg-emerald-500/20 text-emerald-200 border-emerald-500/40",
+    bg: "from-emerald-100 via-green-100 to-emerald-200",
+    ring: "border-emerald-400", chip: "bg-emerald-200 text-emerald-900 border-emerald-400",
     dot: "bg-emerald-500",
   },
   {
     key: "delegate", important: false, urgent: true,
     title: "Неважные и срочные", action: "Делегируй",
     en: "DELEGATE", icon: UserPlus,
-    bg: "from-indigo-600/20 via-violet-600/15 to-indigo-900/30",
-    ring: "border-indigo-500/60", chip: "bg-indigo-500/20 text-indigo-200 border-indigo-500/40",
+    bg: "from-indigo-100 via-violet-100 to-indigo-200",
+    ring: "border-indigo-400", chip: "bg-indigo-200 text-indigo-900 border-indigo-400",
     dot: "bg-indigo-500",
   },
   {
     key: "delete", important: false, urgent: false,
     title: "Неважные и несрочные", action: "Удали / минимизируй",
     en: "DELETE", icon: Trash2,
-    bg: "from-slate-700/30 via-slate-800/20 to-slate-900/40",
-    ring: "border-slate-500/50", chip: "bg-slate-500/20 text-slate-200 border-slate-500/40",
-    dot: "bg-slate-400",
+    bg: "from-slate-100 via-slate-200 to-slate-300",
+    ring: "border-slate-400", chip: "bg-slate-200 text-slate-800 border-slate-400",
+    dot: "bg-slate-500",
   },
 ] as const;
 
@@ -2896,7 +2896,7 @@ function Eisenhower({ notes, setNotes }: { notes: string; setNotes: (v: string) 
             onClick={() => setImportant((v) => !v)}
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs border transition-colors ${
               important
-                ? "bg-rose-500/20 border-rose-500/60 text-rose-100"
+                ? "bg-rose-200 border-rose-500 text-rose-900"
                 : "bg-card border-border text-muted-foreground"
             }`}
           >
@@ -2906,7 +2906,7 @@ function Eisenhower({ notes, setNotes }: { notes: string; setNotes: (v: string) 
             onClick={() => setUrgent((v) => !v)}
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs border transition-colors ${
               urgent
-                ? "bg-amber-500/20 border-amber-500/60 text-amber-100"
+                ? "bg-amber-200 border-amber-500 text-amber-900"
                 : "bg-card border-border text-muted-foreground"
             }`}
           >
@@ -2982,14 +2982,14 @@ function QuadrantCard({
 }) {
   const Icon = q.icon;
   return (
-    <div className={`rounded-xl border ${q.ring} bg-gradient-to-br ${q.bg} p-2.5 sm:p-3 min-h-[180px] flex flex-col`}>
+    <div className={`rounded-xl border ${q.ring} bg-gradient-to-br ${q.bg} text-slate-900 p-2.5 sm:p-3 min-h-[180px] flex flex-col`}>
       <div className="flex items-center gap-2 mb-2">
-        <div className="w-7 h-7 rounded-lg bg-black/30 grid place-items-center">
+        <div className="w-7 h-7 rounded-lg bg-slate-900/80 grid place-items-center">
           <Icon size={14} className="text-white" />
         </div>
         <div className="min-w-0 flex-1">
-          <div className="text-[10px] font-mono uppercase tracking-widest opacity-70">{q.en}</div>
-          <div className="text-xs font-semibold leading-tight truncate">{q.title}</div>
+          <div className="text-[10px] font-mono uppercase tracking-widest text-slate-600">{q.en}</div>
+          <div className="text-xs font-semibold leading-tight truncate text-slate-900">{q.title}</div>
         </div>
         <span className={`text-[10px] px-1.5 py-0.5 rounded-full border ${q.chip}`}>{items.length}</span>
       </div>
@@ -2998,22 +2998,22 @@ function QuadrantCard({
       </div>
       <div className="flex-1 space-y-1.5 overflow-auto">
         {items.length === 0 && (
-          <div className="text-[11px] text-muted-foreground italic py-2 text-center">пусто</div>
+          <div className="text-[11px] text-slate-500 italic py-2 text-center">пусто</div>
         )}
         {items.map((t) => (
           <div
             key={t.id}
-            className="group flex items-center gap-2 bg-black/30 border border-white/10 rounded-lg px-2 py-1.5"
+            className="group flex items-center gap-2 bg-white/80 border border-slate-300 rounded-lg px-2 py-1.5"
           >
-            <button onClick={() => onToggle(t.id)} className="shrink-0 text-white/80 hover:text-white">
+            <button onClick={() => onToggle(t.id)} className="shrink-0 text-slate-700 hover:text-slate-900">
               {t.done ? <CheckSquare size={14} /> : <Square size={14} />}
             </button>
-            <span className={`text-xs flex-1 ${t.done ? "line-through text-muted-foreground" : "text-foreground"}`}>
+            <span className={`text-xs flex-1 ${t.done ? "line-through text-slate-400" : "text-slate-900"}`}>
               {t.text}
             </span>
             <button
               onClick={() => onRemove(t.id)}
-              className="shrink-0 text-muted-foreground hover:text-red-400 opacity-0 group-hover:opacity-100 transition-opacity"
+              className="shrink-0 text-slate-500 hover:text-red-600 opacity-0 group-hover:opacity-100 transition-opacity"
             >
               <X size={13} />
             </button>
