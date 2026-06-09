@@ -847,31 +847,35 @@ function Grow() {
         })}
       </div>
 
-      <div className={`rounded-2xl border p-6 bg-gradient-to-br ${step.accent}`}>
-        <div className="flex items-start justify-between flex-wrap gap-3">
+      <div className={`relative overflow-hidden rounded-2xl border p-6 bg-gradient-to-br ${step.accent}`}>
+        {/* giant decorative watermark */}
+        <div className="absolute -right-10 -top-10 opacity-[0.07] pointer-events-none">
+          <GrowIcon step={step.id as "G" | "R" | "O" | "W"} size={320} />
+        </div>
+        {/* sparkles */}
+        <Sparkles className="absolute right-10 top-6 text-primary/30 animate-pulse" size={24} />
+        <Star className="absolute right-32 top-20 text-amber-400/40 animate-pulse" size={16} />
+        <Sparkles className="absolute right-20 bottom-10 text-primary/20 animate-pulse" size={18} />
+
+        <div className="relative flex items-start justify-between flex-wrap gap-3">
           <div className="flex items-center gap-3">
-            <div className="w-16 h-16 rounded-xl bg-card grid place-items-center">
-              <GrowIcon step={step.id as "G" | "R" | "O" | "W"} size={52} />
+            <div className="w-20 h-20 rounded-2xl bg-card grid place-items-center shadow-xl ring-2 ring-white/40">
+              <GrowIcon step={step.id as "G" | "R" | "O" | "W"} size={64} />
             </div>
             <div>
-              <div className="text-xs uppercase tracking-wide opacity-80">{step.label}</div>
-              <h3 className="text-2xl font-bold text-foreground">{step.title}</h3>
+              <div className="text-xs uppercase tracking-wide opacity-80 font-semibold">{step.label}</div>
+              <h3 className="text-3xl font-extrabold text-foreground tracking-tight">{step.title}</h3>
               <p className="text-sm text-foreground/70">{step.subtitle}</p>
             </div>
           </div>
-          <span className="px-3 py-1 rounded-full bg-card text-foreground text-xs font-medium">⏱ {step.time}</span>
+          <span className="px-3 py-1 rounded-full bg-card text-foreground text-xs font-medium shadow flex items-center gap-1.5">
+            <Timer size={12} className="text-primary" /> {step.time}
+          </span>
         </div>
 
-        <div className="mt-6 grid sm:grid-cols-2 gap-3">
+        <div className="relative mt-6 grid sm:grid-cols-2 gap-3">
           {step.blocks.map((b, i) => (
-            <div key={i} className="bg-card rounded-xl border border-border p-4">
-              <div className="text-xs font-bold uppercase tracking-wide text-primary mb-2">{b.head}</div>
-              <ul className="space-y-1 text-sm">
-                {b.items.map((it, j) => (
-                  <li key={j} className="flex gap-2"><span className="text-primary">·</span><span>{it}</span></li>
-                ))}
-              </ul>
-            </div>
+            <BlockCard key={i} head={b.head} items={b.items} />
           ))}
         </div>
       </div>
