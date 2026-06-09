@@ -328,10 +328,10 @@ export function DiltsPyramidSvg({
   active: number;
   onSelect: (n: number) => void;
 }) {
-  const W = 360;
+  const W = 500;
   const H = 320;
-  const apex = { x: W / 2, y: 10 };
-  const base = { left: 30, right: W - 30, y: H - 10 };
+  const apex = { x: 250, y: 10 };
+  const base = { left: 120, right: 380, y: H - 10 };
   const rows = levels.length; // 6
 
   // linear interpolation along left/right edges
@@ -351,6 +351,8 @@ export function DiltsPyramidSvg({
         const cx = (top.lx + top.rx + bot.lx + bot.rx) / 4;
         const cy = (top.y + bot.y) / 2;
         const isActive = active === lv.n;
+        // Top two narrow segments — label outside with leader line
+        const labelOutside = i < 2;
         return (
           <g
             key={lv.n}
@@ -364,12 +366,45 @@ export function DiltsPyramidSvg({
               stroke={isActive ? "#0f172a" : "#fff"}
               strokeWidth={isActive ? 2.5 : 1.5}
             />
-            <text x={cx} y={cy - 4} textAnchor="middle" fontSize="11" fontWeight="800" fill="#fff">
-              {lv.n}. {lv.name}
-            </text>
-            <text x={cx} y={cy + 9} textAnchor="middle" fontSize="9" fill="#fff" opacity="0.9">
-              {lv.q}
-            </text>
+            {labelOutside ? (
+              <>
+                {/* leader line from right edge midpoint outward */}
+                <line
+                  x1={(top.rx + bot.rx) / 2}
+                  y1={cy}
+                  x2={420}
+                  y2={cy}
+                  stroke={isActive ? "#0f172a" : lv.color}
+                  strokeWidth="1.2"
+                />
+                <text
+                  x={426}
+                  y={cy + 4}
+                  fontSize="12"
+                  fontWeight="800"
+                  fill={isActive ? "#0f172a" : lv.color}
+                >
+                  {lv.n}. {lv.name}
+                </text>
+                <text
+                  x={426}
+                  y={cy + 18}
+                  fontSize="9"
+                  fill="#64748b"
+                >
+                  {lv.q}
+                </text>
+              </>
+            ) : (
+              <>
+                <text x={cx} y={cy - 4} textAnchor="middle" fontSize="11" fontWeight="800" fill="#fff">
+                  {lv.n}. {lv.name}
+                </text>
+                <text x={cx} y={cy + 9} textAnchor="middle" fontSize="9" fill="#fff" opacity="0.9">
+                  {lv.q}
+                </text>
+              </>
+            )}
           </g>
         );
       })}
