@@ -317,6 +317,9 @@ ${notes || "—"}
         {tab === "sos" && <Sos />}
         {tab === "rapport" && <Rapport />}
         {tab === "burger" && <Burger />}
+        {tab === "balance" && <Balance />}
+        {tab === "values" && <Values />}
+        {tab === "supervision" && <Supervision />}
         {tab === "feedback" && <Feedback />}
       </main>
     </div>
