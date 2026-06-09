@@ -49,7 +49,7 @@ const TABS: { id: TabId; label: string; icon: any }[] = [
   { id: "grow", label: "GROW", icon: Target },
   { id: "swot", label: "SWOT", icon: Layers },
   { id: "nlu", label: "Пирамида Дилтса", icon: Triangle },
-  { id: "balance", label: "Колесо баланса", icon: Circle },
+  { id: "balance", label: "Колесо баланса", icon: RadarChartIcon },
   { id: "values", label: "Ценности", icon: Gem },
   { id: "supervision", label: "Супервизия", icon: Users },
   { id: "smart", label: "SMART-цель", icon: CheckCircle2 },
