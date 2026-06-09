@@ -20,6 +20,7 @@ import {
   BalanceRadar,
   DiltsPyramidSvg,
   KarpmanTriangleSvg,
+  RadarChartIcon,
 } from "@/components/coach/CoachVisuals";
 
 export const Route = createFileRoute("/")({
