@@ -1976,7 +1976,7 @@ function Burger() {
     <div className="space-y-5 max-w-3xl">
       <SectionHead title="Гамбургер ОСВК" subtitle="Обратная связь высокого качества · три слоя" />
 
-      <div className="bg-gradient-to-br from-stone-900 via-stone-950 to-black rounded-3xl border border-border p-4 sm:p-6 space-y-3">
+      <div className="bg-gradient-to-br from-amber-50 via-orange-100 to-amber-200 text-stone-900 rounded-3xl border border-amber-300 p-4 sm:p-6 space-y-3">
         {BURGER_LAYERS.map((layer) => {
           const Icon = layer.icon;
           const isActive = active === layer.id;
