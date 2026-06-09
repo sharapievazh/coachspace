@@ -1583,144 +1583,243 @@ function Supervision() {
   const [step, setStep] = useState(1);
   const cur = SUP_PROCESS.find((s) => s.n === step)!;
   const CurI = cur.icon;
+
+  const vitro = SUP_TYPES[0];
+  const vivo = SUP_TYPES[1];
+  const debrief = SUP_TYPES[2];
+
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       <SectionHead title="Виды супервизии" subtitle="Система профессиональной поддержки и развития специалиста" />
 
-      <div className="rounded-2xl bg-[#1e3a6e] text-white p-5 flex items-start gap-3">
-        <Users size={28} className="shrink-0"/>
-        <div>
-          <div className="text-lg font-bold">СУПЕРВИЗИЯ</div>
-          <p className="text-sm text-white/80 mt-1">
-            Профессиональное обсуждение работы специалиста для повышения компетентности и качества помощи клиенту.
-          </p>
-        </div>
-      </div>
-
-      <div className="grid md:grid-cols-2 gap-4">
-        <div className="bg-emerald-500/5 rounded-2xl border border-emerald-500/30 p-4">
-          <h3 className="font-bold text-emerald-700 mb-1">НЕПОСРЕДСТВЕННАЯ СУПЕРВИЗИЯ</h3>
-          <p className="text-xs text-muted-foreground mb-3">Проводится в реальном времени или сразу после работы с клиентом.</p>
-          <div className="space-y-2">
-            {SUP_TYPES.slice(0, 2).map((s) => {
-              const I = s.icon;
-              return (
-                <div key={s.name} className={`rounded-xl border p-3 ${s.color}`}>
-                  <div className="flex items-center gap-2 mb-1"><I size={16}/><div className="font-bold text-sm">{s.name}</div></div>
-                  <p className="text-xs mb-2">{s.desc}</p>
-                  <div className="text-xs font-semibold mb-1">Когда использовать:</div>
-                  <ul className="text-xs space-y-0.5">{s.when.map((w, i) => <li key={i}>· {w}</li>)}</ul>
-                </div>
-              );
-            })}
+      {/* ===== HIERARCHY DIAGRAM ===== */}
+      <div className="relative">
+        {/* Root */}
+        <div className="mx-auto max-w-2xl rounded-2xl bg-[#1e3a6e] text-white p-5 flex items-start gap-3 shadow-lg">
+          <div className="w-12 h-12 rounded-xl bg-white/10 grid place-items-center shrink-0">
+            <Users size={26} />
+          </div>
+          <div>
+            <div className="text-lg font-extrabold tracking-wide">СУПЕРВИЗИЯ</div>
+            <p className="text-sm text-white/80 mt-1 leading-snug">
+              Профессиональное обсуждение работы специалиста для повышения компетентности и качества помощи клиенту.
+            </p>
           </div>
         </div>
-        <div className="bg-sky-500/5 rounded-2xl border border-sky-500/30 p-4">
-          <h3 className="font-bold text-sky-700 mb-1">УДАЛЁННАЯ СУПЕРВИЗИЯ</h3>
-          <p className="text-xs text-muted-foreground mb-3">Проводится после завершения работы (сессии, проекта, периода).</p>
-          {(() => {
-            const s = SUP_TYPES[2]; const I = s.icon;
-            return (
-              <div className={`rounded-xl border p-3 ${s.color}`}>
-                <div className="flex items-center gap-2 mb-1"><I size={16}/><div className="font-bold text-sm">{s.name}</div></div>
-                <p className="text-xs mb-2">{s.desc}</p>
-                <div className="text-xs font-semibold mb-1">Когда использовать:</div>
-                <ul className="text-xs space-y-0.5">{s.when.map((w, i) => <li key={i}>· {w}</li>)}</ul>
+
+        {/* Vertical trunk + horizontal split lines */}
+        <div className="relative mx-auto" style={{ height: 36 }}>
+          <div className="absolute left-1/2 top-0 w-px h-4 bg-border" />
+          <div className="absolute left-[25%] right-[25%] top-4 h-px bg-border" />
+          <div className="absolute left-[25%] top-4 w-px h-5 bg-border" />
+          <div className="absolute left-[75%] top-4 w-px h-5 bg-border" />
+          <ArrowDownTip className="absolute left-[25%] -translate-x-1/2 top-7" />
+          <ArrowDownTip className="absolute left-[75%] -translate-x-1/2 top-7" />
+        </div>
+
+        {/* Two branches */}
+        <div className="grid md:grid-cols-2 gap-4">
+          {/* LEFT — Непосредственная */}
+          <div className="space-y-3">
+            <div className="rounded-2xl bg-emerald-500/10 border border-emerald-500/40 p-4 flex items-start gap-3">
+              <div className="w-10 h-10 rounded-lg bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 grid place-items-center shrink-0">
+                <MessageCircle size={20} />
               </div>
-            );
-          })()}
+              <div>
+                <div className="font-extrabold text-emerald-700 dark:text-emerald-300 tracking-wide text-sm">НЕПОСРЕДСТВЕННАЯ СУПЕРВИЗИЯ</div>
+                <p className="text-xs text-muted-foreground mt-1">Проводится в реальном времени или сразу после работы с клиентом.</p>
+              </div>
+            </div>
+
+            {/* Split into two sub-children */}
+            <div className="relative h-7">
+              <div className="absolute left-1/2 top-0 w-px h-3 bg-emerald-500/40" />
+              <div className="absolute left-[25%] right-[25%] top-3 h-px bg-emerald-500/40" />
+              <div className="absolute left-[25%] top-3 w-px h-3 bg-emerald-500/40" />
+              <div className="absolute left-[75%] top-3 w-px h-3 bg-emerald-500/40" />
+              <ArrowDownTip className="absolute left-[25%] -translate-x-1/2 top-5" color="#10b981" />
+              <ArrowDownTip className="absolute left-[75%] -translate-x-1/2 top-5" color="#10b981" />
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {[vitro, vivo].map((s) => {
+                const I = s.icon;
+                return (
+                  <div key={s.name} className={`rounded-xl border p-3 ${s.color}`}>
+                    <div className="flex items-center gap-2 mb-1"><I size={16} /><div className="font-bold text-sm">{s.name}</div></div>
+                    <p className="text-xs mb-2">{s.desc}</p>
+                    <div className="text-[11px] font-semibold mb-1">Когда использовать:</div>
+                    <ul className="text-[11px] space-y-0.5">{s.when.map((w, i) => <li key={i}>· {w}</li>)}</ul>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* RIGHT — Удалённая */}
+          <div className="space-y-3">
+            <div className="rounded-2xl bg-sky-500/10 border border-sky-500/40 p-4 flex items-start gap-3">
+              <div className="w-10 h-10 rounded-lg bg-sky-500/20 text-sky-700 dark:text-sky-300 grid place-items-center shrink-0">
+                <Laptop size={20} />
+              </div>
+              <div>
+                <div className="font-extrabold text-sky-700 dark:text-sky-300 tracking-wide text-sm">УДАЛЁННАЯ СУПЕРВИЗИЯ</div>
+                <p className="text-xs text-muted-foreground mt-1">Проводится после завершения работы (сессии, проекта, периода).</p>
+              </div>
+            </div>
+
+            <div className="relative h-7">
+              <div className="absolute left-1/2 top-0 w-px h-5 bg-sky-500/40" />
+              <ArrowDownTip className="absolute left-1/2 -translate-x-1/2 top-5" color="#0ea5e9" />
+            </div>
+
+            <div className={`rounded-xl border p-3 ${debrief.color}`}>
+              <div className="flex items-center gap-2 mb-1">
+                <MessageSquare size={16} />
+                <div className="font-bold text-sm">{debrief.name}</div>
+              </div>
+              <p className="text-xs mb-2">{debrief.desc}</p>
+              <div className="text-[11px] font-semibold mb-1">Когда использовать:</div>
+              <ul className="text-[11px] space-y-0.5">{debrief.when.map((w, i) => <li key={i}>· {w}</li>)}</ul>
+            </div>
+          </div>
         </div>
       </div>
 
-      <div className="bg-card rounded-2xl border border-border p-5 space-y-4">
-        <h3 className="font-semibold">Когда какой вид выбирать?</h3>
+      {/* ===== КОГДА КАКОЙ ВИД ВЫБИРАТЬ? ===== */}
+      <div className="space-y-3">
+        <h3 className="text-center text-sm font-extrabold tracking-widest uppercase text-muted-foreground">
+          Когда какой вид выбирать?
+        </h3>
         <div className="grid md:grid-cols-3 gap-3 text-sm">
-          <div className="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/30">
-            <div className="font-bold text-emerald-700 mb-2">НЕПОСРЕДСТВЕННАЯ (IN VITRO / IN VIVO)</div>
+          <div className="p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/30">
+            <div className="font-extrabold text-emerald-700 dark:text-emerald-300 mb-2 text-xs tracking-wide">НЕПОСРЕДСТВЕННАЯ (IN VITRO / IN VIVO)</div>
             <ul className="space-y-1 text-xs">
-              <li>✓ Ситуация сложная и важна поддержка здесь и сейчас</li>
-              <li>✓ Эмоции мешают работе</li>
-              <li>✓ Нужна обратная связь в реальном времени</li>
-              <li>✓ Вы развиваете новые навыки</li>
+              {["Ситуация сложная и важна поддержка здесь и сейчас","Эмоции мешают работе","Нужна обратная связь в реальном времени","Вы развиваете новые навыки"].map((t,i)=>(
+                <li key={i} className="flex gap-2"><CheckCircle2 size={14} className="text-emerald-600 shrink-0 mt-0.5"/><span>{t}</span></li>
+              ))}
             </ul>
           </div>
-          <div className="p-3 rounded-xl bg-sky-500/10 border border-sky-500/30">
-            <div className="font-bold text-sky-700 mb-2">УДАЛЁННАЯ (ОБСУЖДЕНИЕ)</div>
+          <div className="p-4 rounded-2xl bg-sky-500/10 border border-sky-500/30">
+            <div className="font-extrabold text-sky-700 dark:text-sky-300 mb-2 text-xs tracking-wide">УДАЛЁННАЯ (ОБСУЖДЕНИЕ)</div>
             <ul className="space-y-1 text-xs">
-              <li>✓ Ситуация уже завершена</li>
-              <li>✓ Нужно глубоко проанализировать</li>
-              <li>✓ Есть время на рефлексию</li>
-              <li>✓ Нужно увидеть картину целиком</li>
+              {["Ситуация уже завершена","Нужно глубоко проанализировать","Есть время на рефлексию","Нужно увидеть картину целиком"].map((t,i)=>(
+                <li key={i} className="flex gap-2"><CheckCircle2 size={14} className="text-sky-600 shrink-0 mt-0.5"/><span>{t}</span></li>
+              ))}
             </ul>
           </div>
-          <div className="p-3 rounded-xl bg-violet-500/10 border border-violet-500/30">
-            <div className="font-bold text-violet-700 mb-2">ЧТО ДАЁТ СУПЕРВИЗИЯ?</div>
+          <div className="p-4 rounded-2xl bg-violet-500/10 border border-violet-500/30">
+            <div className="font-extrabold text-violet-700 dark:text-violet-300 mb-2 text-xs tracking-wide">ЧТО ДАЁТ СУПЕРВИЗИЯ?</div>
             <ul className="space-y-1 text-xs">
-              <li>✓ Профессиональный рост специалиста</li>
-              <li>✓ Повышение качества работы с клиентами</li>
-              <li>✓ Поддержка и снижение выгорания</li>
-              <li>✓ Развитие осознанности и уверенности</li>
+              {["Профессиональный рост специалиста","Повышение качества работы с клиентами","Поддержка и снижение выгорания","Развитие осознанности и уверенности"].map((t,i)=>(
+                <li key={i} className="flex gap-2"><CheckCircle2 size={14} className="text-violet-600 shrink-0 mt-0.5"/><span>{t}</span></li>
+              ))}
             </ul>
           </div>
         </div>
       </div>
 
-      <div className="bg-card rounded-2xl border border-border p-5">
-        <h3 className="font-semibold mb-3">Как должна проходить супервизия?</h3>
-        <div className="grid grid-cols-3 sm:grid-cols-7 gap-1 mb-4">
-          {SUP_PROCESS.map((s) => {
+      {/* ===== 7-STEP PROCESS WITH ARROWS ===== */}
+      <div className="space-y-3">
+        <h3 className="text-center text-sm font-extrabold tracking-widest uppercase text-muted-foreground">
+          Как должна проходить супервизия?
+        </h3>
+
+        {/* Step cards with arrows between */}
+        <div className="flex items-stretch gap-1 overflow-x-auto pb-2 -mx-1 px-1 sm:overflow-visible">
+          {SUP_PROCESS.map((s, idx) => {
             const I = s.icon; const act = step === s.n;
+            const tones = [
+              "from-orange-500/15 to-orange-500/5 border-orange-500/40 text-orange-600",
+              "from-amber-500/15 to-amber-500/5 border-amber-500/40 text-amber-600",
+              "from-rose-500/15 to-rose-500/5 border-rose-500/40 text-rose-500",
+              "from-violet-500/15 to-violet-500/5 border-violet-500/40 text-violet-500",
+              "from-indigo-500/15 to-indigo-500/5 border-indigo-500/40 text-indigo-500",
+              "from-emerald-500/15 to-emerald-500/5 border-emerald-500/40 text-emerald-600",
+              "from-teal-500/15 to-teal-500/5 border-teal-500/40 text-teal-500",
+            ];
             return (
-              <button key={s.n} onClick={() => setStep(s.n)}
-                className={`p-2 rounded-lg border text-center transition-all ${act ? "bg-primary text-primary-foreground border-primary" : "bg-secondary/60 border-border hover:border-primary/40"}`}>
-                <div className="text-[10px] opacity-80">{s.n}</div>
-                <I size={16} className="mx-auto my-1"/>
-                <div className="text-[10px] font-semibold leading-tight">{s.t}</div>
-              </button>
+              <div key={s.n} className="flex items-center shrink-0 sm:flex-1 sm:min-w-0">
+                <button
+                  onClick={() => setStep(s.n)}
+                  className={`w-28 sm:w-auto sm:flex-1 rounded-xl border bg-gradient-to-b ${tones[idx]} p-2 text-center transition-all ${act ? "ring-2 ring-primary scale-[1.03]" : "hover:scale-[1.02]"}`}
+                >
+                  <div className="text-[10px] opacity-80 font-bold">{s.n}.</div>
+                  <I size={18} className="mx-auto my-1" />
+                  <div className="text-[10px] font-extrabold leading-tight uppercase tracking-tight">{s.t}</div>
+                </button>
+                {idx < SUP_PROCESS.length - 1 && (
+                  <ArrowRight size={14} className="mx-0.5 text-muted-foreground/50 shrink-0" />
+                )}
+              </div>
             );
           })}
         </div>
-        <div className="bg-secondary/40 rounded-xl p-4">
-          <div className="flex items-center gap-2 mb-3">
-            <div className="w-9 h-9 rounded-lg bg-primary/10 text-primary grid place-items-center"><CurI size={18}/></div>
-            <div className="font-bold">{cur.n}. {cur.t}</div>
+
+        {/* Active step detail */}
+        <div className="bg-card rounded-2xl border border-border p-4">
+          <div className="flex items-center gap-3 mb-3">
+            <div className="w-10 h-10 rounded-lg bg-primary/10 text-primary grid place-items-center"><CurI size={20} /></div>
+            <div className="font-extrabold tracking-wide">{cur.n}. {cur.t}</div>
           </div>
           <ul className="space-y-1.5 text-sm">
             {cur.q.map((q, i) => (
-              <li key={i} className="flex gap-2"><span className="text-primary">·</span><span>{q}</span></li>
+              <li key={i} className="flex gap-2"><ChevronRight size={16} className="text-primary shrink-0 mt-0.5" /><span>{q}</span></li>
             ))}
           </ul>
         </div>
       </div>
 
+      {/* ===== FOOTER 3 CARDS ===== */}
       <div className="grid md:grid-cols-3 gap-3">
         <div className="bg-card rounded-2xl border border-border p-4">
-          <div className="flex items-center gap-2 mb-2"><ShieldCheck size={18} className="text-primary"/><h4 className="font-bold text-sm">Правила эффективной супервизии</h4></div>
-          <ul className="text-xs space-y-1">
-            <li>· Конфиденциальность</li>
-            <li>· Уважение и безопасность</li>
-            <li>· Открытость и честность</li>
-            <li>· Фокус на клиенте и профессиональном росте</li>
-            <li>· Конструктивная обратная связь</li>
+          <div className="flex items-center gap-2 mb-3"><ShieldCheck size={18} className="text-primary" /><h4 className="font-extrabold text-sm tracking-wide uppercase">Правила эффективной супервизии</h4></div>
+          <ul className="text-xs space-y-1.5">
+            {["Конфиденциальность","Уважение и безопасность","Открытость и честность","Фокус на клиенте и профессиональном росте","Конструктивная обратная связь"].map((t,i)=>(
+              <li key={i} className="flex gap-2"><span className="text-primary">·</span><span>{t}</span></li>
+            ))}
           </ul>
         </div>
+
         <div className="bg-card rounded-2xl border border-border p-4">
-          <div className="flex items-center gap-2 mb-2"><Target size={18} className="text-primary"/><h4 className="font-bold text-sm">Формула GROW для супервизии</h4></div>
-          <div className="grid grid-cols-4 gap-1 text-center text-xs">
-            <div className="p-2 rounded-lg bg-emerald-500/10"><div className="font-bold text-emerald-700">G</div><div>Какова цель клиента?</div></div>
-            <div className="p-2 rounded-lg bg-sky-500/10"><div className="font-bold text-sky-700">R</div><div>Что происходит сейчас?</div></div>
-            <div className="p-2 rounded-lg bg-amber-500/10"><div className="font-bold text-amber-700">O</div><div>Какие есть варианты?</div></div>
-            <div className="p-2 rounded-lg bg-violet-500/10"><div className="font-bold text-violet-700">W</div><div>Что будет сделано дальше?</div></div>
+          <div className="flex items-center gap-2 mb-3 justify-center"><h4 className="font-extrabold text-sm tracking-wide uppercase">Формула <span className="text-primary">GROW</span> для супервизии</h4></div>
+          <div className="flex items-center justify-between gap-1">
+            {[
+              { L: "G", t: "Goal",    q: "Какова цель клиента?",      bg: "bg-emerald-500", text: "text-emerald-700" },
+              { L: "R", t: "Reality", q: "Что происходит сейчас?",    bg: "bg-sky-500",     text: "text-sky-700" },
+              { L: "O", t: "Options", q: "Какие есть варианты?",      bg: "bg-amber-500",   text: "text-amber-700" },
+              { L: "W", t: "Will",    q: "Что будет сделано дальше?", bg: "bg-violet-500",  text: "text-violet-700" },
+            ].map((g, i, arr) => (
+              <div key={g.L} className="flex items-center shrink-0 flex-1">
+                <div className="flex flex-col items-center text-center flex-1 min-w-0">
+                  <div className={`w-9 h-9 rounded-full ${g.bg} text-white grid place-items-center font-black text-sm shadow`}>{g.L}</div>
+                  <div className={`text-[10px] font-bold mt-1 ${g.text} dark:opacity-90`}>{g.t}</div>
+                  <div className="text-[9px] text-muted-foreground leading-tight mt-0.5">{g.q}</div>
+                </div>
+                {i < arr.length - 1 && <ArrowRight size={12} className="text-muted-foreground/60 shrink-0" />}
+              </div>
+            ))}
           </div>
         </div>
+
         <div className="bg-emerald-500/10 border border-emerald-500/30 rounded-2xl p-4">
-          <div className="flex items-center gap-2 mb-2"><Star size={18} className="text-emerald-600"/><h4 className="font-bold text-sm text-emerald-700">ИТОГ</h4></div>
-          <p className="text-xs">Ясность в действиях, уверенность в решениях, рост профессионализма и результат для клиента.</p>
+          <div className="flex items-center gap-2 mb-2"><Star size={18} className="text-emerald-600" /><h4 className="font-extrabold text-sm tracking-wide uppercase text-emerald-700 dark:text-emerald-300">Итог</h4></div>
+          <p className="text-xs leading-relaxed">Ясность в действиях, уверенность в решениях, рост профессионализма и результат для клиента.</p>
         </div>
       </div>
     </div>
   );
 }
+
+/* Small downward-arrow tip used in hierarchy diagrams */
+function ArrowDownTip({ className = "", color = "hsl(var(--border))" }: { className?: string; color?: string }) {
+  return (
+    <svg width="10" height="8" viewBox="0 0 10 8" className={className} aria-hidden>
+      <path d="M5 8 L0 0 L10 0 Z" fill={color} />
+    </svg>
+  );
+}
+
 
 /* ---------- SOS Karpman ---------- */
 const ROLES = [
