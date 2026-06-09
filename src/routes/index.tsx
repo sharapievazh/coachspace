@@ -9,7 +9,7 @@ import {
   Eye, Timer, Brain, Flag, Calendar, CheckCircle2, Wrench, Home, User, Bell,
   ChevronRight, Zap, ListChecks, Compass, Sun, Hourglass, TrendingUp, Scale,
   HelpCircle, AlertOctagon, Hand, Mountain, Telescope, Glasses,
-  Ear, Crown, Palette, Calculator, Smile, Wind, ChevronDown,
+  Ear, Crown, Palette, Calculator, Smile, Wind, ChevronDown, Briefcase,
 } from "lucide-react";
 import burgerTop from "@/assets/burger-top.png";
 import burgerPatty from "@/assets/burger-patty.png";
