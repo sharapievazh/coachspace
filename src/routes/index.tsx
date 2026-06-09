@@ -2478,7 +2478,7 @@ function Eisenhower({ notes, setNotes }: { notes: string; setNotes: (v: string) 
   };
 
   return (
-    <div className="max-w-5xl mx-auto rounded-2xl border border-border bg-gradient-to-br from-slate-900 via-slate-950 to-black p-3 sm:p-5 space-y-4">
+    <div className="max-w-5xl mx-auto rounded-2xl border border-border bg-gradient-to-br from-sky-50 via-indigo-100 to-violet-200 text-slate-900 p-3 sm:p-5 space-y-4">
       <div className="flex items-start gap-3">
         <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-500 to-rose-600 grid place-items-center shadow-lg shrink-0">
           <Grid2x2 size={22} className="text-white" />
