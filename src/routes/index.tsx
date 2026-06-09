@@ -352,17 +352,23 @@ function CoachSpace() {
 
   useEffect(() => {
     if (!running || !endsAt) return;
+    const handleSessionEnd = async () => {
+      alertPlayedRef.current = true;
+      setRunning(false);
+      setEndsAt(null);
+      localStorage.removeItem(TIMER_STORAGE_KEY);
+      releaseWakeLock();
+      try {
+        await playEndAlert();
+      } finally {
+        setTimeout(stopSilentKeepAlive, 4000);
+      }
+    };
     const tick = () => {
       const next = Math.max(0, Math.ceil((endsAt - Date.now()) / 1000));
       setRemaining(next);
       if (next <= 0 && !alertPlayedRef.current) {
-        alertPlayedRef.current = true;
-        setRunning(false);
-        setEndsAt(null);
-        localStorage.removeItem(TIMER_STORAGE_KEY);
-        releaseWakeLock();
-        playEndAlert();
-        setTimeout(stopSilentKeepAlive, 4000);
+        handleSessionEnd();
       }
     };
     tick();
