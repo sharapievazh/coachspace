@@ -2240,7 +2240,7 @@ function EricksonStar() {
     <div className="space-y-5 max-w-4xl mx-auto">
       <SectionHead title="Звезда Принципов Эриксона" subtitle="Философский фундамент коучинга · 5 опор" />
 
-      <div className="relative rounded-3xl border border-amber-500/30 bg-gradient-to-br from-slate-900 via-slate-950 to-black p-4 sm:p-8 overflow-hidden">
+      <div className="relative rounded-3xl border border-amber-500/40 bg-gradient-to-br from-indigo-950 via-violet-900 to-slate-800 p-4 sm:p-8 overflow-hidden">
         {/* constellation dots */}
         <div className="absolute inset-0 pointer-events-none opacity-50">
           {Array.from({ length: 30 }).map((_, i) => {
