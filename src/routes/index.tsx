@@ -26,7 +26,20 @@ export const Route = createFileRoute("/")({
   component: CoachSpace,
 });
 
-type TabId = "session" | "erickson" | "grow" | "swot" | "rapport" | "eisenhower" | "burger" | "rules" | "nlu" | "sos" | "balance" | "supervision" | "values" | "feedback";
+type TabId = "session" | "erickson" | "grow" | "swot" | "rapport" | "smart" | "eisenhower" | "burger" | "rules" | "nlu" | "sos" | "balance" | "supervision" | "values" | "feedback";
+
+const SMART_STORAGE = "coach-space-smart-goal";
+type SmartData = { s: string; m: string; a: string; r: string; t: string; positive: boolean; balanced: boolean };
+const SMART_EMPTY: SmartData = { s: "", m: "", a: "", r: "", t: "", positive: false, balanced: false };
+const buildSmartParagraph = (d: SmartData) => {
+  const parts: string[] = [];
+  if (d.s.trim()) parts.push(d.s.trim().replace(/[.!?]+$/, "") + ".");
+  if (d.m.trim()) parts.push("Результат измерим: " + d.m.trim().replace(/[.!?]+$/, "") + ".");
+  if (d.a.trim()) parts.push("Цель достижима — " + d.a.trim().replace(/[.!?]+$/, "") + ".");
+  if (d.r.trim()) parts.push("Это важно сейчас, потому что " + d.r.trim().replace(/[.!?]+$/, "") + ".");
+  if (d.t.trim()) parts.push("Срок: " + d.t.trim().replace(/[.!?]+$/, "") + ".");
+  return parts.join(" ");
+};
 
 const TABS: { id: TabId; label: string; icon: any }[] = [
   { id: "session", label: "Вести Сессию", icon: Sparkles },
