@@ -11,6 +11,12 @@ import {
 import burgerTop from "@/assets/burger-top.png";
 import burgerPatty from "@/assets/burger-patty.png";
 import burgerBottom from "@/assets/burger-bottom.png";
+import {
+  GrowIcon,
+  BalanceRadar,
+  DiltsPyramidSvg,
+  KarpmanTriangleSvg,
+} from "@/components/coach/CoachVisuals";
 
 export const Route = createFileRoute("/")({
   component: CoachSpace,
@@ -619,7 +625,7 @@ const GROW_CLOSE = [
 function Grow() {
   const [active, setActive] = useState("G");
   const step = GROW_STEPS.find((s) => s.id === active)!;
-  const Icon = step.icon;
+  void step.icon;
   return (
     <div className="space-y-6">
       <SectionHead title="Модель GROW" subtitle="Структура эффективной коуч-сессии (60 мин)" />
@@ -642,11 +648,11 @@ function Grow() {
 
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
         {GROW_STEPS.map((s) => {
-          const I = s.icon; const act = active===s.id;
+          const act = active === s.id;
           return (
-            <button key={s.id} onClick={()=>setActive(s.id)}
+            <button key={s.id} onClick={() => setActive(s.id)}
               className={`p-4 rounded-xl border text-left transition-all ${act ? "bg-primary text-primary-foreground border-primary shadow-lg" : "bg-card border-border hover:border-primary/40"}`}>
-              <I size={20} className="mb-2"/>
+              <GrowIcon step={s.id as "G" | "R" | "O" | "W"} size={44} className="mb-2" />
               <div className="font-bold text-2xl">{s.id}</div>
               <div className={`text-xs ${act ? "opacity-90" : "text-muted-foreground"}`}>{s.label}</div>
             </button>
@@ -657,7 +663,9 @@ function Grow() {
       <div className={`rounded-2xl border p-6 bg-gradient-to-br ${step.accent}`}>
         <div className="flex items-start justify-between flex-wrap gap-3">
           <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-xl bg-card grid place-items-center"><Icon size={24}/></div>
+            <div className="w-16 h-16 rounded-xl bg-card grid place-items-center">
+              <GrowIcon step={step.id as "G" | "R" | "O" | "W"} size={52} />
+            </div>
             <div>
               <div className="text-xs uppercase tracking-wide opacity-80">{step.label}</div>
               <h3 className="text-2xl font-bold text-foreground">{step.title}</h3>
@@ -806,37 +814,53 @@ function Nlu() {
     <div className="space-y-6">
       <SectionHead title="Пирамида Дилтса" subtitle="Неврологические уровни изменений" />
 
-      <div className="space-y-2">
-        {DILTS.map((lv, idx) => {
-          const width = 40 + idx * 10;
-          const isOpen = open === lv.n;
-          const I = lv.icon;
-          return (
-            <div key={lv.n} className="flex flex-col items-center">
+      <div className="grid md:grid-cols-2 gap-6 items-start">
+        <DiltsPyramidSvg
+          levels={DILTS.map((lv) => {
+            // map tailwind bg class to hex for SVG fill
+            const hex: Record<string, string> = {
+              "bg-violet-500 text-white": "#8b5cf6",
+              "bg-blue-500 text-white": "#3b82f6",
+              "bg-teal-500 text-white": "#14b8a6",
+              "bg-green-500 text-white": "#22c55e",
+              "bg-yellow-500 text-white": "#eab308",
+              "bg-orange-500 text-white": "#f97316",
+            };
+            return { n: lv.n, name: lv.name, q: lv.q, desc: lv.desc, focus: lv.focus, color: hex[lv.color] ?? "#64748b" };
+          })}
+          active={open ?? 0}
+          onSelect={(n) => setOpen(open === n ? null : n)}
+        />
+        <div className="space-y-2">
+          {DILTS.map((lv) => {
+            const isOpen = open === lv.n;
+            const I = lv.icon;
+            return (
               <button
+                key={lv.n}
                 onClick={() => setOpen(isOpen ? null : lv.n)}
-                style={{ width: `${width}%` }}
-                className={`min-w-[70%] sm:min-w-[60%] px-4 py-3 rounded-lg border transition-all flex items-center gap-3 ${isOpen ? "ring-2 ring-primary" : "hover:border-primary/40"} ${lv.color} border-transparent`}
+                className={`w-full text-left px-3 py-2 rounded-lg border transition-all flex items-start gap-3 ${
+                  isOpen ? "ring-2 ring-primary border-transparent " + lv.color : "bg-card border-border hover:border-primary/40"
+                }`}
               >
-                <span className="w-8 h-8 rounded-full bg-white/20 grid place-items-center font-bold shrink-0">{lv.n}</span>
-                <I size={20} className="shrink-0"/>
-                <div className="text-left flex-1">
-                  <div className="font-bold text-sm">{lv.name}</div>
-                  <div className="text-xs opacity-90">{lv.q}</div>
+                <span className={`w-7 h-7 rounded-full grid place-items-center font-bold text-xs shrink-0 ${isOpen ? "bg-white/25" : "bg-secondary"}`}>{lv.n}</span>
+                <I size={18} className="mt-0.5 shrink-0" />
+                <div className="flex-1">
+                  <div className="font-bold text-sm leading-tight">{lv.name}</div>
+                  <div className={`text-xs ${isOpen ? "opacity-90" : "text-muted-foreground"}`}>{lv.q}</div>
+                  {isOpen && (
+                    <div className={`mt-2 text-xs ${isOpen ? "opacity-95" : ""}`}>
+                      <div className="mb-1">{lv.desc}</div>
+                      <div className="font-semibold">▸ {lv.focus}</div>
+                    </div>
+                  )}
                 </div>
               </button>
-              {isOpen && (
-                <div className="mt-2 mb-2 w-full max-w-2xl bg-card rounded-xl border border-border p-4">
-                  <div className="text-xs text-muted-foreground mb-1 uppercase tracking-wide">Описание</div>
-                  <p className="text-sm mb-3">{lv.desc}</p>
-                  <div className="text-xs text-muted-foreground mb-1 uppercase tracking-wide">Фокус вопросов</div>
-                  <p className="text-sm font-medium text-primary">▸ {lv.focus}</p>
-                </div>
-              )}
-            </div>
-          );
-        })}
+            );
+          })}
+        </div>
       </div>
+
 
       <div className="bg-card rounded-2xl border border-border p-5">
         <h3 className="font-semibold mb-4">Как работать с пирамидой Дилтса</h3>
@@ -898,6 +922,9 @@ function Balance() {
   const [scores, setScores] = useState<Record<number, number>>(() =>
     Object.fromEntries(BALANCE_AREAS.map((a) => [a.n, 5]))
   );
+  const average = (
+    BALANCE_AREAS.reduce((s, a) => s + scores[a.n], 0) / BALANCE_AREAS.length
+  ).toFixed(1);
   return (
     <div className="space-y-6">
       <SectionHead
@@ -934,6 +961,21 @@ function Balance() {
           );
         })}
       </div>
+
+      <div className="bg-card rounded-2xl border border-border p-4 sm:p-6 flex flex-col items-center">
+        <div className="text-xs uppercase tracking-wide text-muted-foreground mb-1">Ваше колесо баланса</div>
+        <p className="text-xs text-muted-foreground mb-3 text-center max-w-md">
+          Оранжевый полигон — ваши текущие оценки. Серый пунктирный круг — идеальный баланс.
+          Чем «круглее» полигон — тем гармоничнее жизнь. Средний балл:{" "}
+          <span className="font-bold text-foreground">{average} / 10</span>.
+        </p>
+        <BalanceRadar
+          values={BALANCE_AREAS.map((a) => scores[a.n])}
+          labels={BALANCE_AREAS.map((a) => a.name)}
+          colors={["#10b981", "#e11d48", "#f59e0b", "#14b8a6", "#8b5cf6", "#6366f1", "#d97706", "#a855f7"]}
+        />
+      </div>
+
 
       <div className="bg-card rounded-2xl border border-border p-5">
         <h3 className="font-semibold flex items-center gap-2 mb-3"><Lightbulb size={18} className="text-primary"/> Как работать с колесом</h3>
@@ -1210,28 +1252,45 @@ const ROLES = [
   { name: "Преследователь", color: "border-rose-500/40 bg-rose-500/10", signs: ["Критика, давление, обвинение", "«Ты должен...»", "Сравнения не в пользу клиента"], antidote: "Замени оценку на любопытство. Вопрос вместо суждения.", q: ["Что я сейчас защищаю?", "Это про клиента или про меня?", "Как сказать это с уважением?"] },
 ];
 function Sos() {
+  const [active, setActive] = useState<string | null>(null);
   return (
     <div className="space-y-6">
       <SectionHead title="SOS · Треугольник Карпмана" subtitle="Шпаргалка-предохранитель для растождествления" />
+
+      <div className="bg-card rounded-2xl border border-border p-4 sm:p-6">
+        <p className="text-xs text-center text-muted-foreground mb-3">
+          Нажмите на роль, чтобы увидеть признаки, антидот и SOS-вопросы. В центре — точка растождествления.
+        </p>
+        <KarpmanTriangleSvg active={active} onSelect={(r) => setActive(active === r ? null : r)} />
+      </div>
+
       <div className="grid md:grid-cols-3 gap-4">
-        {ROLES.map((r)=>(
-          <div key={r.name} className={`p-5 rounded-2xl border-2 ${r.color}`}>
-            <div className="flex items-center gap-2 mb-3">
-              <AlertTriangle size={18}/>
-              <h3 className="font-semibold">{r.name}</h3>
+        {ROLES.map((r) => {
+          const isActive = active === r.name;
+          return (
+            <div
+              key={r.name}
+              onClick={() => setActive(isActive ? null : r.name)}
+              className={`p-5 rounded-2xl border-2 cursor-pointer transition-all ${r.color} ${isActive ? "ring-2 ring-primary scale-[1.02]" : ""}`}
+            >
+              <div className="flex items-center gap-2 mb-3">
+                <AlertTriangle size={18} />
+                <h3 className="font-semibold">{r.name}</h3>
+              </div>
+              <div className="text-xs uppercase tracking-wide text-muted-foreground mb-1">Признаки</div>
+              <ul className="text-sm space-y-1 mb-4">{r.signs.map((s, i) => <li key={i}>· {s}</li>)}</ul>
+              <div className="text-xs uppercase tracking-wide text-muted-foreground mb-1">Антидот</div>
+              <p className="text-sm mb-4 font-medium">{r.antidote}</p>
+              <div className="text-xs uppercase tracking-wide text-muted-foreground mb-1">SOS-вопросы</div>
+              <ul className="text-sm space-y-1">{r.q.map((s, i) => <li key={i}>→ {s}</li>)}</ul>
             </div>
-            <div className="text-xs uppercase tracking-wide text-muted-foreground mb-1">Признаки</div>
-            <ul className="text-sm space-y-1 mb-4">{r.signs.map((s,i)=><li key={i}>· {s}</li>)}</ul>
-            <div className="text-xs uppercase tracking-wide text-muted-foreground mb-1">Антидот</div>
-            <p className="text-sm mb-4 font-medium">{r.antidote}</p>
-            <div className="text-xs uppercase tracking-wide text-muted-foreground mb-1">Вопросы коучу к себе</div>
-            <ul className="text-sm space-y-1">{r.q.map((s,i)=><li key={i}>→ {s}</li>)}</ul>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );
 }
+
 
 /* ---------- Rapport ---------- */
 function Rapport() {
