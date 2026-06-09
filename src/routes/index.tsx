@@ -10,6 +10,7 @@ import {
   ChevronRight, Zap, ListChecks, Compass, Sun, Hourglass, TrendingUp, Scale,
   HelpCircle, AlertOctagon, Hand, Mountain, Telescope, Glasses,
   Ear, Crown, Palette, Calculator, Smile, Wind, ChevronDown, Briefcase,
+  Award, Handshake, ArrowRight, Plus, Minus, BadgePlus,
 } from "lucide-react";
 import burgerTop from "@/assets/burger-top.png";
 import burgerPatty from "@/assets/burger-patty.png";
@@ -25,7 +26,7 @@ export const Route = createFileRoute("/")({
   component: CoachSpace,
 });
 
-type TabId = "session" | "grow" | "swot" | "rapport" | "burger" | "nlu" | "sos" | "balance" | "supervision" | "values" | "feedback";
+type TabId = "session" | "grow" | "swot" | "rapport" | "burger" | "rules" | "nlu" | "sos" | "balance" | "supervision" | "values" | "feedback";
 
 const TABS: { id: TabId; label: string; icon: any }[] = [
   { id: "session", label: "Вести Сессию", icon: Sparkles },
@@ -36,10 +37,13 @@ const TABS: { id: TabId; label: string; icon: any }[] = [
   { id: "balance", label: "Колесо баланса", icon: Circle },
   { id: "values", label: "Ценности", icon: Gem },
   { id: "supervision", label: "Супервизия", icon: Users },
-  { id: "burger", label: "Гамбургер", icon: Sandwich },
+  { id: "burger", label: "Гамбургер ОСВК", icon: Sandwich },
+  { id: "rules", label: "8 Правил ОСВК", icon: Award },
   { id: "sos", label: "SOS Карпман", icon: AlertTriangle },
   { id: "feedback", label: "Обратная связь", icon: MessageSquare },
 ];
+
+const OSVK_TEMPLATE = `\n[ОСВК Гамбургер]\n🟧 Что получилось хорошо: \n🟫 Что стоит изменить (в будущем, позитивно): \n🟧 Итог · благодарность: \n`;
 
 const TIMER_STORAGE_KEY = "coach-space-session-timer";
 
@@ -416,6 +420,7 @@ ${notes || "—"}
         {tab === "sos" && <Sos />}
         {tab === "rapport" && <Rapport />}
         {tab === "burger" && <Burger />}
+        {tab === "rules" && <BurgerRules />}
         {tab === "balance" && <Balance scores={balanceScores} onChange={setBalanceScores} />}
         {tab === "values" && <Values />}
         {tab === "supervision" && <Supervision />}
@@ -507,7 +512,13 @@ function SessionPanel(p: any) {
             placeholder="Веди заметки прямо во время сессии..."
             className="w-full px-3 py-2 rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-ring resize-y"/>
         </Field>
-        <div className="flex justify-end">
+        <div className="flex items-center justify-between gap-2 flex-wrap">
+          <button
+            onClick={() => p.setNotes((p.notes || "") + OSVK_TEMPLATE)}
+            className="inline-flex items-center gap-2 px-3 py-2 rounded-lg border border-amber-500/40 bg-gradient-to-r from-amber-500/15 to-orange-500/10 hover:from-amber-500/25 hover:to-orange-500/20 text-sm text-amber-200"
+          >
+            <Sandwich size={16}/> Маркер ОСВК
+          </button>
           <button onClick={p.exportSession} className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-primary text-primary-foreground hover:opacity-90">
             <Download size={16}/> Экспорт .txt
           </button>
@@ -1901,34 +1912,171 @@ function Rapport() {
 }
 
 /* ---------- Гамбургер (ОСВК) ---------- */
+const BURGER_LAYERS = [
+  {
+    id: "top",
+    title: "Верхняя булочка",
+    subtitle: "Что получилось особенно хорошо!",
+    rule: "Сначала всегда описывается то, что было сделано хорошо и удачно.",
+    gradient: "from-amber-300 via-orange-400 to-amber-600",
+    glow: "shadow-[0_10px_40px_-10px_rgba(251,146,60,0.6)]",
+    ring: "ring-amber-400/60",
+    accent: "text-amber-100",
+    shape: "rounded-t-[120px] rounded-b-2xl",
+    icon: ThumbsUp,
+    phrases: [
+      "Что у тебя получилось особенно хорошо в этот раз?",
+      "Конкретно мне понравилось, как ты…",
+      "Самым удачным моментом в твоей работе было…",
+    ],
+  },
+  {
+    id: "patty",
+    title: "Мясо · начинка",
+    subtitle: "Что стоило изменить?",
+    rule: "Пожелания — в позитивной форме и в будущем времени. Обсуждаем поведение, а не личность. Каждое дополнение демонстрируем на фактах.",
+    gradient: "from-amber-900 via-stone-800 to-amber-950",
+    glow: "shadow-[0_10px_40px_-10px_rgba(120,53,15,0.7)]",
+    ring: "ring-amber-900/60",
+    accent: "text-amber-50",
+    shape: "rounded-xl",
+    icon: Wrench,
+    phrases: [
+      "Что стоило бы изменить?",
+      "Как стоило сделать по-другому в следующий раз?",
+      "В будущем я бы порекомендовал добавить…",
+      "Что можно улучшить, чтобы достичь ещё большего результата?",
+    ],
+  },
+  {
+    id: "bottom",
+    title: "Нижняя булочка",
+    subtitle: "Общая позитивная оценка",
+    rule: "Закрепляем позитивным завершением и благодарностью — чтобы человек ушёл с уверенностью в своих силах.",
+    gradient: "from-amber-600 via-orange-400 to-amber-300",
+    glow: "shadow-[0_10px_40px_-10px_rgba(251,146,60,0.6)]",
+    ring: "ring-amber-400/60",
+    accent: "text-amber-100",
+    shape: "rounded-b-[120px] rounded-t-2xl",
+    icon: Heart,
+    phrases: [
+      "В целом, это отличная работа, спасибо тебе за…",
+      "Подводя итог: твой прогресс очевиден, продолжай в том же духе!",
+    ],
+  },
+];
+
 function Burger() {
-  const burger = [
-    { img: burgerTop, t: "Верхняя булка — Признание", d: "Что конкретно сработало хорошо. Фактами, без лести." },
-    { img: burgerPatty, t: "Котлета — Развивающая часть", d: "Что можно усилить. На поведении, не на личности. С конкретным примером." },
-    { img: burgerBottom, t: "Нижняя булка — Поддержка", d: "Вера в способности. Следующий шаг, ресурс или предложение." },
-  ];
+  const [active, setActive] = useState<string>("top");
   return (
-    <div className="space-y-6">
-      <SectionHead title="Гамбургер" subtitle="ОСВК · правило развивающей обратной связи" />
-      <div className="grid md:grid-cols-3 gap-4 max-w-4xl">
-        {burger.map((s, i) => (
-          <div key={i} className="bg-card rounded-2xl border border-border p-5 flex flex-col items-center text-center">
-            <img
-              src={s.img}
-              alt={s.t}
-              loading="lazy"
-              width={512}
-              height={512}
-              className="w-32 h-32 object-contain mb-3"
-            />
-            <div className="font-semibold mb-1">{s.t}</div>
-            <div className="text-sm text-muted-foreground">{s.d}</div>
-          </div>
-        ))}
+    <div className="space-y-5 max-w-3xl">
+      <SectionHead title="Гамбургер ОСВК" subtitle="Обратная связь высокого качества · три слоя" />
+
+      <div className="bg-gradient-to-br from-stone-900 via-stone-950 to-black rounded-3xl border border-border p-4 sm:p-6 space-y-3">
+        {BURGER_LAYERS.map((layer) => {
+          const Icon = layer.icon;
+          const isActive = active === layer.id;
+          return (
+            <button
+              key={layer.id}
+              onClick={() => setActive(isActive ? "" : layer.id)}
+              className={`w-full text-left bg-gradient-to-br ${layer.gradient} ${layer.shape} ${layer.glow} ${isActive ? `ring-2 ${layer.ring} scale-[1.01]` : "opacity-90 hover:opacity-100"} transition-all duration-300 overflow-hidden`}
+            >
+              <div className="px-5 py-4 flex items-center gap-3">
+                <div className={`w-10 h-10 rounded-full bg-black/25 grid place-items-center ${layer.accent} shrink-0`}>
+                  <Icon size={20} />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className={`font-bold text-base sm:text-lg ${layer.accent} drop-shadow`}>{layer.title}</div>
+                  <div className={`text-xs sm:text-sm ${layer.accent} opacity-90 truncate`}>{layer.subtitle}</div>
+                </div>
+                {isActive ? <Minus size={18} className={layer.accent} /> : <Plus size={18} className={layer.accent} />}
+              </div>
+              <div className={`grid transition-all duration-300 ${isActive ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0"}`}>
+                <div className="overflow-hidden">
+                  <div className="px-5 pb-5 space-y-3">
+                    <div className={`text-xs sm:text-sm ${layer.accent} bg-black/30 rounded-lg px-3 py-2 leading-relaxed`}>
+                      {layer.rule}
+                    </div>
+                    <ul className="space-y-1.5">
+                      {layer.phrases.map((p, i) => (
+                        <li key={i} className={`flex gap-2 text-sm ${layer.accent} bg-black/20 rounded-md px-3 py-2`}>
+                          <ChevronRight size={14} className="mt-0.5 shrink-0" />
+                          <span>«{p}»</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            </button>
+          );
+        })}
       </div>
-      <div className="bg-secondary/60 rounded-xl p-4 max-w-2xl text-sm text-muted-foreground">
-        <MessageCircle size={16} className="inline mr-2 text-primary" />
-        Структура «гамбургера» помогает давать обратную связь так, чтобы человек её услышал и смог использовать.
+
+      <div className="bg-secondary/60 rounded-xl p-4 text-sm text-muted-foreground flex gap-3">
+        <MessageCircle size={18} className="text-primary shrink-0 mt-0.5" />
+        <div>Нажми на слой, чтобы развернуть формулировки. Используй кнопку «Маркер ОСВК» в блокноте сессии, чтобы быстро вставить шаблон.</div>
+      </div>
+    </div>
+  );
+}
+
+/* ---------- 8 золотых правил ОСВК ---------- */
+const OSVK_RULES = [
+  { icon: Handshake,   emoji: "🤝", title: "Раппорт",                  text: "Перед началом убедитесь, что между вами установлен и поддерживается контакт.", color: "from-rose-500/20 to-rose-500/5",    border: "border-rose-500/40",   tint: "text-rose-300" },
+  { icon: Eye,          emoji: "👁",  title: "Позиция наблюдателя",      text: "Давайте обратную связь с позиции стороннего наблюдателя — «взгляд со стороны».", color: "from-sky-500/20 to-sky-500/5",       border: "border-sky-500/40",    tint: "text-sky-300" },
+  { icon: Wrench,       emoji: "🛠",  title: "Уровень поведения",        text: "Описывайте только поведение — что человек делал. Не затрагивайте личность и способности.", color: "from-indigo-500/20 to-indigo-500/5", border: "border-indigo-500/40", tint: "text-indigo-300" },
+  { icon: Hourglass,    emoji: "⏳",  title: "Прошедшее время для фактов", text: "Разговор о сделанном — и хорошее, и зоны роста — строится в прошедшем времени.", color: "from-amber-500/20 to-amber-500/5",   border: "border-amber-500/40",  tint: "text-amber-300" },
+  { icon: Plus,         emoji: "➕",  title: "Сначала плюсы",            text: "В первую очередь описывайте только то, что было сделано удачно.", color: "from-emerald-500/20 to-emerald-500/5", border: "border-emerald-500/40", tint: "text-emerald-300" },
+  { icon: Rocket,       emoji: "🚀",  title: "Позитив и будущее",         text: "Все пожелания и зоны роста — только в позитивном ключе и направлены в будущее.", color: "from-violet-500/20 to-violet-500/5", border: "border-violet-500/40",  tint: "text-violet-300" },
+  { icon: BadgePlus,    emoji: "📊",  title: "Демонстрация",              text: "Каждое дополнение или предложение предметно демонстрируйте на фактах.", color: "from-cyan-500/20 to-cyan-500/5",    border: "border-cyan-500/40",   tint: "text-cyan-300" },
+  { icon: Heart,        emoji: "❤️",  title: "Благодарность в конце",     text: "Всегда закрепляйте финал общей позитивной оценкой и благодарностью.", color: "from-pink-500/20 to-pink-500/5",    border: "border-pink-500/40",   tint: "text-pink-300" },
+];
+
+function BurgerRules() {
+  return (
+    <div className="space-y-5 max-w-4xl">
+      <SectionHead title="8 Золотых Правил ОСВК" subtitle="Чек-лист развивающей обратной связи высокого качества" />
+
+      <div className="rounded-2xl border border-amber-500/30 bg-gradient-to-br from-amber-500/10 via-orange-500/5 to-transparent p-5 flex items-center gap-4">
+        <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-amber-400 to-orange-600 grid place-items-center shadow-lg shrink-0">
+          <Award size={28} className="text-white" />
+        </div>
+        <div>
+          <div className="font-semibold">Кодекс коуча</div>
+          <div className="text-sm text-muted-foreground">Восемь принципов, которые превращают замечания в развитие.</div>
+        </div>
+      </div>
+
+      <ol className="grid sm:grid-cols-2 gap-3 list-none">
+        {OSVK_RULES.map((r, i) => {
+          const Icon = r.icon;
+          return (
+            <li
+              key={i}
+              className={`relative rounded-xl border ${r.border} bg-gradient-to-br ${r.color} p-4 flex gap-3 overflow-hidden`}
+            >
+              <div className="absolute -right-4 -bottom-4 text-7xl opacity-10 select-none">{r.emoji}</div>
+              <div className={`w-10 h-10 rounded-lg bg-background/50 border ${r.border} grid place-items-center shrink-0 ${r.tint}`}>
+                <Icon size={18} />
+              </div>
+              <div className="relative flex-1 min-w-0">
+                <div className="flex items-center gap-2 mb-1">
+                  <span className={`text-xs font-mono font-bold ${r.tint}`}>0{i + 1}</span>
+                  <span className="text-base">{r.emoji}</span>
+                  <span className="font-semibold text-sm sm:text-base">{r.title}</span>
+                </div>
+                <div className="text-xs sm:text-sm text-muted-foreground leading-snug">{r.text}</div>
+              </div>
+            </li>
+          );
+        })}
+      </ol>
+
+      <div className="rounded-xl bg-secondary/60 border border-border p-4 text-sm text-muted-foreground flex gap-3">
+        <ShieldCheck size={18} className="text-primary shrink-0 mt-0.5" />
+        <div>Совет: перед тем как давать ОСВК, мысленно пройдись по этим 8 пунктам — это занимает 10 секунд и сохраняет раппорт.</div>
       </div>
     </div>
   );
