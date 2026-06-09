@@ -320,6 +320,11 @@ function CoachSpace() {
         setRemaining(0);
         localStorage.removeItem(TIMER_STORAGE_KEY);
         releaseWakeLock();
+        // Keep silent loop alive briefly so the bell can play through the
+        // suspended audio session, then release it.
+        playEndAlert();
+        setTimeout(stopSilentKeepAlive, 4000);
+        return;
         playEndAlert();
       }
     };
