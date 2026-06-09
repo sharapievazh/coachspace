@@ -171,6 +171,7 @@ function CoachSpace() {
       Notification.requestPermission().catch((e) => console.warn("notification permission failed", e));
     }
     await requestWakeLock();
+    startSilentKeepAlive();
     const nextEndsAt = Date.now() + remaining * 1000;
     localStorage.setItem(TIMER_STORAGE_KEY, JSON.stringify({ endsAt: nextEndsAt, duration }));
     setEndsAt(nextEndsAt);
