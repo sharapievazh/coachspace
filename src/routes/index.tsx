@@ -83,6 +83,7 @@ function CoachSpace() {
   const wakeLockRef = useRef<any>(null);
   const alertPlayedRef = useRef(false);
   const workerRef = useRef<Worker | null>(null);
+  const silentAudioRef = useRef<HTMLAudioElement | null>(null);
   const [timeUp, setTimeUp] = useState(false);
 
   const getWorker = () => {
