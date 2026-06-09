@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   Play, Pause, RotateCcw, Download, Target, Search, Lightbulb, Rocket,
   AlertTriangle, Heart, Triangle, Layers, MessageCircle, Sparkles, Sandwich,
