@@ -460,6 +460,12 @@ function SessionPanel(p: any) {
             <RotateCcw size={16}/> Сброс
           </button>
         </div>
+        <button
+          onClick={p.testSound}
+          className="w-full inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg border border-border bg-background hover:bg-secondary text-sm"
+        >
+          <Bell size={16} className="text-primary" /> Тест звука
+        </button>
         <div className="flex gap-2 flex-wrap">
           {[20, 30, 45, 60, 90].map((m) => (
             <button key={m} onClick={() => p.setDuration(m*60)}
