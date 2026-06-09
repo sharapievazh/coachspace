@@ -466,6 +466,7 @@ ${notes || "—"}
         {tab === "values" && <Values />}
         {tab === "supervision" && <Supervision />}
         {tab === "feedback" && <Feedback />}
+        {tab === "competencies" && <Competencies />}
       </main>
 
       {timeUp && (
