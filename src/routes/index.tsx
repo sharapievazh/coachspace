@@ -421,6 +421,7 @@ ${notes || "—"}
         {tab === "sos" && <Sos />}
         {tab === "rapport" && <Rapport />}
         {tab === "burger" && <Burger />}
+        {tab === "erickson" && <EricksonStar />}
         {tab === "rules" && <BurgerRules />}
         {tab === "balance" && <Balance scores={balanceScores} onChange={setBalanceScores} />}
         {tab === "values" && <Values />}
