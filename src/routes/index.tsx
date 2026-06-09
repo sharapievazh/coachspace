@@ -10,7 +10,7 @@ import {
   ChevronRight, Zap, ListChecks, Compass, Sun, Hourglass, TrendingUp, Scale,
   HelpCircle, AlertOctagon, Hand, Mountain, Telescope, Glasses,
   Ear, Crown, Palette, Calculator, Smile, Wind, ChevronDown, Briefcase,
-  Award, Handshake, ArrowRight, Plus, Minus, BadgePlus, Grid2x2, Trash2, CheckSquare, Square, Clock, Flame, CalendarCheck, UserPlus, X,
+  Award, Handshake, ArrowRight, Plus, Minus, BadgePlus, LayoutGrid, Trash2, CheckSquare, Square, Clock, Flame, CalendarCheck, UserPlus, X,
 } from "lucide-react";
 import burgerTop from "@/assets/burger-top.png";
 import burgerPatty from "@/assets/burger-patty.png";
@@ -38,7 +38,7 @@ const TABS: { id: TabId; label: string; icon: any }[] = [
   { id: "balance", label: "Колесо баланса", icon: Circle },
   { id: "values", label: "Ценности", icon: Gem },
   { id: "supervision", label: "Супервизия", icon: Users },
-  { id: "eisenhower", label: "Матрица Эйзенхауэра", icon: Grid2x2 },
+  { id: "eisenhower", label: "Матрица Эйзенхауэра", icon: LayoutGrid },
   { id: "burger", label: "Гамбургер ОСВК", icon: Sandwich },
   { id: "rules", label: "8 Правил ОСВК", icon: Award },
   { id: "sos", label: "SOS Карпман", icon: AlertTriangle },
@@ -2481,7 +2481,7 @@ function Eisenhower({ notes, setNotes }: { notes: string; setNotes: (v: string) 
     <div className="max-w-5xl mx-auto rounded-2xl border border-border bg-gradient-to-br from-sky-50 via-indigo-100 to-violet-200 text-slate-900 p-3 sm:p-5 space-y-4">
       <div className="flex items-start gap-3">
         <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-500 to-rose-600 grid place-items-center shadow-lg shrink-0">
-          <Grid2x2 size={22} className="text-white" />
+          <LayoutGrid size={22} className="text-white" />
         </div>
         <div className="min-w-0">
           <h2 className="text-lg sm:text-xl font-bold leading-tight">Матрица Эйзенхауэра</h2>
