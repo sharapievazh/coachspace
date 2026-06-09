@@ -2292,9 +2292,9 @@ function EricksonStar() {
           })}
         </div>
 
-        <div className="relative grid lg:grid-cols-[1fr,1fr] gap-6 items-center">
-          <div className="relative aspect-square w-full max-w-md mx-auto">
-            <svg viewBox="0 0 400 440" className="w-full h-full">
+        <div className="relative flex flex-col gap-5 items-center">
+          <div className="relative aspect-square w-full max-w-sm mx-auto">
+            <svg viewBox="0 0 400 420" className="w-full h-full">
               <defs>
                 <linearGradient id="starGold" x1="0" y1="0" x2="1" y2="1">
                   <stop offset="0%" stopColor="#fde68a" />
@@ -2336,7 +2336,7 @@ function EricksonStar() {
                 filter="url(#starShadow)"
               />
 
-              {/* clickable tip hotspots + glow */}
+              {/* clickable tip hotspots with large number badge */}
               {points.map((p, i) => (
                 <g key={i} onClick={() => setActive(i)} className="cursor-pointer">
                   {active === i && (
@@ -2345,36 +2345,29 @@ function EricksonStar() {
                       <animate attributeName="opacity" values="0.45;0.15;0.45" dur="2.4s" repeatCount="indefinite" />
                     </circle>
                   )}
-                  <circle cx={p.x} cy={p.y} r="14" fill={active === i ? "#fff" : "#fde68a"} stroke="#b45309" strokeWidth="1.5" />
-                  <text x={p.x} y={p.y + 4} textAnchor="middle" fontSize="11" fontWeight="700" fill="#7c2d12">
+                  <circle
+                    cx={p.x} cy={p.y}
+                    r={active === i ? 24 : 20}
+                    fill={active === i ? "#fff" : "#fde68a"}
+                    stroke="#b45309"
+                    strokeWidth="2"
+                  />
+                  <text
+                    x={p.x} y={p.y + 7}
+                    textAnchor="middle"
+                    fontSize="22"
+                    fontWeight="900"
+                    fill="#7c2d12"
+                  >
                     {i + 1}
                   </text>
-                  <circle cx={p.x} cy={p.y} r="30" fill="transparent" />
+                  <circle cx={p.x} cy={p.y} r="34" fill="transparent" />
                 </g>
               ))}
-
-              {/* labels around the star */}
-              {points.map((p, i) => {
-                const anchor = p.lx < cx - 10 ? "end" : p.lx > cx + 10 ? "start" : "middle";
-                return (
-                  <text
-                    key={`t${i}`}
-                    x={p.lx} y={p.ly}
-                    textAnchor={anchor}
-                    fontSize="12"
-                    fontWeight={active === i ? 800 : 600}
-                    fill={active === i ? "#fef3c7" : "#fcd34d"}
-                    className="cursor-pointer select-none"
-                    onClick={() => setActive(i)}
-                  >
-                    {ERICKSON_PRINCIPLES[i].short}
-                  </text>
-                );
-              })}
             </svg>
           </div>
 
-          <div className="space-y-3">
+          <div className="w-full space-y-3">
             <div className="text-xs uppercase tracking-widest text-amber-300/80">Принцип {active + 1} из 5</div>
             <div className="flex items-center gap-3">
               <div
