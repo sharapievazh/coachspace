@@ -1252,28 +1252,45 @@ const ROLES = [
   { name: "Преследователь", color: "border-rose-500/40 bg-rose-500/10", signs: ["Критика, давление, обвинение", "«Ты должен...»", "Сравнения не в пользу клиента"], antidote: "Замени оценку на любопытство. Вопрос вместо суждения.", q: ["Что я сейчас защищаю?", "Это про клиента или про меня?", "Как сказать это с уважением?"] },
 ];
 function Sos() {
+  const [active, setActive] = useState<string | null>(null);
   return (
     <div className="space-y-6">
       <SectionHead title="SOS · Треугольник Карпмана" subtitle="Шпаргалка-предохранитель для растождествления" />
+
+      <div className="bg-card rounded-2xl border border-border p-4 sm:p-6">
+        <p className="text-xs text-center text-muted-foreground mb-3">
+          Нажмите на роль, чтобы увидеть признаки, антидот и SOS-вопросы. В центре — точка растождествления.
+        </p>
+        <KarpmanTriangleSvg active={active} onSelect={(r) => setActive(active === r ? null : r)} />
+      </div>
+
       <div className="grid md:grid-cols-3 gap-4">
-        {ROLES.map((r)=>(
-          <div key={r.name} className={`p-5 rounded-2xl border-2 ${r.color}`}>
-            <div className="flex items-center gap-2 mb-3">
-              <AlertTriangle size={18}/>
-              <h3 className="font-semibold">{r.name}</h3>
+        {ROLES.map((r) => {
+          const isActive = active === r.name;
+          return (
+            <div
+              key={r.name}
+              onClick={() => setActive(isActive ? null : r.name)}
+              className={`p-5 rounded-2xl border-2 cursor-pointer transition-all ${r.color} ${isActive ? "ring-2 ring-primary scale-[1.02]" : ""}`}
+            >
+              <div className="flex items-center gap-2 mb-3">
+                <AlertTriangle size={18} />
+                <h3 className="font-semibold">{r.name}</h3>
+              </div>
+              <div className="text-xs uppercase tracking-wide text-muted-foreground mb-1">Признаки</div>
+              <ul className="text-sm space-y-1 mb-4">{r.signs.map((s, i) => <li key={i}>· {s}</li>)}</ul>
+              <div className="text-xs uppercase tracking-wide text-muted-foreground mb-1">Антидот</div>
+              <p className="text-sm mb-4 font-medium">{r.antidote}</p>
+              <div className="text-xs uppercase tracking-wide text-muted-foreground mb-1">SOS-вопросы</div>
+              <ul className="text-sm space-y-1">{r.q.map((s, i) => <li key={i}>→ {s}</li>)}</ul>
             </div>
-            <div className="text-xs uppercase tracking-wide text-muted-foreground mb-1">Признаки</div>
-            <ul className="text-sm space-y-1 mb-4">{r.signs.map((s,i)=><li key={i}>· {s}</li>)}</ul>
-            <div className="text-xs uppercase tracking-wide text-muted-foreground mb-1">Антидот</div>
-            <p className="text-sm mb-4 font-medium">{r.antidote}</p>
-            <div className="text-xs uppercase tracking-wide text-muted-foreground mb-1">Вопросы коучу к себе</div>
-            <ul className="text-sm space-y-1">{r.q.map((s,i)=><li key={i}>→ {s}</li>)}</ul>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );
 }
+
 
 /* ---------- Rapport ---------- */
 function Rapport() {
