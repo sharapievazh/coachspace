@@ -399,14 +399,14 @@ ${notes || "—"}
               <p className="text-xs text-muted-foreground">Рабочее пространство коуча</p>
             </div>
           </div>
-          <div className="hidden sm:flex items-center gap-3 px-3 py-2 rounded-lg bg-secondary">
-            <div className="font-mono text-xl tabular-nums">{mmss}</div>
+          <div className="flex items-center gap-2 sm:gap-3 px-2 sm:px-3 py-1.5 sm:py-2 rounded-lg bg-secondary">
+            <div className="font-mono text-base sm:text-xl tabular-nums">{mmss}</div>
             <button
               onClick={toggleTimer}
-              className="p-2 rounded-md bg-primary text-primary-foreground hover:opacity-90"
+              className="p-1.5 sm:p-2 rounded-md bg-primary text-primary-foreground hover:opacity-90"
               aria-label="toggle"
             >
-              {running ? <Pause size={16} /> : <Play size={16} />}
+              {running ? <Pause size={14} /> : <Play size={14} />}
             </button>
           </div>
         </div>
