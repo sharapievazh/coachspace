@@ -345,6 +345,26 @@ function CoachSpace() {
     const balanceLines = BALANCE_AREAS.map(
       (a) => `  ${a.n}. ${a.name}: ${balanceScores[a.n] ?? 5}/10`
     ).join("\n");
+    let smartBlock = "";
+    try {
+      const raw = typeof window !== "undefined" ? localStorage.getItem(SMART_STORAGE) : null;
+      if (raw) {
+        const d = { ...SMART_EMPTY, ...JSON.parse(raw) } as SmartData;
+        const para = buildSmartParagraph(d);
+        if (para || d.s || d.m || d.a || d.r || d.t) {
+          smartBlock = `\nSMART-цель:
+  S (конкретная): ${d.s || "—"}
+  M (измеримая): ${d.m || "—"}
+  A (достижимая): ${d.a || "—"}
+  R (актуальная): ${d.r || "—"}
+  T (срок): ${d.t || "—"}
+  Позитивная формулировка: ${d.positive ? "да" : "нет"}
+  Баланс вызова и реальности: ${d.balanced ? "да" : "нет"}
+  Итог: ${para || "—"}
+`;
+        }
+      }
+    } catch {}
     const txt = `Coach Space — Протокол сессии
 Дата: ${new Date().toLocaleString()}
 Клиент: ${clientName || "—"}
@@ -353,7 +373,7 @@ function CoachSpace() {
 
 Колесо баланса (оценки):
 ${balanceLines}
-
+${smartBlock}
 Заметки коуча:
 ${notes || "—"}
 `;
