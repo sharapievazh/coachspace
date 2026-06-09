@@ -1414,11 +1414,13 @@ function RadarWithTooltip({ scores }: { scores: Record<number, number> }) {
   const [active, setActive] = useState<number | null>(null);
   const area = active != null ? BALANCE_AREAS[active] : null;
   const I = area?.icon;
+  const values = useMemo(() => BALANCE_AREAS.map((a) => scores[a.n]), [scores]);
+  const labels = useMemo(() => BALANCE_AREAS.map((a) => a.name), []);
   return (
     <div className="relative w-full max-w-md">
       <BalanceRadar
-        values={BALANCE_AREAS.map((a) => scores[a.n])}
-        labels={BALANCE_AREAS.map((a) => a.name)}
+        values={values}
+        labels={labels}
         colors={BALANCE_COLORS}
         active={active}
         onSelect={setActive}
