@@ -154,11 +154,15 @@ export function BalanceRadar({
   labels,
   colors,
   size = 360,
+  active = null,
+  onSelect,
 }: {
   values: number[]; // 1..10, length 8
   labels: string[];
   colors?: string[];
   size?: number;
+  active?: number | null;
+  onSelect?: (i: number | null) => void;
 }) {
   const n = values.length;
   const cx = size / 2;
@@ -178,8 +182,28 @@ export function BalanceRadar({
     })
     .join(" ");
 
+  // Wedge path for a sector (hit area + active highlight)
+  const wedgePath = (i: number, r: number) => {
+    const half = Math.PI / n;
+    const a1 = angle(i) - half;
+    const a2 = angle(i) + half;
+    const x1 = cx + Math.cos(a1) * r;
+    const y1 = cy + Math.sin(a1) * r;
+    const x2 = cx + Math.cos(a2) * r;
+    const y2 = cy + Math.sin(a2) * r;
+    return `M ${cx} ${cy} L ${x1} ${y1} A ${r} ${r} 0 0 1 ${x2} ${y2} Z`;
+  };
+
   return (
-    <svg viewBox={`0 0 ${size} ${size}`} width="100%" height="100%" className="max-w-full">
+    <svg
+      viewBox={`0 0 ${size} ${size}`}
+      width="100%"
+      height="100%"
+      className="max-w-full"
+      onClick={(e) => {
+        if (e.target === e.currentTarget) onSelect?.(null);
+      }}
+    >
       <defs>
         <radialGradient id="radar-fill" cx="50%" cy="50%" r="50%">
           <stop offset="0%" stopColor="#fb923c" stopOpacity="0.55" />
@@ -200,6 +224,15 @@ export function BalanceRadar({
           opacity={k === 10 ? 0.9 : 0.5}
         />
       ))}
+      {/* active sector highlight */}
+      {active != null && (
+        <path
+          d={wedgePath(active, R)}
+          fill={colors?.[active] ?? "#c2410c"}
+          opacity="0.18"
+          pointerEvents="none"
+        />
+      )}
       {/* axes */}
       {Array.from({ length: n }).map((_, i) => {
         const [x, y] = point(i, R);
@@ -208,7 +241,24 @@ export function BalanceRadar({
       {/* perfect circle reference (ideal wheel) */}
       <circle cx={cx} cy={cy} r={R} fill="none" stroke="#64748b" strokeWidth="1.2" strokeDasharray="4 4" opacity="0.7" />
       {/* user polygon */}
-      <polygon points={polygon} fill="url(#radar-fill)" stroke="#c2410c" strokeWidth="2.2" strokeLinejoin="round" />
+      <polygon points={polygon} fill="url(#radar-fill)" stroke="#c2410c" strokeWidth="2.2" strokeLinejoin="round" pointerEvents="none" />
+      {/* invisible wedge hit areas for click/hover */}
+      {onSelect &&
+        Array.from({ length: n }).map((_, i) => (
+          <path
+            key={`hit-${i}`}
+            d={wedgePath(i, R + 18)}
+            fill="transparent"
+            style={{ cursor: "pointer" }}
+            onMouseEnter={() => onSelect(i)}
+            onClick={(e) => {
+              e.stopPropagation();
+              onSelect(active === i ? null : i);
+            }}
+          >
+            <title>{labels[i]}</title>
+          </path>
+        ))}
       {/* user points */}
       {values.map((v, i) => {
         const [x, y] = point(i, (R * v) / 10);
@@ -217,10 +267,11 @@ export function BalanceRadar({
             key={i}
             cx={x}
             cy={y}
-            r="4"
+            r={active === i ? 6 : 4}
             fill={colors?.[i] ?? "#c2410c"}
             stroke="#fff"
             strokeWidth="1.5"
+            pointerEvents="none"
           />
         );
       })}
@@ -228,6 +279,7 @@ export function BalanceRadar({
       {labels.map((l, i) => {
         const [x, y] = point(i, R + 22);
         const anchor = x < cx - 4 ? "end" : x > cx + 4 ? "start" : "middle";
+        const isActive = active === i;
         return (
           <text
             key={i}
@@ -236,15 +288,20 @@ export function BalanceRadar({
             textAnchor={anchor}
             dominantBaseline="middle"
             fontSize="10"
-            fontWeight="700"
-            fill="#334155"
+            fontWeight={isActive ? 900 : 700}
+            fill={isActive ? (colors?.[i] ?? "#0f172a") : "#334155"}
+            style={{ cursor: onSelect ? "pointer" : "default" }}
+            onClick={(e) => {
+              e.stopPropagation();
+              onSelect?.(active === i ? null : i);
+            }}
           >
             {i + 1}. {l.length > 18 ? l.slice(0, 17) + "…" : l}
           </text>
         );
       })}
       {/* center */}
-      <circle cx={cx} cy={cy} r="3" fill="#0f172a" />
+      <circle cx={cx} cy={cy} r="3" fill="#0f172a" pointerEvents="none" />
     </svg>
   );
 }
