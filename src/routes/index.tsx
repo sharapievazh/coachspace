@@ -910,26 +910,51 @@ function Grow() {
 /* ---------- SWOT ---------- */
 function Swot() {
   const cells = [
-    { k: "S", title: "Strengths · Сильные стороны", color: "bg-emerald-500/10 text-emerald-700 border-emerald-500/30", q: ["В чём ты силён?", "Какие ресурсы у тебя уже есть?", "Что говорят другие о твоих сильных сторонах?"] },
-    { k: "W", title: "Weaknesses · Слабые стороны", color: "bg-amber-500/10 text-amber-700 border-amber-500/30", q: ["Что тебя ограничивает?", "Чего тебе не хватает?", "Где ты чаще всего спотыкаешься?"] },
-    { k: "O", title: "Opportunities · Возможности", color: "bg-sky-500/10 text-sky-700 border-sky-500/30", q: ["Какие тренды тебе на руку?", "Кто может стать союзником?", "Какие двери открыты прямо сейчас?"] },
-    { k: "T", title: "Threats · Угрозы", color: "bg-rose-500/10 text-rose-700 border-rose-500/30", q: ["Что может пойти не так?", "Кто или что мешает?", "Какие риски ты избегаешь замечать?"] },
+    { k: "S", title: "Strengths · Сильные стороны", Icon: ShieldCheck, grad: "from-emerald-500 to-teal-500", ring: "border-emerald-500/30 bg-emerald-500/5",
+      q: ["В чём ты силён?", "Какие ресурсы у тебя уже есть?", "Что говорят другие о твоих сильных сторонах?"] },
+    { k: "W", title: "Weaknesses · Слабые стороны", Icon: AlertOctagon, grad: "from-amber-500 to-orange-500", ring: "border-amber-500/30 bg-amber-500/5",
+      q: ["Что тебя ограничивает?", "Чего тебе не хватает?", "Где ты чаще всего спотыкаешься?"] },
+    { k: "O", title: "Opportunities · Возможности", Icon: Lightbulb, grad: "from-sky-500 to-cyan-500", ring: "border-sky-500/30 bg-sky-500/5",
+      q: ["Какие тренды тебе на руку?", "Кто может стать союзником?", "Какие двери открыты прямо сейчас?"] },
+    { k: "T", title: "Threats · Угрозы", Icon: AlertTriangle, grad: "from-rose-500 to-red-500", ring: "border-rose-500/30 bg-rose-500/5",
+      q: ["Что может пойти не так?", "Кто или что мешает?", "Какие риски ты избегаешь замечать?"] },
   ];
+  const qIcons = [HelpCircle, Compass, Eye];
   return (
     <div className="space-y-6">
       <SectionHead title="Матрица SWOT" subtitle="Внутренняя и внешняя среда клиента" />
       <div className="grid sm:grid-cols-2 gap-4">
-        {cells.map((c) => (
-          <div key={c.k} className={`p-5 rounded-2xl border ${c.color}`}>
-            <div className="flex items-center gap-2 mb-3">
-              <span className="w-8 h-8 rounded-lg bg-card grid place-items-center font-bold">{c.k}</span>
-              <h3 className="font-semibold text-foreground">{c.title}</h3>
+        {cells.map((c) => {
+          const C = c.Icon;
+          return (
+            <div key={c.k} className={`relative overflow-hidden p-5 rounded-2xl border ${c.ring}`}>
+              {/* huge faded letter */}
+              <div className={`absolute -right-4 -bottom-10 text-[180px] font-black leading-none bg-gradient-to-br ${c.grad} bg-clip-text text-transparent opacity-[0.12] pointer-events-none select-none`}>
+                {c.k}
+              </div>
+              <div className="relative flex items-center gap-3 mb-4">
+                <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${c.grad} text-white grid place-items-center shadow-lg`}>
+                  <C size={22} />
+                </div>
+                <div>
+                  <div className={`text-2xl font-black bg-gradient-to-br ${c.grad} bg-clip-text text-transparent leading-none`}>{c.k}</div>
+                  <h3 className="font-semibold text-foreground text-sm">{c.title}</h3>
+                </div>
+              </div>
+              <ul className="relative space-y-2 text-sm text-foreground/85">
+                {c.q.map((x, i) => {
+                  const QI = qIcons[i % qIcons.length];
+                  return (
+                    <li key={i} className="flex items-start gap-2">
+                      <QI size={14} className={`mt-0.5 shrink-0 bg-gradient-to-br ${c.grad} bg-clip-text`} style={{ color: "currentColor" }} />
+                      <span>{x}</span>
+                    </li>
+                  );
+                })}
+              </ul>
             </div>
-            <ul className="space-y-1.5 text-sm text-foreground/80">
-              {c.q.map((x,i)=><li key={i}>· {x}</li>)}
-            </ul>
-          </div>
-        ))}
+          );
+        })}
       </div>
       <div className="bg-card rounded-2xl border border-border p-6">
         <h3 className="font-semibold flex items-center gap-2"><Lightbulb size={18} className="text-primary"/> Мосты SWOT — от Реальности к Возможностям</h3>
