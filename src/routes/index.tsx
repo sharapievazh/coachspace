@@ -392,52 +392,228 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
   );
 }
 
-/* ---------- GROW ---------- */
+/* ---------- GROW (Полная модель из материалов обучения) ---------- */
 const GROW_STEPS = [
   {
-    id: "G", label: "Goal", title: "Цель",
-    icon: Target, time: "5–10 мин", focus: "Конкретика, измеримость, экологичность",
-    questions: [
-      "Какой результат сессии будет для тебя ценным?",
-      "Как ты поймёшь, что цель достигнута?",
-      "Зачем тебе это сейчас?",
-      "Что изменится в твоей жизни, когда цель будет достигнута?",
-      "Эта цель — твоя или чья-то ещё?",
+    id: "G", label: "GOAL", title: "ЦЕЛЬ",
+    subtitle: "Что вы хотите получить?",
+    icon: Target, time: "10 мин",
+    accent: "from-emerald-500/15 to-emerald-500/5 border-emerald-500/30 text-emerald-700",
+    blocks: [
+      {
+        head: "ЦЕЛЬ СЕССИИ",
+        items: [
+          "Что хотите получить по итогам встречи?",
+          "Какой результат будет идеальным?",
+          "Что должно измениться?",
+        ],
+      },
+      {
+        head: "ЦЕЛЬ В ДОЛГОСРОЧНОЙ ПЕРСПЕКТИВЕ",
+        items: ["Через 3 месяца", "Через 6 месяцев", "Через 1 год", "Через 5 лет"],
+      },
+      {
+        head: "ИНСТРУМЕНТЫ · SMART",
+        items: ["Specific", "Measurable", "Achievable", "Relevant", "Time-bound"],
+      },
+      {
+        head: "КОЛЕСО БАЛАНСА",
+        items: ["Семья", "Отношения", "Дети", "Карьера", "Финансы", "Здоровье", "Самореализация", "Отдых"],
+      },
+      {
+        head: "ШКАЛИРОВАНИЕ",
+        items: ["Где вы сейчас от 1 до 10?", "Где хотите быть?"],
+      },
+      {
+        head: "ИДЕАЛЬНЫЙ ДЕНЬ",
+        items: [
+          "Представьте результат достигнутым",
+          "Что изменилось?",
+          "Что вы чувствуете?",
+        ],
+      },
+      {
+        head: "ПУТЕШЕСТВИЕ В БУДУЩЕЕ",
+        items: ["Визуализация результата", "Образ успешного будущего"],
+      },
+      {
+        head: "КОУЧИНГОВЫЕ ВОПРОСЫ",
+        items: [
+          "Чего вы хотите?",
+          "Что для вас важно?",
+          "Как выглядит успех?",
+          "Почему это важно сейчас?",
+          "Что произойдёт после достижения цели?",
+        ],
+      },
     ],
   },
   {
-    id: "R", label: "Reality", title: "Реальность",
-    icon: Search, time: "10–15 мин", focus: "Факты без оценки, ресурсы и ограничения",
-    questions: [
-      "Что происходит сейчас? Опиши фактами.",
-      "Что ты уже пробовал? Что сработало, что нет?",
-      "Какие ресурсы у тебя есть?",
-      "Что тебя останавливает на самом деле?",
-      "Кто ещё вовлечён в ситуацию?",
+    id: "R", label: "REALITY", title: "РЕАЛЬНОСТЬ",
+    subtitle: "Где вы находитесь сейчас?",
+    icon: Search, time: "15 мин",
+    accent: "from-sky-500/15 to-sky-500/5 border-sky-500/30 text-sky-700",
+    blocks: [
+      {
+        head: "ЧТО ПРОИСХОДИТ СЕЙЧАС?",
+        items: ["Факты", "События", "Результаты"],
+      },
+      {
+        head: "ЧТО УЖЕ РАБОТАЕТ?",
+        items: ["Успешный опыт", "Достижения", "Сильные стороны"],
+      },
+      {
+        head: "ЧТО МЕШАЕТ?",
+        items: ["Ограничения", "Страхи", "Убеждения", "Внешние факторы"],
+      },
+      {
+        head: "ИНСТРУМЕНТЫ · SWOT-АНАЛИЗ",
+        items: [
+          "S — Сильные стороны",
+          "W — Слабые стороны",
+          "O — Возможности",
+          "T — Угрозы",
+        ],
+      },
+      {
+        head: "МЕТОД 5 ПОЧЕМУ",
+        items: ["Почему?", "Почему?", "Почему?", "Почему?", "Почему?"],
+      },
+      {
+        head: "ЛИНИЯ ВРЕМЕНИ",
+        items: ["Прошлое", "Настоящее", "Будущее"],
+      },
+      {
+        head: "АНАЛИЗ РЕСУРСОВ",
+        items: ["Деньги", "Время", "Энергия", "Связи", "Знания"],
+      },
+      {
+        head: "КОУЧИНГОВЫЕ ВОПРОСЫ",
+        items: [
+          "Где вы сейчас?",
+          "Что уже сделано?",
+          "Что помогает?",
+          "Что препятствует?",
+          "Какие ресурсы доступны?",
+          "Что находится под вашим контролем?",
+        ],
+      },
     ],
   },
   {
-    id: "O", label: "Options", title: "Возможности",
-    icon: Lightbulb, time: "10–15 мин", focus: "Расширение поля выбора, креатив",
-    questions: [
-      "Какие варианты у тебя есть? Назови минимум 5.",
-      "А если бы не было ограничений — что бы ты сделал?",
-      "Что бы посоветовал в этой ситуации мудрый человек?",
-      "Что ты ещё не пробовал?",
-      "Какие у каждого варианта плюсы и минусы?",
+    id: "O", label: "OPTIONS", title: "ВОЗМОЖНОСТИ",
+    subtitle: "Какие варианты у вас есть?",
+    icon: Lightbulb, time: "20 мин",
+    accent: "from-amber-500/15 to-amber-500/5 border-amber-500/30 text-amber-700",
+    blocks: [
+      {
+        head: "ГЕНЕРАЦИЯ ВАРИАНТОВ · МОЗГОВОЙ ШТУРМ",
+        items: [
+          "Правила: не критиковать идеи",
+          "Количество важнее качества",
+        ],
+      },
+      {
+        head: "МЕТОД ДИСНЕЯ",
+        items: [
+          "Мечтатель — что возможно?",
+          "Реалист — как реализовать?",
+          "Критик — какие риски?",
+        ],
+      },
+      {
+        head: "ШЕСТЬ ШЛЯП МЫШЛЕНИЯ",
+        items: [
+          "Белая — факты",
+          "Красная — эмоции",
+          "Чёрная — риски",
+          "Жёлтая — плюсы",
+          "Зелёная — креатив",
+          "Синяя — управление процессом",
+        ],
+      },
+      {
+        head: "РЕВЕРСИВНОЕ МЫШЛЕНИЕ",
+        items: ["Как гарантированно провалиться?", "Что нужно исключить?"],
+      },
+      {
+        head: "А ЧТО ЕЩЁ?",
+        items: ["Задаётся минимум 5–7 раз подряд"],
+      },
+      {
+        head: "КОУЧИНГОВЫЕ ВОПРОСЫ",
+        items: [
+          "Какие варианты вы видите?",
+          "Что ещё возможно?",
+          "Если бы не было ограничений?",
+          "Что сделал бы ваш наставник?",
+          "Какое решение кажется самым сильным?",
+          "Что вы ещё не рассматривали?",
+        ],
+      },
     ],
   },
   {
-    id: "W", label: "Will", title: "Действия",
-    icon: Rocket, time: "5–10 мин", focus: "Обязательство, первый шаг, сроки",
-    questions: [
-      "Что ты выбираешь сделать?",
-      "Какой будет первый конкретный шаг? Когда?",
-      "По шкале от 1 до 10 — насколько ты привержен этому?",
-      "Что может помешать и как ты с этим справишься?",
-      "Кому ты расскажешь о своём решении?",
+    id: "W", label: "WILL / WAY FORWARD", title: "ДЕЙСТВИЕ",
+    subtitle: "Что вы будете делать?",
+    icon: Rocket, time: "15 мин",
+    accent: "from-violet-500/15 to-violet-500/5 border-violet-500/30 text-violet-700",
+    blocks: [
+      {
+        head: "ПЛАН ДЕЙСТВИЙ · SMART-ШАГИ",
+        items: ["Каждый шаг: конкретный, измеримый, реалистичный"],
+      },
+      {
+        head: "ПЛАН 90 ДНЕЙ",
+        items: ["Цель", "30 дней", "60 дней", "90 дней"],
+      },
+      {
+        head: "ПЛАН 30–60–90",
+        items: ["Что сделать за неделю", "За месяц", "За квартал"],
+      },
+      {
+        head: "ACCOUNTABILITY · Ответственность",
+        items: ["Кто поддержит?", "Кто проконтролирует?", "Как отслеживать прогресс?"],
+      },
+      {
+        head: "АНАЛИЗ ПРЕПЯТСТВИЙ · Что может помешать?",
+        items: ["Время", "Страх", "Лень", "Деньги", "Отсутствие поддержки"],
+      },
+      {
+        head: "ПЛАН Б",
+        items: ["Что будете делать, если возникнет препятствие?"],
+      },
+      {
+        head: "КОУЧИНГОВЫЕ ВОПРОСЫ",
+        items: [
+          "Что конкретно сделаете?",
+          "Когда?",
+          "Где?",
+          "С кем?",
+          "Какой первый шаг?",
+          "Что может помешать?",
+          "Как преодолеете препятствия?",
+          "Насколько готовы действовать от 1 до 10?",
+        ],
+      },
     ],
   },
+];
+
+const GROW_STRUCTURE = [
+  { n: 1, code: "G — GOAL", time: "10 мин", text: "Формулируем цель встречи" },
+  { n: 2, code: "R — REALITY", time: "15 мин", text: "Анализируем текущую ситуацию" },
+  { n: 3, code: "O — OPTIONS", time: "20 мин", text: "Генерируем варианты решений" },
+  { n: 4, code: "W — WILL", time: "15 мин", text: "Создаём план действий" },
+];
+
+const GROW_CLOSE = [
+  { t: "ИНСАЙТЫ", d: "Что стало главным открытием? Что удивило?", icon: Lightbulb },
+  { t: "РЕЗУЛЬТАТ", d: "Что берёте с собой?", icon: Sparkles },
+  { t: "ОБЯЗАТЕЛЬСТВО", d: "Что сделаете в течение 24 часов?", icon: Target },
+  { t: "МОТИВАЦИЯ", d: "Почему это важно для вас?", icon: Heart },
+  { t: "УВЕРЕННОСТЬ", d: "Насколько уверены в успехе от 1 до 10?", icon: Activity },
+  { t: "ДОМАШНЕЕ ЗАДАНИЕ", d: "Конкретное действие до следующей встречи.", icon: ClipboardList },
 ];
 
 function Grow() {
@@ -446,8 +622,25 @@ function Grow() {
   const Icon = step.icon;
   return (
     <div className="space-y-6">
-      <SectionHead title="Модель GROW" subtitle="Структура коучинговой сессии по Джону Уитмору" />
-      <div className="grid grid-cols-4 gap-2">
+      <SectionHead title="Модель GROW" subtitle="Структура эффективной коуч-сессии (60 мин)" />
+
+      <div className="bg-card rounded-2xl border border-border p-5">
+        <h3 className="font-semibold mb-3 flex items-center gap-2"><Timer size={18} className="text-primary"/> Структура сессии (60 мин)</h3>
+        <div className="grid sm:grid-cols-4 gap-2">
+          {GROW_STRUCTURE.map((s) => (
+            <div key={s.n} className="p-3 rounded-xl bg-secondary/60">
+              <div className="flex items-center gap-2 text-primary font-semibold">
+                <span className="w-6 h-6 rounded-full bg-primary text-primary-foreground grid place-items-center text-xs">{s.n}</span>
+                {s.code}
+              </div>
+              <div className="text-xs text-muted-foreground mt-1">{s.time}</div>
+              <div className="text-sm mt-1">{s.text}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
         {GROW_STEPS.map((s) => {
           const I = s.icon; const act = active===s.id;
           return (
@@ -461,25 +654,55 @@ function Grow() {
         })}
       </div>
 
-      <div className="bg-card rounded-2xl border border-border p-6">
+      <div className={`rounded-2xl border p-6 bg-gradient-to-br ${step.accent}`}>
         <div className="flex items-start justify-between flex-wrap gap-3">
           <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-xl bg-primary/10 text-primary grid place-items-center"><Icon size={24}/></div>
+            <div className="w-12 h-12 rounded-xl bg-card grid place-items-center"><Icon size={24}/></div>
             <div>
-              <h3 className="text-xl font-semibold">{step.title}</h3>
-              <p className="text-sm text-muted-foreground">{step.focus}</p>
+              <div className="text-xs uppercase tracking-wide opacity-80">{step.label}</div>
+              <h3 className="text-2xl font-bold text-foreground">{step.title}</h3>
+              <p className="text-sm text-foreground/70">{step.subtitle}</p>
             </div>
           </div>
-          <span className="px-3 py-1 rounded-full bg-secondary text-secondary-foreground text-xs font-medium">⏱ {step.time}</span>
+          <span className="px-3 py-1 rounded-full bg-card text-foreground text-xs font-medium">⏱ {step.time}</span>
         </div>
-        <ul className="mt-6 space-y-2">
-          {step.questions.map((q,i)=>(
-            <li key={i} className="flex gap-3 p-3 rounded-lg bg-secondary/60 hover:bg-secondary transition-colors">
-              <span className="font-mono text-primary font-bold">{i+1}.</span>
-              <span>{q}</span>
-            </li>
+
+        <div className="mt-6 grid sm:grid-cols-2 gap-3">
+          {step.blocks.map((b, i) => (
+            <div key={i} className="bg-card rounded-xl border border-border p-4">
+              <div className="text-xs font-bold uppercase tracking-wide text-primary mb-2">{b.head}</div>
+              <ul className="space-y-1 text-sm">
+                {b.items.map((it, j) => (
+                  <li key={j} className="flex gap-2"><span className="text-primary">·</span><span>{it}</span></li>
+                ))}
+              </ul>
+            </div>
           ))}
-        </ul>
+        </div>
+      </div>
+
+      <div className="bg-card rounded-2xl border border-border p-5">
+        <h3 className="font-semibold mb-4 flex items-center gap-2"><Flag size={18} className="text-primary"/> Завершение сессии</h3>
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2">
+          {GROW_CLOSE.map((c, i) => {
+            const I = c.icon;
+            return (
+              <div key={i} className="p-3 rounded-xl bg-secondary/60">
+                <I size={18} className="text-primary mb-1"/>
+                <div className="font-semibold text-xs">{c.t}</div>
+                <div className="text-xs text-muted-foreground mt-1">{c.d}</div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      <div className="rounded-2xl border border-primary/30 bg-primary/10 p-5 flex items-start gap-3">
+        <Star size={20} className="text-primary mt-0.5"/>
+        <div>
+          <div className="text-xs uppercase tracking-wide text-primary font-bold mb-1">Финальный вопрос коуча</div>
+          <div className="font-medium">Если бы вы начали действовать уже сегодня, что стало бы первым шагом?</div>
+        </div>
       </div>
     </div>
   );
