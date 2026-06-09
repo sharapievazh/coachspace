@@ -231,6 +231,7 @@ function CoachSpace() {
       if (next > 0) {
         setEndsAt(parsed.endsAt);
         setRunning(true);
+        getWorker()?.postMessage({ type: "start", endsAt: parsed.endsAt });
       } else {
         localStorage.removeItem(TIMER_STORAGE_KEY);
         playEndAlert();
@@ -239,6 +240,37 @@ function CoachSpace() {
       console.warn("timer restore failed", e);
       localStorage.removeItem(TIMER_STORAGE_KEY);
     }
+  }, []);
+
+  // Subscribe to worker messages (background tick source)
+  useEffect(() => {
+    const w = getWorker();
+    if (!w) return;
+    const onMessage = (e: MessageEvent) => {
+      const data = e.data || {};
+      if (data.type === "tick" && typeof data.remaining === "number") {
+        setRemaining(data.remaining);
+      } else if (data.type === "end" && !alertPlayedRef.current) {
+        alertPlayedRef.current = true;
+        setRunning(false);
+        setEndsAt(null);
+        setRemaining(0);
+        localStorage.removeItem(TIMER_STORAGE_KEY);
+        releaseWakeLock();
+        playEndAlert();
+      }
+    };
+    w.addEventListener("message", onMessage);
+    return () => {
+      w.removeEventListener("message", onMessage);
+    };
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      workerRef.current?.terminate();
+      workerRef.current = null;
+    };
   }, []);
 
   useEffect(() => {
