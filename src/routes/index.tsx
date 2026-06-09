@@ -38,6 +38,7 @@ const TABS: { id: TabId; label: string; icon: any }[] = [
   { id: "balance", label: "Колесо баланса", icon: Circle },
   { id: "values", label: "Ценности", icon: Gem },
   { id: "supervision", label: "Супервизия", icon: Users },
+  { id: "eisenhower", label: "Матрица Эйзенхауэра", icon: Grid2x2 },
   { id: "burger", label: "Гамбургер ОСВК", icon: Sandwich },
   { id: "rules", label: "8 Правил ОСВК", icon: Award },
   { id: "sos", label: "SOS Карпман", icon: AlertTriangle },
