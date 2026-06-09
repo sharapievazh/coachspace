@@ -10,6 +10,7 @@ import {
   ChevronRight, Zap, ListChecks, Compass, Sun, Hourglass, TrendingUp, Scale,
   HelpCircle, AlertOctagon, Hand, Mountain, Telescope, Glasses,
   Ear, Crown, Palette, Calculator, Smile, Wind, ChevronDown, Briefcase,
+  Award, Handshake, ArrowRight, Plus, Minus, BadgePlus,
 } from "lucide-react";
 import burgerTop from "@/assets/burger-top.png";
 import burgerPatty from "@/assets/burger-patty.png";
@@ -25,7 +26,7 @@ export const Route = createFileRoute("/")({
   component: CoachSpace,
 });
 
-type TabId = "session" | "grow" | "swot" | "rapport" | "burger" | "nlu" | "sos" | "balance" | "supervision" | "values" | "feedback";
+type TabId = "session" | "grow" | "swot" | "rapport" | "burger" | "rules" | "nlu" | "sos" | "balance" | "supervision" | "values" | "feedback";
 
 const TABS: { id: TabId; label: string; icon: any }[] = [
   { id: "session", label: "Вести Сессию", icon: Sparkles },
@@ -36,10 +37,13 @@ const TABS: { id: TabId; label: string; icon: any }[] = [
   { id: "balance", label: "Колесо баланса", icon: Circle },
   { id: "values", label: "Ценности", icon: Gem },
   { id: "supervision", label: "Супервизия", icon: Users },
-  { id: "burger", label: "Гамбургер", icon: Sandwich },
+  { id: "burger", label: "Гамбургер ОСВК", icon: Sandwich },
+  { id: "rules", label: "8 Правил ОСВК", icon: Award },
   { id: "sos", label: "SOS Карпман", icon: AlertTriangle },
   { id: "feedback", label: "Обратная связь", icon: MessageSquare },
 ];
+
+const OSVK_TEMPLATE = `\n[ОСВК Гамбургер]\n🟧 Что получилось хорошо: \n🟫 Что стоит изменить (в будущем, позитивно): \n🟧 Итог · благодарность: \n`;
 
 const TIMER_STORAGE_KEY = "coach-space-session-timer";
 
@@ -416,6 +420,7 @@ ${notes || "—"}
         {tab === "sos" && <Sos />}
         {tab === "rapport" && <Rapport />}
         {tab === "burger" && <Burger />}
+        {tab === "rules" && <BurgerRules />}
         {tab === "balance" && <Balance scores={balanceScores} onChange={setBalanceScores} />}
         {tab === "values" && <Values />}
         {tab === "supervision" && <Supervision />}
