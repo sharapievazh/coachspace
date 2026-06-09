@@ -2896,7 +2896,7 @@ function Eisenhower({ notes, setNotes }: { notes: string; setNotes: (v: string) 
             onClick={() => setImportant((v) => !v)}
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs border transition-colors ${
               important
-                ? "bg-rose-500/20 border-rose-500/60 text-rose-100"
+                ? "bg-rose-200 border-rose-500 text-rose-900"
                 : "bg-card border-border text-muted-foreground"
             }`}
           >
@@ -2906,7 +2906,7 @@ function Eisenhower({ notes, setNotes }: { notes: string; setNotes: (v: string) 
             onClick={() => setUrgent((v) => !v)}
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs border transition-colors ${
               urgent
-                ? "bg-amber-500/20 border-amber-500/60 text-amber-100"
+                ? "bg-amber-200 border-amber-500 text-amber-900"
                 : "bg-card border-border text-muted-foreground"
             }`}
           >
