@@ -1,6 +1,46 @@
 import { useState } from "react";
 
 /* ============================================================
+   RadarChartIcon — миниатюра "колеса баланса" для табов
+   ============================================================ */
+export function RadarChartIcon({
+  size = 18,
+  className = "",
+  color = "currentColor",
+}: {
+  size?: number;
+  className?: string;
+  color?: string;
+}) {
+  // 8-axis radar mini chart
+  const cx = 12, cy = 12, R = 9;
+  const n = 8;
+  const ang = (i: number) => (Math.PI * 2 * i) / n - Math.PI / 2;
+  const ringR = [R * 0.33, R * 0.66, R];
+  const sample = [7, 4, 6, 5, 8, 6, 4, 7]; // varied silhouette
+  const poly = sample
+    .map((v, i) => {
+      const r = (R * v) / 10;
+      return `${(cx + Math.cos(ang(i)) * r).toFixed(1)},${(cy + Math.sin(ang(i)) * r).toFixed(1)}`;
+    })
+    .join(" ");
+  return (
+    <svg viewBox="0 0 24 24" width={size} height={size} className={className} fill="none">
+      {ringR.map((r, i) => (
+        <circle key={i} cx={cx} cy={cy} r={r} stroke={color} strokeWidth="1" opacity={0.45} />
+      ))}
+      {Array.from({ length: n }).map((_, i) => {
+        const x = cx + Math.cos(ang(i)) * R;
+        const y = cy + Math.sin(ang(i)) * R;
+        return <line key={i} x1={cx} y1={cy} x2={x} y2={y} stroke={color} strokeWidth="0.8" opacity={0.5} />;
+      })}
+      <polygon points={poly} fill={color} fillOpacity={0.35} stroke={color} strokeWidth="1.3" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
+
+/* ============================================================
    GROW — 4 уникальные SVG-иконки (G / R / O / W)
    ============================================================ */
 
@@ -167,7 +207,9 @@ export function BalanceRadar({
   const n = values.length;
   const cx = size / 2;
   const cy = size / 2;
-  const R = size * 0.36;
+  const R = size * 0.3;
+  const pad = 56; // extra room for outer labels
+
   const angle = (i: number) => (Math.PI * 2 * i) / n - Math.PI / 2;
 
   const point = (i: number, r: number) => {
@@ -196,7 +238,7 @@ export function BalanceRadar({
 
   return (
     <svg
-      viewBox={`0 0 ${size} ${size}`}
+      viewBox={`${-pad} ${-pad / 2} ${size + pad * 2} ${size + pad}`}
       width="100%"
       height="100%"
       className="max-w-full"
@@ -277,7 +319,7 @@ export function BalanceRadar({
       })}
       {/* axis labels */}
       {labels.map((l, i) => {
-        const [x, y] = point(i, R + 22);
+        const [x, y] = point(i, R + 16);
         const anchor = x < cx - 4 ? "end" : x > cx + 4 ? "start" : "middle";
         const isActive = active === i;
         return (
@@ -287,16 +329,16 @@ export function BalanceRadar({
             y={y}
             textAnchor={anchor}
             dominantBaseline="middle"
-            fontSize="10"
+            fontSize="11"
             fontWeight={isActive ? 900 : 700}
-            fill={isActive ? (colors?.[i] ?? "#0f172a") : "#334155"}
+            fill={isActive ? (colors?.[i] ?? "#0f172a") : "#cbd5e1"}
             style={{ cursor: onSelect ? "pointer" : "default" }}
             onClick={(e) => {
               e.stopPropagation();
               onSelect?.(active === i ? null : i);
             }}
           >
-            {i + 1}. {l.length > 18 ? l.slice(0, 17) + "…" : l}
+            {i + 1}. {l}
           </text>
         );
       })}
@@ -328,10 +370,10 @@ export function DiltsPyramidSvg({
   active: number;
   onSelect: (n: number) => void;
 }) {
-  const W = 360;
+  const W = 500;
   const H = 320;
-  const apex = { x: W / 2, y: 10 };
-  const base = { left: 30, right: W - 30, y: H - 10 };
+  const apex = { x: 250, y: 10 };
+  const base = { left: 120, right: 380, y: H - 10 };
   const rows = levels.length; // 6
 
   // linear interpolation along left/right edges
@@ -351,6 +393,8 @@ export function DiltsPyramidSvg({
         const cx = (top.lx + top.rx + bot.lx + bot.rx) / 4;
         const cy = (top.y + bot.y) / 2;
         const isActive = active === lv.n;
+        // Top two narrow segments — label outside with leader line
+        const labelOutside = i < 2;
         return (
           <g
             key={lv.n}
@@ -364,12 +408,45 @@ export function DiltsPyramidSvg({
               stroke={isActive ? "#0f172a" : "#fff"}
               strokeWidth={isActive ? 2.5 : 1.5}
             />
-            <text x={cx} y={cy - 4} textAnchor="middle" fontSize="11" fontWeight="800" fill="#fff">
-              {lv.n}. {lv.name}
-            </text>
-            <text x={cx} y={cy + 9} textAnchor="middle" fontSize="9" fill="#fff" opacity="0.9">
-              {lv.q}
-            </text>
+            {labelOutside ? (
+              <>
+                {/* leader line from right edge midpoint outward */}
+                <line
+                  x1={(top.rx + bot.rx) / 2}
+                  y1={cy}
+                  x2={420}
+                  y2={cy}
+                  stroke={isActive ? "#0f172a" : lv.color}
+                  strokeWidth="1.2"
+                />
+                <text
+                  x={426}
+                  y={cy + 4}
+                  fontSize="12"
+                  fontWeight="800"
+                  fill={isActive ? "#0f172a" : lv.color}
+                >
+                  {lv.n}. {lv.name}
+                </text>
+                <text
+                  x={426}
+                  y={cy + 18}
+                  fontSize="9"
+                  fill="#64748b"
+                >
+                  {lv.q}
+                </text>
+              </>
+            ) : (
+              <>
+                <text x={cx} y={cy - 4} textAnchor="middle" fontSize="11" fontWeight="800" fill="#fff">
+                  {lv.n}. {lv.name}
+                </text>
+                <text x={cx} y={cy + 9} textAnchor="middle" fontSize="9" fill="#fff" opacity="0.9">
+                  {lv.q}
+                </text>
+              </>
+            )}
           </g>
         );
       })}

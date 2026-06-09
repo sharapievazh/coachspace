@@ -20,6 +20,7 @@ import {
   BalanceRadar,
   DiltsPyramidSvg,
   KarpmanTriangleSvg,
+  RadarChartIcon,
 } from "@/components/coach/CoachVisuals";
 
 export const Route = createFileRoute("/")({
@@ -48,7 +49,7 @@ const TABS: { id: TabId; label: string; icon: any }[] = [
   { id: "grow", label: "GROW", icon: Target },
   { id: "swot", label: "SWOT", icon: Layers },
   { id: "nlu", label: "Пирамида Дилтса", icon: Triangle },
-  { id: "balance", label: "Колесо баланса", icon: Circle },
+  { id: "balance", label: "Колесо баланса", icon: RadarChartIcon },
   { id: "values", label: "Ценности", icon: Gem },
   { id: "supervision", label: "Супервизия", icon: Users },
   { id: "smart", label: "SMART-цель", icon: CheckCircle2 },
@@ -877,21 +878,8 @@ function Grow() {
     <div className="space-y-6">
       <SectionHead title="Модель GROW" subtitle="Структура эффективной коуч-сессии (60 мин)" />
 
-      <div className="bg-card rounded-2xl border border-border p-5">
-        <h3 className="font-semibold mb-3 flex items-center gap-2"><Timer size={18} className="text-primary"/> Структура сессии (60 мин)</h3>
-        <div className="grid sm:grid-cols-4 gap-2">
-          {GROW_STRUCTURE.map((s) => (
-            <div key={s.n} className="p-3 rounded-xl bg-secondary/60">
-              <div className="flex items-center gap-2 text-primary font-semibold">
-                <span className="w-6 h-6 rounded-full bg-primary text-primary-foreground grid place-items-center text-xs">{s.n}</span>
-                {s.code}
-              </div>
-              <div className="text-xs text-muted-foreground mt-1">{s.time}</div>
-              <div className="text-sm mt-1">{s.text}</div>
-            </div>
-          ))}
-        </div>
-      </div>
+      {/* верхняя дублирующая панель убрана — структура встроена в каждую карточку шага */}
+
 
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
         {GROW_STEPS.map((s) => {
@@ -933,7 +921,19 @@ function Grow() {
           </span>
         </div>
 
-        <div className="relative mt-6 grid sm:grid-cols-2 gap-3">
+        {(() => {
+          const meta = GROW_STRUCTURE.find((g) => g.code.startsWith(step.id));
+          return meta ? (
+            <div className="relative mt-4 rounded-xl bg-card/70 border border-border/60 px-3 py-2 flex items-center gap-3 text-xs sm:text-sm">
+              <span className="w-6 h-6 rounded-full bg-primary text-primary-foreground grid place-items-center text-[11px] font-bold shrink-0">{meta.n}</span>
+              <span className="font-semibold text-foreground">{meta.code}</span>
+              <span className="text-muted-foreground">· {meta.time}</span>
+              <span className="text-foreground/80 leading-tight">— {meta.text}</span>
+            </div>
+          ) : null;
+        })()}
+
+        <div className="relative mt-4 grid sm:grid-cols-2 gap-3">
           {step.blocks.map((b, i) => (
             <BlockCard key={i} head={b.head} items={b.items} />
           ))}
@@ -2292,9 +2292,9 @@ function EricksonStar() {
           })}
         </div>
 
-        <div className="relative grid lg:grid-cols-[1fr,1fr] gap-6 items-center">
-          <div className="relative aspect-square w-full max-w-md mx-auto">
-            <svg viewBox="0 0 400 440" className="w-full h-full">
+        <div className="relative flex flex-col gap-5 items-center">
+          <div className="relative aspect-square w-full max-w-sm mx-auto">
+            <svg viewBox="0 0 400 420" className="w-full h-full">
               <defs>
                 <linearGradient id="starGold" x1="0" y1="0" x2="1" y2="1">
                   <stop offset="0%" stopColor="#fde68a" />
@@ -2336,7 +2336,7 @@ function EricksonStar() {
                 filter="url(#starShadow)"
               />
 
-              {/* clickable tip hotspots + glow */}
+              {/* clickable tip hotspots with large number badge */}
               {points.map((p, i) => (
                 <g key={i} onClick={() => setActive(i)} className="cursor-pointer">
                   {active === i && (
@@ -2345,36 +2345,29 @@ function EricksonStar() {
                       <animate attributeName="opacity" values="0.45;0.15;0.45" dur="2.4s" repeatCount="indefinite" />
                     </circle>
                   )}
-                  <circle cx={p.x} cy={p.y} r="14" fill={active === i ? "#fff" : "#fde68a"} stroke="#b45309" strokeWidth="1.5" />
-                  <text x={p.x} y={p.y + 4} textAnchor="middle" fontSize="11" fontWeight="700" fill="#7c2d12">
+                  <circle
+                    cx={p.x} cy={p.y}
+                    r={active === i ? 24 : 20}
+                    fill={active === i ? "#fff" : "#fde68a"}
+                    stroke="#b45309"
+                    strokeWidth="2"
+                  />
+                  <text
+                    x={p.x} y={p.y + 7}
+                    textAnchor="middle"
+                    fontSize="22"
+                    fontWeight="900"
+                    fill="#7c2d12"
+                  >
                     {i + 1}
                   </text>
-                  <circle cx={p.x} cy={p.y} r="30" fill="transparent" />
+                  <circle cx={p.x} cy={p.y} r="34" fill="transparent" />
                 </g>
               ))}
-
-              {/* labels around the star */}
-              {points.map((p, i) => {
-                const anchor = p.lx < cx - 10 ? "end" : p.lx > cx + 10 ? "start" : "middle";
-                return (
-                  <text
-                    key={`t${i}`}
-                    x={p.lx} y={p.ly}
-                    textAnchor={anchor}
-                    fontSize="12"
-                    fontWeight={active === i ? 800 : 600}
-                    fill={active === i ? "#fef3c7" : "#fcd34d"}
-                    className="cursor-pointer select-none"
-                    onClick={() => setActive(i)}
-                  >
-                    {ERICKSON_PRINCIPLES[i].short}
-                  </text>
-                );
-              })}
             </svg>
           </div>
 
-          <div className="space-y-3">
+          <div className="w-full space-y-3">
             <div className="text-xs uppercase tracking-widest text-amber-300/80">Принцип {active + 1} из 5</div>
             <div className="flex items-center gap-3">
               <div
