@@ -4,6 +4,9 @@ import {
   Play, Pause, RotateCcw, Download, Target, Search, Lightbulb, Rocket,
   AlertTriangle, Heart, Triangle, Layers, MessageCircle, Sparkles, Sandwich,
   MessageSquare, Send, ThumbsUp, ThumbsDown,
+  Gem, Users, BookOpen, ClipboardList, UserCheck, ShieldCheck, Footprints, Star,
+  Circle, HeartPulse, Coins, Baby, HandHeart, Laptop, GraduationCap, Activity,
+  Eye, Timer, Brain, Flag, Calendar, CheckCircle2, Wrench, Home, User,
 } from "lucide-react";
 import burgerTop from "@/assets/burger-top.png";
 import burgerPatty from "@/assets/burger-patty.png";
@@ -13,15 +16,18 @@ export const Route = createFileRoute("/")({
   component: CoachSpace,
 });
 
-type TabId = "session" | "grow" | "swot" | "rapport" | "burger" | "nlu" | "sos" | "feedback";
+type TabId = "session" | "grow" | "swot" | "rapport" | "burger" | "nlu" | "sos" | "balance" | "supervision" | "values" | "feedback";
 
 const TABS: { id: TabId; label: string; icon: any }[] = [
   { id: "session", label: "Сессия", icon: Sparkles },
   { id: "grow", label: "GROW", icon: Target },
   { id: "swot", label: "SWOT", icon: Layers },
+  { id: "balance", label: "Колесо баланса", icon: Circle },
+  { id: "nlu", label: "Пирамида Дилтса", icon: Triangle },
+  { id: "values", label: "Ценности", icon: Gem },
+  { id: "supervision", label: "Супервизия", icon: Users },
   { id: "rapport", label: "Раппорт", icon: Heart },
   { id: "burger", label: "Гамбургер", icon: Sandwich },
-  { id: "nlu", label: "Пирамида НЛУ", icon: Triangle },
   { id: "sos", label: "SOS Карпман", icon: AlertTriangle },
   { id: "feedback", label: "Обратная связь", icon: MessageSquare },
 ];
