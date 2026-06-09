@@ -210,6 +210,8 @@ export function BalanceRadar({
   const R = size * 0.3;
   const pad = 56; // extra room for outer labels
 
+  const safeValues = values.map((v) => Math.min(10, Math.max(0, Number(v) || 0)));
+
   const angle = (i: number) => (Math.PI * 2 * i) / n - Math.PI / 2;
 
   const point = (i: number, r: number) => {
@@ -217,7 +219,7 @@ export function BalanceRadar({
     return [cx + Math.cos(a) * r, cy + Math.sin(a) * r] as const;
   };
 
-  const polygon = values
+  const polygon = safeValues
     .map((v, i) => {
       const [x, y] = point(i, (R * v) / 10);
       return `${x.toFixed(1)},${y.toFixed(1)}`;
@@ -302,7 +304,7 @@ export function BalanceRadar({
           </path>
         ))}
       {/* user points */}
-      {values.map((v, i) => {
+      {safeValues.map((v, i) => {
         const [x, y] = point(i, (R * v) / 10);
         return (
           <circle
