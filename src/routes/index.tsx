@@ -351,6 +351,7 @@ function CoachSpace() {
         localStorage.removeItem(TIMER_STORAGE_KEY);
         releaseWakeLock();
         playEndAlert();
+        setTimeout(stopSilentKeepAlive, 4000);
       }
     };
     tick();
