@@ -279,7 +279,7 @@ export function BalanceRadar({
       })}
       {/* axis labels */}
       {labels.map((l, i) => {
-        const [x, y] = point(i, R + 22);
+        const [x, y] = point(i, R + 16);
         const anchor = x < cx - 4 ? "end" : x > cx + 4 ? "start" : "middle";
         const isActive = active === i;
         return (
@@ -289,16 +289,16 @@ export function BalanceRadar({
             y={y}
             textAnchor={anchor}
             dominantBaseline="middle"
-            fontSize="10"
+            fontSize="11"
             fontWeight={isActive ? 900 : 700}
-            fill={isActive ? (colors?.[i] ?? "#0f172a") : "#334155"}
+            fill={isActive ? (colors?.[i] ?? "#0f172a") : "#cbd5e1"}
             style={{ cursor: onSelect ? "pointer" : "default" }}
             onClick={(e) => {
               e.stopPropagation();
               onSelect?.(active === i ? null : i);
             }}
           >
-            {i + 1}. {l.length > 18 ? l.slice(0, 17) + "…" : l}
+            {i + 1}. {l}
           </text>
         );
       })}
