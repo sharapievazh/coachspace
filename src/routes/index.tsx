@@ -7,6 +7,8 @@ import {
   Gem, Users, BookOpen, ClipboardList, UserCheck, ShieldCheck, Footprints, Star,
   Circle, HeartPulse, Coins, Baby, HandHeart, Laptop, GraduationCap, Activity,
   Eye, Timer, Brain, Flag, Calendar, CheckCircle2, Wrench, Home, User, Bell,
+  ChevronRight, Zap, ListChecks, Compass, Sun, Hourglass, TrendingUp, Scale,
+  HelpCircle, AlertOctagon, Hand, Mountain, Telescope, Glasses,
 } from "lucide-react";
 import burgerTop from "@/assets/burger-top.png";
 import burgerPatty from "@/assets/burger-patty.png";
@@ -514,6 +516,75 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
   );
 }
 
+/* ---------- Visual helpers for rich block cards ---------- */
+const BLOCK_ICON_MAP: Array<{ match: RegExp; icon: any; tone: string }> = [
+  { match: /цель сессии/i,                 icon: Target,      tone: "from-emerald-500 to-teal-500" },
+  { match: /долгосрочн/i,                  icon: Mountain,    tone: "from-emerald-600 to-green-500" },
+  { match: /smart/i,                       icon: ListChecks,  tone: "from-lime-500 to-emerald-500" },
+  { match: /колесо баланса/i,              icon: Circle,      tone: "from-amber-500 to-orange-500" },
+  { match: /шкалирован/i,                  icon: TrendingUp,  tone: "from-cyan-500 to-sky-500" },
+  { match: /идеальн/i,                     icon: Sun,         tone: "from-yellow-400 to-amber-500" },
+  { match: /путешеств/i,                   icon: Telescope,   tone: "from-indigo-500 to-violet-500" },
+  { match: /коучинговые вопросы/i,         icon: HelpCircle,  tone: "from-sky-500 to-blue-500" },
+  { match: /что происходит/i,              icon: ClipboardList, tone: "from-blue-500 to-sky-500" },
+  { match: /что уже работает/i,            icon: ThumbsUp,    tone: "from-emerald-500 to-sky-500" },
+  { match: /что мешает/i,                  icon: AlertOctagon, tone: "from-rose-500 to-orange-500" },
+  { match: /swot/i,                        icon: Layers,      tone: "from-indigo-500 to-blue-600" },
+  { match: /5 почему/i,                    icon: HelpCircle,  tone: "from-violet-500 to-fuchsia-500" },
+  { match: /линия времени/i,               icon: Hourglass,   tone: "from-sky-500 to-cyan-500" },
+  { match: /ресурс/i,                      icon: Coins,       tone: "from-amber-500 to-yellow-500" },
+  { match: /мозгов|штурм|генерац/i,        icon: Zap,         tone: "from-amber-500 to-orange-500" },
+  { match: /дисне/i,                       icon: Sparkles,    tone: "from-pink-500 to-rose-500" },
+  { match: /шляп/i,                        icon: Brain,       tone: "from-violet-500 to-indigo-500" },
+  { match: /реверсивн/i,                   icon: RotateCcw,   tone: "from-fuchsia-500 to-purple-500" },
+  { match: /а что ещё|ещe/i,               icon: Sparkles,    tone: "from-amber-500 to-orange-500" },
+  { match: /план действ|smart-шаги/i,      icon: ListChecks,  tone: "from-violet-500 to-indigo-500" },
+  { match: /90 дн/i,                       icon: Calendar,    tone: "from-violet-500 to-purple-500" },
+  { match: /30.60.90/i,                    icon: Calendar,    tone: "from-indigo-500 to-violet-500" },
+  { match: /accountab|ответствен/i,        icon: ShieldCheck, tone: "from-emerald-500 to-teal-500" },
+  { match: /препятств/i,                   icon: AlertOctagon, tone: "from-rose-500 to-red-500" },
+  { match: /план б/i,                      icon: Compass,     tone: "from-sky-500 to-indigo-500" },
+];
+
+function pickBlockIcon(head: string) {
+  return BLOCK_ICON_MAP.find((m) => m.match.test(head)) ?? { icon: Sparkles, tone: "from-primary to-primary/60" };
+}
+
+const ITEM_BULLETS = [CheckCircle2, Zap, Star, ChevronRight, Sparkles];
+function getItemIcon(i: number) { return ITEM_BULLETS[i % ITEM_BULLETS.length]; }
+
+function BlockCard({ head, items }: { head: string; items: string[] }) {
+  const meta = pickBlockIcon(head);
+  const I = meta.icon;
+  return (
+    <div className="relative overflow-hidden bg-card rounded-2xl border border-border p-4 group hover:border-primary/40 transition-colors">
+      {/* glow watermark */}
+      <I
+        size={140}
+        className={`absolute -right-6 -bottom-8 text-foreground/[0.04] pointer-events-none`}
+        strokeWidth={1.2}
+      />
+      <div className="relative flex items-center gap-3 mb-3">
+        <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${meta.tone} text-white grid place-items-center shadow-md shadow-primary/20`}>
+          <I size={20} />
+        </div>
+        <div className="text-[11px] font-bold uppercase tracking-wider text-foreground/80 leading-tight">{head}</div>
+      </div>
+      <ul className="relative space-y-1.5 text-sm">
+        {items.map((it, j) => {
+          const B = getItemIcon(j);
+          return (
+            <li key={j} className="flex items-start gap-2">
+              <B size={14} className="text-primary mt-0.5 shrink-0" />
+              <span className="text-foreground/90">{it}</span>
+            </li>
+          );
+        })}
+      </ul>
+    </div>
+  );
+}
+
 /* ---------- GROW (Полная модель из материалов обучения) ---------- */
 const GROW_STEPS = [
   {
@@ -776,31 +847,35 @@ function Grow() {
         })}
       </div>
 
-      <div className={`rounded-2xl border p-6 bg-gradient-to-br ${step.accent}`}>
-        <div className="flex items-start justify-between flex-wrap gap-3">
+      <div className={`relative overflow-hidden rounded-2xl border p-6 bg-gradient-to-br ${step.accent}`}>
+        {/* giant decorative watermark */}
+        <div className="absolute -right-10 -top-10 opacity-[0.07] pointer-events-none">
+          <GrowIcon step={step.id as "G" | "R" | "O" | "W"} size={320} />
+        </div>
+        {/* sparkles */}
+        <Sparkles className="absolute right-10 top-6 text-primary/30 animate-pulse" size={24} />
+        <Star className="absolute right-32 top-20 text-amber-400/40 animate-pulse" size={16} />
+        <Sparkles className="absolute right-20 bottom-10 text-primary/20 animate-pulse" size={18} />
+
+        <div className="relative flex items-start justify-between flex-wrap gap-3">
           <div className="flex items-center gap-3">
-            <div className="w-16 h-16 rounded-xl bg-card grid place-items-center">
-              <GrowIcon step={step.id as "G" | "R" | "O" | "W"} size={52} />
+            <div className="w-20 h-20 rounded-2xl bg-card grid place-items-center shadow-xl ring-2 ring-white/40">
+              <GrowIcon step={step.id as "G" | "R" | "O" | "W"} size={64} />
             </div>
             <div>
-              <div className="text-xs uppercase tracking-wide opacity-80">{step.label}</div>
-              <h3 className="text-2xl font-bold text-foreground">{step.title}</h3>
+              <div className="text-xs uppercase tracking-wide opacity-80 font-semibold">{step.label}</div>
+              <h3 className="text-3xl font-extrabold text-foreground tracking-tight">{step.title}</h3>
               <p className="text-sm text-foreground/70">{step.subtitle}</p>
             </div>
           </div>
-          <span className="px-3 py-1 rounded-full bg-card text-foreground text-xs font-medium">⏱ {step.time}</span>
+          <span className="px-3 py-1 rounded-full bg-card text-foreground text-xs font-medium shadow flex items-center gap-1.5">
+            <Timer size={12} className="text-primary" /> {step.time}
+          </span>
         </div>
 
-        <div className="mt-6 grid sm:grid-cols-2 gap-3">
+        <div className="relative mt-6 grid sm:grid-cols-2 gap-3">
           {step.blocks.map((b, i) => (
-            <div key={i} className="bg-card rounded-xl border border-border p-4">
-              <div className="text-xs font-bold uppercase tracking-wide text-primary mb-2">{b.head}</div>
-              <ul className="space-y-1 text-sm">
-                {b.items.map((it, j) => (
-                  <li key={j} className="flex gap-2"><span className="text-primary">·</span><span>{it}</span></li>
-                ))}
-              </ul>
-            </div>
+            <BlockCard key={i} head={b.head} items={b.items} />
           ))}
         </div>
       </div>
@@ -835,26 +910,51 @@ function Grow() {
 /* ---------- SWOT ---------- */
 function Swot() {
   const cells = [
-    { k: "S", title: "Strengths · Сильные стороны", color: "bg-emerald-500/10 text-emerald-700 border-emerald-500/30", q: ["В чём ты силён?", "Какие ресурсы у тебя уже есть?", "Что говорят другие о твоих сильных сторонах?"] },
-    { k: "W", title: "Weaknesses · Слабые стороны", color: "bg-amber-500/10 text-amber-700 border-amber-500/30", q: ["Что тебя ограничивает?", "Чего тебе не хватает?", "Где ты чаще всего спотыкаешься?"] },
-    { k: "O", title: "Opportunities · Возможности", color: "bg-sky-500/10 text-sky-700 border-sky-500/30", q: ["Какие тренды тебе на руку?", "Кто может стать союзником?", "Какие двери открыты прямо сейчас?"] },
-    { k: "T", title: "Threats · Угрозы", color: "bg-rose-500/10 text-rose-700 border-rose-500/30", q: ["Что может пойти не так?", "Кто или что мешает?", "Какие риски ты избегаешь замечать?"] },
+    { k: "S", title: "Strengths · Сильные стороны", Icon: ShieldCheck, grad: "from-emerald-500 to-teal-500", ring: "border-emerald-500/30 bg-emerald-500/5", ic: "text-emerald-600",
+      q: ["В чём ты силён?", "Какие ресурсы у тебя уже есть?", "Что говорят другие о твоих сильных сторонах?"] },
+    { k: "W", title: "Weaknesses · Слабые стороны", Icon: AlertOctagon, grad: "from-amber-500 to-orange-500", ring: "border-amber-500/30 bg-amber-500/5", ic: "text-amber-600",
+      q: ["Что тебя ограничивает?", "Чего тебе не хватает?", "Где ты чаще всего спотыкаешься?"] },
+    { k: "O", title: "Opportunities · Возможности", Icon: Lightbulb, grad: "from-sky-500 to-cyan-500", ring: "border-sky-500/30 bg-sky-500/5", ic: "text-sky-600",
+      q: ["Какие тренды тебе на руку?", "Кто может стать союзником?", "Какие двери открыты прямо сейчас?"] },
+    { k: "T", title: "Threats · Угрозы", Icon: AlertTriangle, grad: "from-rose-500 to-red-500", ring: "border-rose-500/30 bg-rose-500/5", ic: "text-rose-600",
+      q: ["Что может пойти не так?", "Кто или что мешает?", "Какие риски ты избегаешь замечать?"] },
   ];
+  const qIcons = [HelpCircle, Compass, Eye];
   return (
     <div className="space-y-6">
       <SectionHead title="Матрица SWOT" subtitle="Внутренняя и внешняя среда клиента" />
       <div className="grid sm:grid-cols-2 gap-4">
-        {cells.map((c) => (
-          <div key={c.k} className={`p-5 rounded-2xl border ${c.color}`}>
-            <div className="flex items-center gap-2 mb-3">
-              <span className="w-8 h-8 rounded-lg bg-card grid place-items-center font-bold">{c.k}</span>
-              <h3 className="font-semibold text-foreground">{c.title}</h3>
+        {cells.map((c) => {
+          const C = c.Icon;
+          return (
+            <div key={c.k} className={`relative overflow-hidden p-5 rounded-2xl border ${c.ring}`}>
+              {/* huge faded letter */}
+              <div className={`absolute -right-4 -bottom-10 text-[180px] font-black leading-none bg-gradient-to-br ${c.grad} bg-clip-text text-transparent opacity-[0.12] pointer-events-none select-none`}>
+                {c.k}
+              </div>
+              <div className="relative flex items-center gap-3 mb-4">
+                <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${c.grad} text-white grid place-items-center shadow-lg`}>
+                  <C size={22} />
+                </div>
+                <div>
+                  <div className={`text-2xl font-black bg-gradient-to-br ${c.grad} bg-clip-text text-transparent leading-none`}>{c.k}</div>
+                  <h3 className="font-semibold text-foreground text-sm">{c.title}</h3>
+                </div>
+              </div>
+              <ul className="relative space-y-2 text-sm text-foreground/85">
+                {c.q.map((x, i) => {
+                  const QI = qIcons[i % qIcons.length];
+                  return (
+                    <li key={i} className="flex items-start gap-2">
+                      <QI size={14} className={`mt-0.5 shrink-0 ${c.ic}`} />
+                      <span>{x}</span>
+                    </li>
+                  );
+                })}
+              </ul>
             </div>
-            <ul className="space-y-1.5 text-sm text-foreground/80">
-              {c.q.map((x,i)=><li key={i}>· {x}</li>)}
-            </ul>
-          </div>
-        ))}
+          );
+        })}
       </div>
       <div className="bg-card rounded-2xl border border-border p-6">
         <h3 className="font-semibold flex items-center gap-2"><Lightbulb size={18} className="text-primary"/> Мосты SWOT — от Реальности к Возможностям</h3>
