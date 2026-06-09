@@ -1220,17 +1220,14 @@ function RadarWithTooltip({ scores }: { scores: Record<number, number> }) {
   );
 }
 
-function Balance() {
-  const [scores, setScores] = useState<Record<number, number>>(() =>
-    Object.fromEntries(BALANCE_AREAS.map((a) => [a.n, 5]))
-  );
+function Balance({ scores, onChange }: { scores: Record<number, number>; onChange: (s: Record<number, number>) => void }) {
   const average = (
     BALANCE_AREAS.reduce((s, a) => s + scores[a.n], 0) / BALANCE_AREAS.length
   ).toFixed(1);
   return (
     <div className="space-y-6">
       <SectionHead
-        title="Колесо баланса жизни Пола Майера"
+        title="Колесо баланса жизни"
         subtitle="Оцените каждую сферу вашей жизни по шкале от 1 до 10 и создайте свою гармоничную и наполненную жизнь"
       />
 
@@ -1255,7 +1252,7 @@ function Balance() {
                 </div>
                 <input
                   type="range" min={1} max={10} value={v}
-                  onChange={(e) => setScores({ ...scores, [a.n]: Number(e.target.value) })}
+                  onChange={(e) => onChange({ ...scores, [a.n]: Number(e.target.value) })}
                   className="w-full accent-primary"
                 />
               </div>
