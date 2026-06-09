@@ -1239,29 +1239,61 @@ function Nlu() {
         })}
       </div>
 
-      <div className="bg-card rounded-2xl border border-border p-5">
-        <h3 className="font-semibold mb-4">Как работать с пирамидой Дилтса</h3>
-        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3">
-          {DILTS_HOW.map((s) => (
-            <div key={s.n} className="p-3 rounded-xl bg-secondary/60">
-              <div className="flex items-center gap-2 mb-1">
-                <span className="w-6 h-6 rounded-full bg-primary text-primary-foreground grid place-items-center text-xs font-bold">{s.n}</span>
-                <div className="font-semibold text-sm">{s.t}</div>
+      {/* HOW-TO — 4 colored cards as in reference */}
+      <div className="rounded-2xl border border-border bg-card/80 p-4 sm:p-5">
+        <h3 className="text-center text-base sm:text-lg font-extrabold tracking-wide uppercase mb-4">
+          Как работать с пирамидой Дилтса
+        </h3>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+          {DILTS_HOW.map((s) => {
+            const Icon = s.icon;
+            return (
+              <div
+                key={s.n}
+                className={`rounded-xl bg-background/40 p-3 ring-1 ${s.ring} flex flex-col gap-2`}
+              >
+                <div className="flex items-center gap-2">
+                  <span
+                    className="w-7 h-7 rounded-full grid place-items-center text-xs font-black text-white shrink-0"
+                    style={{ background: s.hex }}
+                  >
+                    {s.n}
+                  </span>
+                  <div className={`text-sm font-extrabold leading-tight ${s.text}`}>{s.t}</div>
+                </div>
+                <div className="flex items-start gap-3 pt-1">
+                  <div
+                    className="w-12 h-12 rounded-lg grid place-items-center shrink-0"
+                    style={{ background: s.hex + "1A", color: s.hex }}
+                  >
+                    <Icon size={28} strokeWidth={2.2} />
+                  </div>
+                  <p className="text-xs leading-snug text-foreground/85">{s.d}</p>
+                </div>
               </div>
-              <p className="text-xs text-muted-foreground">{s.d}</p>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
 
-      <div className="rounded-2xl border border-primary/30 bg-primary/10 p-5">
-        <div className="text-xs uppercase tracking-wide text-primary font-bold mb-2">Принцип</div>
-        <p className="font-medium mb-2">«Чтобы изменить результат, начните с изменения себя»</p>
-        <p className="text-sm text-muted-foreground">
-          Изменение окружения влияет на поведение. Изменение поведения развивает способности.
-          Изменение способностей формирует убеждения. Изменение убеждений меняет идентичность.
-          Изменение идентичности определяет вашу миссию.
-        </p>
+      {/* PRINCIPLE — lightbulb + quote + body, как на референсе */}
+      <div className="rounded-2xl border border-primary/30 bg-primary/10 p-4 sm:p-5">
+        <div className="flex items-start gap-4">
+          <div className="w-12 h-12 rounded-xl bg-primary/15 text-primary grid place-items-center shrink-0">
+            <Lightbulb size={28} strokeWidth={2.2} />
+          </div>
+          <div className="min-w-0">
+            <p className="font-semibold mb-2 leading-snug">
+              <span className="text-primary font-extrabold uppercase tracking-wide mr-1">Принцип:</span>
+              «Чтобы изменить результат, начните с изменения себя»
+            </p>
+            <p className="text-sm text-muted-foreground leading-relaxed">
+              Изменение окружения влияет на поведение. Изменение поведения развивает способности.
+              Изменение способностей формирует убеждения. Изменение убеждений меняет идентичность.
+              Изменение идентичности определяет вашу миссию.
+            </p>
+          </div>
+        </div>
       </div>
     </div>
   );
