@@ -6,7 +6,7 @@ import {
   MessageSquare, Send, ThumbsUp, ThumbsDown,
   Gem, Users, BookOpen, ClipboardList, UserCheck, ShieldCheck, Footprints, Star,
   Circle, HeartPulse, Coins, Baby, HandHeart, Laptop, GraduationCap, Activity,
-  Eye, Timer, Brain, Flag, Calendar, CheckCircle2, Wrench, Home, User,
+  Eye, Timer, Brain, Flag, Calendar, CheckCircle2, Wrench, Home, User, Bell,
 } from "lucide-react";
 import burgerTop from "@/assets/burger-top.png";
 import burgerPatty from "@/assets/burger-patty.png";
