@@ -648,11 +648,11 @@ function Grow() {
 
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
         {GROW_STEPS.map((s) => {
-          const I = s.icon; const act = active===s.id;
+          const act = active === s.id;
           return (
-            <button key={s.id} onClick={()=>setActive(s.id)}
+            <button key={s.id} onClick={() => setActive(s.id)}
               className={`p-4 rounded-xl border text-left transition-all ${act ? "bg-primary text-primary-foreground border-primary shadow-lg" : "bg-card border-border hover:border-primary/40"}`}>
-              <I size={20} className="mb-2"/>
+              <GrowIcon step={s.id as "G" | "R" | "O" | "W"} size={44} className="mb-2" />
               <div className="font-bold text-2xl">{s.id}</div>
               <div className={`text-xs ${act ? "opacity-90" : "text-muted-foreground"}`}>{s.label}</div>
             </button>
@@ -663,7 +663,9 @@ function Grow() {
       <div className={`rounded-2xl border p-6 bg-gradient-to-br ${step.accent}`}>
         <div className="flex items-start justify-between flex-wrap gap-3">
           <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-xl bg-card grid place-items-center"><Icon size={24}/></div>
+            <div className="w-16 h-16 rounded-xl bg-card grid place-items-center">
+              <GrowIcon step={step.id as "G" | "R" | "O" | "W"} size={52} />
+            </div>
             <div>
               <div className="text-xs uppercase tracking-wide opacity-80">{step.label}</div>
               <h3 className="text-2xl font-bold text-foreground">{step.title}</h3>
