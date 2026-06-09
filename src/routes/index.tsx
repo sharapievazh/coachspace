@@ -371,18 +371,20 @@ function CoachSpace() {
         handleSessionEnd();
       }
     };
-    tick();
-    const id = setInterval(() => {
-      tick();
-    }, 1000);
+    const hasWorker = !!getWorker();
+    let id: ReturnType<typeof setInterval> | null = null;
+    if (!hasWorker) {
+      id = setInterval(tick, 1000);
+    }
     document.addEventListener("visibilitychange", tick);
     window.addEventListener("focus", tick);
     return () => {
-      clearInterval(id);
+      if (id) clearInterval(id);
       document.removeEventListener("visibilitychange", tick);
       window.removeEventListener("focus", tick);
     };
   }, [running, endsAt]);
+
 
   useEffect(() => {
     if (!running) return;
