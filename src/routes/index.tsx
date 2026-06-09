@@ -106,6 +106,7 @@ function CoachSpace() {
 
   const startTimer = async () => {
     alertPlayedRef.current = false;
+    setTimeUp(false);
     await ensureAudioReady();
     if ("Notification" in window && Notification.permission === "default") {
       Notification.requestPermission().catch((e) => console.warn("notification permission failed", e));
@@ -115,6 +116,7 @@ function CoachSpace() {
     localStorage.setItem(TIMER_STORAGE_KEY, JSON.stringify({ endsAt: nextEndsAt, duration }));
     setEndsAt(nextEndsAt);
     setRunning(true);
+    getWorker()?.postMessage({ type: "start", endsAt: nextEndsAt });
   };
 
   const pauseTimer = () => {
