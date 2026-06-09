@@ -322,11 +322,17 @@ function CoachSpace() {
   }, [remaining]);
 
   const exportSession = () => {
+    const balanceLines = BALANCE_AREAS.map(
+      (a) => `  ${a.n}. ${a.name}: ${balanceScores[a.n] ?? 5}/10`
+    ).join("\n");
     const txt = `Coach Space — Протокол сессии
 Дата: ${new Date().toLocaleString()}
 Клиент: ${clientName || "—"}
 Запрос: ${topic || "—"}
 Остаток времени: ${mmss}
+
+Колесо баланса (оценки):
+${balanceLines}
 
 Заметки коуча:
 ${notes || "—"}
