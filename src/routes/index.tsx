@@ -512,7 +512,13 @@ function SessionPanel(p: any) {
             placeholder="Веди заметки прямо во время сессии..."
             className="w-full px-3 py-2 rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-ring resize-y"/>
         </Field>
-        <div className="flex justify-end">
+        <div className="flex items-center justify-between gap-2 flex-wrap">
+          <button
+            onClick={() => p.setNotes((p.notes || "") + OSVK_TEMPLATE)}
+            className="inline-flex items-center gap-2 px-3 py-2 rounded-lg border border-amber-500/40 bg-gradient-to-r from-amber-500/15 to-orange-500/10 hover:from-amber-500/25 hover:to-orange-500/20 text-sm text-amber-200"
+          >
+            <Sandwich size={16}/> Маркер ОСВК
+          </button>
           <button onClick={p.exportSession} className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-primary text-primary-foreground hover:opacity-90">
             <Download size={16}/> Экспорт .txt
           </button>
