@@ -167,7 +167,9 @@ export function BalanceRadar({
   const n = values.length;
   const cx = size / 2;
   const cy = size / 2;
-  const R = size * 0.36;
+  const R = size * 0.3;
+  const pad = 56; // extra room for outer labels
+
   const angle = (i: number) => (Math.PI * 2 * i) / n - Math.PI / 2;
 
   const point = (i: number, r: number) => {
