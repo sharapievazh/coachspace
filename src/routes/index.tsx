@@ -317,7 +317,7 @@ function CoachSpace() {
   useEffect(() => {
     const w = getWorker();
     if (!w) return;
-    const onMessage = (e: MessageEvent) => {
+    const onMessage = async (e: MessageEvent) => {
       const data = e.data || {};
       if (data.type === "tick" && typeof data.remaining === "number") {
         setRemaining(data.remaining);
@@ -328,11 +328,12 @@ function CoachSpace() {
         setRemaining(0);
         localStorage.removeItem(TIMER_STORAGE_KEY);
         releaseWakeLockRef.current?.();
-        // Keep silent loop alive briefly so the bell can play through the
-        // suspended audio session, then release it.
-        playEndAlert();
-        if (silentStopTimerRef.current) clearTimeout(silentStopTimerRef.current);
-        silentStopTimerRef.current = setTimeout(() => stopSilentKeepAliveRef.current?.(), 4000);
+        try {
+          await playEndAlert();
+        } finally {
+          if (silentStopTimerRef.current) clearTimeout(silentStopTimerRef.current);
+          silentStopTimerRef.current = setTimeout(() => stopSilentKeepAliveRef.current?.(), 4000);
+        }
       }
     };
     w.addEventListener("message", onMessage);
