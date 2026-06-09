@@ -1145,6 +1145,71 @@ const BALANCE_AREAS = [
 
 const BALANCE_COLORS = ["#10b981", "#e11d48", "#f59e0b", "#14b8a6", "#8b5cf6", "#6366f1", "#d97706", "#a855f7"];
 
+function RadarWithTooltip({ scores }: { scores: Record<number, number> }) {
+  const [active, setActive] = useState<number | null>(null);
+  const area = active != null ? BALANCE_AREAS[active] : null;
+  const I = area?.icon;
+  return (
+    <div className="relative w-full max-w-md">
+      <BalanceRadar
+        values={BALANCE_AREAS.map((a) => scores[a.n])}
+        labels={BALANCE_AREAS.map((a) => a.name)}
+        colors={BALANCE_COLORS}
+        active={active}
+        onSelect={setActive}
+      />
+      {area && I && (
+        <div
+          className="absolute left-1/2 -translate-x-1/2 -bottom-2 sm:bottom-2 w-[88%] max-w-sm rounded-xl border bg-card/95 backdrop-blur shadow-xl p-3 animate-in fade-in zoom-in-95 duration-200"
+          style={{ borderColor: BALANCE_COLORS[active!] + "66" }}
+        >
+          <div className="flex items-start gap-2">
+            <div
+              className="w-8 h-8 rounded-lg grid place-items-center text-white shrink-0"
+              style={{ background: BALANCE_COLORS[active!] }}
+            >
+              <I size={16} />
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="flex items-baseline justify-between gap-2">
+                <div className="font-bold text-sm leading-tight">
+                  {area.n}. {area.name}
+                </div>
+                <span className="font-mono text-xs font-bold" style={{ color: BALANCE_COLORS[active!] }}>
+                  {scores[area.n]} / 10
+                </span>
+              </div>
+              <div className="flex flex-wrap gap-1 mt-1.5">
+                {area.tips.map((t) => (
+                  <span
+                    key={t}
+                    className="text-[10px] px-1.5 py-0.5 rounded-full border"
+                    style={{
+                      borderColor: BALANCE_COLORS[active!] + "55",
+                      color: BALANCE_COLORS[active!],
+                      background: BALANCE_COLORS[active!] + "14",
+                    }}
+                  >
+                    {t}
+                  </span>
+                ))}
+              </div>
+              <p className="text-[11px] italic text-muted-foreground mt-1.5">{area.q}</p>
+            </div>
+            <button
+              onClick={() => setActive(null)}
+              className="text-muted-foreground hover:text-foreground text-xs leading-none p-1"
+              aria-label="закрыть"
+            >
+              ✕
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 function Balance() {
   const [scores, setScores] = useState<Record<number, number>>(() =>
     Object.fromEntries(BALANCE_AREAS.map((a) => [a.n, 5]))
