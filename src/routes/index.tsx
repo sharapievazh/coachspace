@@ -324,8 +324,6 @@ function CoachSpace() {
         // suspended audio session, then release it.
         playEndAlert();
         setTimeout(stopSilentKeepAlive, 4000);
-        return;
-        playEndAlert();
       }
     };
     w.addEventListener("message", onMessage);
