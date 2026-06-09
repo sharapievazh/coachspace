@@ -18,7 +18,6 @@ import burgerBottom from "@/assets/burger-bottom.png";
 import {
   GrowIcon,
   BalanceRadar,
-  DiltsPyramidSvg,
   KarpmanTriangleSvg,
   RadarChartIcon,
 } from "@/components/coach/CoachVisuals";
@@ -1038,43 +1037,42 @@ function Bridge({ title, text }: { title: string; text: string }) {
 }
 
 /* ---------- Пирамида Дилтса ---------- */
-const DILTS = [
-  {
-    n: 6, name: "МИССИЯ", q: "Ради чего?",
-    icon: Flag, color: "bg-violet-500 text-white",
+type DiltsLevel = {
+  n: number;
+  name: string;
+  q: string;
+  icon: typeof Flag;
+  hex: string;       // pyramid fill
+  textColor: string; // accent text color (left column)
+  desc: string;
+  focus: string;
+};
+
+const DILTS: DiltsLevel[] = [
+  { n: 6, name: "МИССИЯ", q: "Ради чего?", icon: Mountain,
+    hex: "#a78bfa", textColor: "text-violet-400",
     desc: "Ваш вклад в мир. Высшая цель и смысл существования.",
-    focus: "Ради чего я живу? Какой след я хочу оставить?",
-  },
-  {
-    n: 5, name: "ИДЕНТИЧНОСТЬ", q: "Кто я?",
-    icon: User, color: "bg-blue-500 text-white",
+    focus: "Ради чего я живу? Какой след я хочу оставить?" },
+  { n: 5, name: "ИДЕНТИЧНОСТЬ", q: "Кто я?", icon: User,
+    hex: "#60a5fa", textColor: "text-blue-400",
     desc: "Кем вы себя видите. Ценности, убеждения, самоощущение.",
-    focus: "Кто я? Во что верю? Что для меня важно?",
-  },
-  {
-    n: 4, name: "УБЕЖДЕНИЯ И ЦЕННОСТИ", q: "Почему?",
-    icon: Gem, color: "bg-teal-500 text-white",
+    focus: "Кто я? Во что верю? Что для меня важно?" },
+  { n: 4, name: "УБЕЖДЕНИЯ И ЦЕННОСТИ", q: "Почему?", icon: Gem,
+    hex: "#2dd4bf", textColor: "text-teal-400",
     desc: "Ваши убеждения, принципы и ценности, которые управляют поведением.",
-    focus: "Почему я это делаю? Что для меня важно?",
-  },
-  {
-    n: 3, name: "СПОСОБНОСТИ", q: "Как?",
-    icon: Wrench, color: "bg-green-500 text-white",
+    focus: "Почему я это делаю? Что для меня важно?" },
+  { n: 3, name: "СПОСОБНОСТИ", q: "Как?", icon: Wrench,
+    hex: "#86efac", textColor: "text-green-400",
     desc: "Ваши навыки, умения, таланты. То, что вы умеете делать.",
-    focus: "Как я могу это сделать? Какие навыки мне нужны?",
-  },
-  {
-    n: 2, name: "ПОВЕДЕНИЕ", q: "Что делаю?",
-    icon: Footprints, color: "bg-yellow-500 text-white",
+    focus: "Как я могу это сделать? Какие навыки мне нужны?" },
+  { n: 2, name: "ПОВЕДЕНИЕ", q: "Что делаю?", icon: Footprints,
+    hex: "#fbbf24", textColor: "text-yellow-400",
     desc: "Ваши действия и поступки. Конкретные шаги и поведение.",
-    focus: "Что я делаю? Что я могу изменить в своих действиях?",
-  },
-  {
-    n: 1, name: "ОКРУЖЕНИЕ", q: "Где? Когда? С кем?",
-    icon: Home, color: "bg-orange-500 text-white",
+    focus: "Что я делаю? Что я могу изменить в своих действиях?" },
+  { n: 1, name: "ОКРУЖЕНИЕ", q: "Где? Когда? С кем?", icon: Home,
+    hex: "#fb923c", textColor: "text-orange-400",
     desc: "Ваше окружение и контекст. Место, время, люди, ресурсы.",
-    focus: "Где я? С кем я? Какие ресурсы у меня есть?",
-  },
+    focus: "Где я? С кем я? Какие ресурсы у меня есть?" },
 ];
 
 const DILTS_HOW = [
@@ -1085,58 +1083,152 @@ const DILTS_HOW = [
 ];
 
 function Nlu() {
-  const [open, setOpen] = useState<number | null>(6);
+  const [active, setActive] = useState<number>(6);
+  const rows = DILTS.length; // 6
+  const ROW_H = 60; // px per row
+
   return (
     <div className="space-y-6">
       <SectionHead title="Пирамида Дилтса" subtitle="Неврологические уровни изменений" />
 
-      <div className="grid md:grid-cols-2 gap-6 items-start">
-        <DiltsPyramidSvg
-          levels={DILTS.map((lv) => {
-            // map tailwind bg class to hex for SVG fill
-            const hex: Record<string, string> = {
-              "bg-violet-500 text-white": "#8b5cf6",
-              "bg-blue-500 text-white": "#3b82f6",
-              "bg-teal-500 text-white": "#14b8a6",
-              "bg-green-500 text-white": "#22c55e",
-              "bg-yellow-500 text-white": "#eab308",
-              "bg-orange-500 text-white": "#f97316",
-            };
-            return { n: lv.n, name: lv.name, q: lv.q, desc: lv.desc, focus: lv.focus, color: hex[lv.color] ?? "#64748b" };
-          })}
-          active={open ?? 0}
-          onSelect={(n) => setOpen(open === n ? null : n)}
-        />
-        <div className="space-y-2">
+      {/* Header row */}
+      <div className="hidden md:grid grid-cols-[1fr_280px_1fr] gap-4 items-end">
+        <div className="text-right pr-2">
+          <div className="text-[11px] uppercase tracking-widest text-muted-foreground">УРОВЕНЬ</div>
+          <div className="text-[10px] text-muted-foreground/70">что изменяем?</div>
+        </div>
+        <div />
+        <div className="pl-2">
+          <div className="text-[11px] uppercase tracking-widest text-muted-foreground">ОПИСАНИЕ</div>
+          <div className="text-[10px] text-muted-foreground/70">фокус вопросов</div>
+        </div>
+      </div>
+
+      {/* Main: left labels | pyramid | right descriptions */}
+      <div className="grid md:grid-cols-[1fr_280px_1fr] gap-3 md:gap-4 items-start">
+        {/* LEFT — labels (numbers + name + question) */}
+        <div className="hidden md:flex flex-col" style={{ height: rows * ROW_H }}>
           {DILTS.map((lv) => {
-            const isOpen = open === lv.n;
-            const I = lv.icon;
+            const isActive = active === lv.n;
             return (
               <button
                 key={lv.n}
-                onClick={() => setOpen(isOpen ? null : lv.n)}
-                className={`w-full text-left px-3 py-2 rounded-lg border transition-all flex items-start gap-3 ${
-                  isOpen ? "ring-2 ring-primary border-transparent " + lv.color : "bg-card border-border hover:border-primary/40"
+                onClick={() => setActive(lv.n)}
+                style={{ height: ROW_H }}
+                className={`group w-full flex items-center justify-end gap-3 pr-3 text-right transition-all ${
+                  isActive ? "scale-[1.02]" : "opacity-80 hover:opacity-100"
                 }`}
               >
-                <span className={`w-7 h-7 rounded-full grid place-items-center font-bold text-xs shrink-0 ${isOpen ? "bg-white/25" : "bg-secondary"}`}>{lv.n}</span>
-                <I size={18} className="mt-0.5 shrink-0" />
-                <div className="flex-1">
-                  <div className="font-bold text-sm leading-tight">{lv.name}</div>
-                  <div className={`text-xs ${isOpen ? "opacity-90" : "text-muted-foreground"}`}>{lv.q}</div>
-                  {isOpen && (
-                    <div className={`mt-2 text-xs ${isOpen ? "opacity-95" : ""}`}>
-                      <div className="mb-1">{lv.desc}</div>
-                      <div className="font-semibold">▸ {lv.focus}</div>
-                    </div>
-                  )}
+                <div>
+                  <div className={`text-sm font-extrabold leading-tight tracking-wide ${lv.textColor}`}>
+                    {lv.name}
+                  </div>
+                  <div className="text-xs text-muted-foreground leading-tight">{lv.q}</div>
+                </div>
+                <div
+                  className="text-3xl font-black leading-none shrink-0"
+                  style={{ color: lv.hex }}
+                >
+                  {lv.n}
                 </div>
               </button>
             );
           })}
         </div>
+
+        {/* PYRAMID — clip-path trapezoids, icons only */}
+        <div className="mx-auto w-full max-w-[300px]">
+          <div className="relative" style={{ height: rows * ROW_H }}>
+            {DILTS.map((lv, i) => {
+              const Icon = lv.icon;
+              const isActive = active === lv.n;
+              const topHalf = (i / rows) * 50;
+              const botHalf = ((i + 1) / rows) * 50;
+              const clip = `polygon(${50 - topHalf}% 0%, ${50 + topHalf}% 0%, ${50 + botHalf}% 100%, ${50 - botHalf}% 100%)`;
+              // Icon area shrinks for narrow top rows
+              const iconSize = i === 0 ? 18 : i === 1 ? 26 : 32;
+              return (
+                <button
+                  key={lv.n}
+                  onClick={() => setActive(lv.n)}
+                  className="absolute left-0 right-0 grid place-items-center transition-all"
+                  style={{
+                    top: i * ROW_H,
+                    height: ROW_H,
+                    background: lv.hex,
+                    clipPath: clip,
+                    filter: isActive ? "brightness(1.15) saturate(1.15)" : "none",
+                    boxShadow: isActive ? `inset 0 0 0 2px rgba(255,255,255,0.6)` : "none",
+                  }}
+                  aria-label={lv.name}
+                >
+                  <Icon size={iconSize} className="text-white drop-shadow" strokeWidth={2.2} />
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* RIGHT — description + focus question */}
+        <div className="hidden md:flex flex-col" style={{ height: rows * ROW_H }}>
+          {DILTS.map((lv) => {
+            const isActive = active === lv.n;
+            return (
+              <div
+                key={lv.n}
+                onClick={() => setActive(lv.n)}
+                style={{ height: ROW_H }}
+                className={`pl-3 pr-2 text-left cursor-pointer transition-all flex flex-col justify-center ${
+                  isActive ? "" : "opacity-75 hover:opacity-100"
+                }`}
+              >
+                <p className="text-[12px] leading-tight text-foreground/90">{lv.desc}</p>
+                <p className={`text-[11px] mt-1 leading-tight font-semibold ${lv.textColor}`}>
+                  ▸ {lv.focus}
+                </p>
+              </div>
+            );
+          })}
+        </div>
       </div>
 
+      {/* MOBILE: list under pyramid */}
+      <div className="md:hidden space-y-2">
+        {DILTS.map((lv) => {
+          const isActive = active === lv.n;
+          const Icon = lv.icon;
+          return (
+            <button
+              key={lv.n}
+              onClick={() => setActive(lv.n)}
+              className={`w-full text-left rounded-xl border p-3 transition-all flex items-start gap-3 ${
+                isActive ? "border-transparent ring-2" : "bg-card border-border"
+              }`}
+              style={isActive ? { background: lv.hex + "22", borderColor: lv.hex } : undefined}
+            >
+              <div
+                className="w-9 h-9 rounded-lg grid place-items-center shrink-0"
+                style={{ background: lv.hex }}
+              >
+                <Icon size={18} className="text-white" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-baseline gap-2">
+                  <span className="text-lg font-black" style={{ color: lv.hex }}>{lv.n}</span>
+                  <span className={`text-sm font-extrabold ${lv.textColor}`}>{lv.name}</span>
+                </div>
+                <div className="text-xs text-muted-foreground">{lv.q}</div>
+                {isActive && (
+                  <div className="mt-2 space-y-1">
+                    <p className="text-xs text-foreground/90 leading-snug">{lv.desc}</p>
+                    <p className={`text-xs font-semibold ${lv.textColor}`}>▸ {lv.focus}</p>
+                  </div>
+                )}
+              </div>
+            </button>
+          );
+        })}
+      </div>
 
       <div className="bg-card rounded-2xl border border-border p-5">
         <h3 className="font-semibold mb-4">Как работать с пирамидой Дилтса</h3>
