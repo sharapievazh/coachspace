@@ -54,6 +54,21 @@ function CoachSpace() {
   const audioCtxRef = useRef<any>(null);
   const wakeLockRef = useRef<any>(null);
   const alertPlayedRef = useRef(false);
+  const workerRef = useRef<Worker | null>(null);
+  const [timeUp, setTimeUp] = useState(false);
+
+  const getWorker = () => {
+    if (typeof window === "undefined") return null;
+    if (!workerRef.current) {
+      try {
+        workerRef.current = new Worker("/timer-worker.js");
+      } catch (e) {
+        console.warn("worker init failed", e);
+        return null;
+      }
+    }
+    return workerRef.current;
+  };
 
   const ensureAudioReady = async () => {
     try {
