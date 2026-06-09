@@ -946,7 +946,7 @@ function Swot() {
                   const QI = qIcons[i % qIcons.length];
                   return (
                     <li key={i} className="flex items-start gap-2">
-                      <QI size={14} className={`mt-0.5 shrink-0 bg-gradient-to-br ${c.grad} bg-clip-text`} style={{ color: "currentColor" }} />
+                      <QI size={14} className={`mt-0.5 shrink-0 ${c.ic}`} />
                       <span>{x}</span>
                     </li>
                   );
