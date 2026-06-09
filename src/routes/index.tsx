@@ -271,8 +271,8 @@ function CoachSpace() {
     }
   };
 
-  const playEndAlert = () => {
-    playBell(false);
+  const playEndAlert = async () => {
+    await playBell(false);
     setTimeUp(true);
     if (typeof navigator !== "undefined" && "vibrate" in navigator) {
       navigator.vibrate?.([400, 150, 400, 150, 600]);
@@ -317,7 +317,7 @@ function CoachSpace() {
   useEffect(() => {
     const w = getWorker();
     if (!w) return;
-    const onMessage = (e: MessageEvent) => {
+    const onMessage = async (e: MessageEvent) => {
       const data = e.data || {};
       if (data.type === "tick" && typeof data.remaining === "number") {
         setRemaining(data.remaining);
@@ -328,11 +328,12 @@ function CoachSpace() {
         setRemaining(0);
         localStorage.removeItem(TIMER_STORAGE_KEY);
         releaseWakeLockRef.current?.();
-        // Keep silent loop alive briefly so the bell can play through the
-        // suspended audio session, then release it.
-        playEndAlert();
-        if (silentStopTimerRef.current) clearTimeout(silentStopTimerRef.current);
-        silentStopTimerRef.current = setTimeout(() => stopSilentKeepAliveRef.current?.(), 4000);
+        try {
+          await playEndAlert();
+        } finally {
+          if (silentStopTimerRef.current) clearTimeout(silentStopTimerRef.current);
+          silentStopTimerRef.current = setTimeout(() => stopSilentKeepAliveRef.current?.(), 4000);
+        }
       }
     };
     w.addEventListener("message", onMessage);
@@ -351,17 +352,23 @@ function CoachSpace() {
 
   useEffect(() => {
     if (!running || !endsAt) return;
+    const handleSessionEnd = async () => {
+      alertPlayedRef.current = true;
+      setRunning(false);
+      setEndsAt(null);
+      localStorage.removeItem(TIMER_STORAGE_KEY);
+      releaseWakeLock();
+      try {
+        await playEndAlert();
+      } finally {
+        setTimeout(stopSilentKeepAlive, 4000);
+      }
+    };
     const tick = () => {
       const next = Math.max(0, Math.ceil((endsAt - Date.now()) / 1000));
       setRemaining(next);
       if (next <= 0 && !alertPlayedRef.current) {
-        alertPlayedRef.current = true;
-        setRunning(false);
-        setEndsAt(null);
-        localStorage.removeItem(TIMER_STORAGE_KEY);
-        releaseWakeLock();
-        playEndAlert();
-        setTimeout(stopSilentKeepAlive, 4000);
+        handleSessionEnd();
       }
     };
     tick();
