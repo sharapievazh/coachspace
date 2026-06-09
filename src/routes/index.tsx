@@ -51,6 +51,7 @@ const TABS: { id: TabId; label: string; icon: any }[] = [
   { id: "balance", label: "Колесо баланса", icon: Circle },
   { id: "values", label: "Ценности", icon: Gem },
   { id: "supervision", label: "Супервизия", icon: Users },
+  { id: "smartinfo", label: "Критерии SMART", icon: Lightbulb },
   { id: "smart", label: "SMART-цель", icon: CheckCircle2 },
   { id: "eisenhower", label: "Матрица Эйзенхауэра", icon: LayoutGrid },
   { id: "burger", label: "Гамбургер ОСВК", icon: Sandwich },
