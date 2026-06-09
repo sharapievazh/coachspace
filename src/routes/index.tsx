@@ -115,6 +115,36 @@ function CoachSpace() {
     }
   };
 
+  // Keep the audio session alive on mobile (iOS/Android suspend WebAudio when
+  // the screen locks). Looping a tiny silent media element prevents that so
+  // the end-of-session bell still plays when the phone is locked.
+  const startSilentKeepAlive = () => {
+    try {
+      if (silentAudioRef.current) {
+        silentAudioRef.current.play().catch(() => {});
+        return;
+      }
+      // 1s of silent WAV
+      const silentWav =
+        "data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQAAAAA=";
+      const el = new Audio(silentWav);
+      el.loop = true;
+      el.volume = 0.001;
+      (el as any).playsInline = true;
+      el.setAttribute("playsinline", "true");
+      silentAudioRef.current = el;
+      el.play().catch((e) => console.warn("silent keepalive failed", e));
+    } catch (e) {
+      console.warn("silent keepalive init failed", e);
+    }
+  };
+
+  const stopSilentKeepAlive = () => {
+    try {
+      silentAudioRef.current?.pause();
+    } catch {}
+  };
+
   const requestWakeLock = async () => {
     try {
       if ("wakeLock" in navigator && !wakeLockRef.current) {
