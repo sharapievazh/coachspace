@@ -58,6 +58,7 @@ const TABS: { id: TabId; label: string; icon: any }[] = [
   { id: "rules", label: "8 Правил ОСВК", icon: Award },
   { id: "sos", label: "SOS Карпман", icon: AlertTriangle },
   { id: "feedback", label: "Обратная связь", icon: MessageSquare },
+  { id: "competencies", label: "16 Компетенций", icon: GraduationCap },
 ];
 
 const OSVK_TEMPLATE = `\n[ОСВК Гамбургер]\n🟧 Что получилось хорошо: \n🟫 Что стоит изменить (в будущем, позитивно): \n🟧 Итог · благодарность: \n`;
