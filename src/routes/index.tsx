@@ -361,6 +361,13 @@ function CoachSpace() {
   }, []);
 
   useEffect(() => {
+    return () => {
+      wakeLockRef.current?.release().catch(() => {});
+      wakeLockRef.current = null;
+    };
+  }, []);
+
+  useEffect(() => {
     if (!running || !endsAt) return;
     const handleSessionEnd = async () => {
       alertPlayedRef.current = true;
