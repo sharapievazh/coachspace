@@ -205,7 +205,7 @@ function CoachSpace() {
     }
   };
 
-  const changeDuration = (seconds: number) => {
+  const changeDuration = useCallback((seconds: number) => {
     setDuration(seconds);
     setRemaining(seconds);
     setRunning(false);
@@ -216,9 +216,9 @@ function CoachSpace() {
     alertPlayedRef.current = false;
     setTimeUp(false);
     getWorker()?.postMessage({ type: "stop" });
-  };
+  }, []);
 
-  const resetTimer = () => {
+  const resetTimer = useCallback(() => {
     setRunning(false);
     setRemaining(duration);
     setEndsAt(null);
@@ -228,7 +228,7 @@ function CoachSpace() {
     alertPlayedRef.current = false;
     setTimeUp(false);
     getWorker()?.postMessage({ type: "stop" });
-  };
+  }, [duration]);
 
   // Stable refs so memoized SessionPanel callbacks don't change identity each render.
   const startTimerRef = useRef(startTimer);
@@ -295,10 +295,10 @@ function CoachSpace() {
     }
   };
 
-  const testSound = async () => {
+  const testSound = useCallback(async () => {
     await ensureAudioReady();
     playBell(true);
-  };
+  }, []);
 
   useEffect(() => {
     const saved = localStorage.getItem(TIMER_STORAGE_KEY);
@@ -418,7 +418,7 @@ function CoachSpace() {
     return `${m}:${s}`;
   }, [remaining]);
 
-  const exportSession = () => {
+  const exportSession = useCallback(() => {
     const balanceLines = BALANCE_AREAS.map(
       (a) => `  ${a.n}. ${a.name}: ${balanceScores[a.n] ?? 5}/10`
     ).join("\n");
@@ -461,7 +461,7 @@ ${notes || "—"}
     a.download = `session-${clientName || "client"}-${Date.now()}.txt`;
     a.click();
     URL.revokeObjectURL(url);
-  };
+  }, [clientName, topic, notes, mmss, balanceScores]);
 
   return (
     <div className="min-h-screen bg-background text-foreground">
