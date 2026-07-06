@@ -164,6 +164,7 @@
 @layer base {
   * {
     border-color: var(--color-border);
+    box-sizing: border-box;
   }
 
   body {
@@ -189,5 +190,10 @@
 
   label {
     font-size: 0.9375rem;
+  }
+
+  h1, h2, h3 {
+    word-break: break-word;
+    overflow-wrap: break-word;
   }
 }

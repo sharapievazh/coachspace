@@ -499,14 +499,14 @@ ${notes || "—"}
                   }
                 }}
                 onClick={() => setTab(t.id)}
-                className={`flex items-center gap-2 px-3 min-h-11 text-sm rounded-lg whitespace-nowrap transition-all duration-200 ${
+                className={`flex items-center gap-2 px-3 min-h-11 text-xs rounded-lg transition-all duration-200 min-w-0 max-w-[140px] ${
                   active
                     ? "bg-primary text-primary-foreground scale-[1.02]"
                     : "text-muted-foreground hover:bg-secondary"
                 }`}
               >
                 <Icon size={16} />
-                {t.label}
+                <span className="truncate">{t.label}</span>
               </button>
             );
           })}
@@ -735,7 +735,7 @@ function SwipeableTabContent({
 /* ---------- Session ---------- */
 function SessionPanel(p: any) {
   return (
-    <div className="grid md:grid-cols-3 gap-6">
+    <div className="grid md:grid-cols-3 gap-6 max-w-full overflow-hidden">
       <section className="md:col-span-1 bg-card rounded-2xl border border-border p-5 space-y-4">
         <h2 className="font-semibold flex items-center gap-2"><Sparkles size={18} className="text-primary" /> Таймер сессии</h2>
         <div className="text-center py-6 rounded-xl bg-secondary">
@@ -1110,7 +1110,7 @@ function Grow() {
   const step = GROW_STEPS.find((s) => s.id === active)!;
   void step.icon;
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 max-w-full overflow-hidden">
       <SectionHead title="Модель GROW" subtitle="Структура эффективной коуч-сессии (60 мин)" />
 
       {/* верхняя дублирующая панель убрана — структура встроена в каждую карточку шага */}
@@ -1151,7 +1151,7 @@ function Grow() {
                 </div>
                 <div className="min-w-0">
                   <div className="text-xs uppercase tracking-wide opacity-80 font-semibold">{step.label}</div>
-                  <h3 className="text-3xl font-extrabold text-foreground tracking-tight leading-none">{step.title}</h3>
+                  <h3 className="text-[clamp(28px,8vw,56px)] font-extrabold text-foreground tracking-tight leading-none">{step.title}</h3>
                   {meta && (
                     <div className="mt-2 flex flex-wrap items-center gap-2">
                       <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-primary text-primary-foreground text-[11px] font-bold">
@@ -1218,15 +1218,15 @@ function Swot() {
   ];
   const qIcons = [HelpCircle, Compass, Eye];
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 max-w-full overflow-hidden">
       <SectionHead title="Матрица SWOT" subtitle="Внутренняя и внешняя среда клиента" />
       <div className="grid sm:grid-cols-2 gap-4">
         {cells.map((c) => {
           const C = c.Icon;
           return (
-            <div key={c.k} className={`relative overflow-hidden p-5 rounded-2xl border ${c.ring}`}>
+            <div key={c.k} className={`relative overflow-hidden p-5 rounded-2xl border ${c.ring} max-w-full`}>
               {/* huge faded letter */}
-              <div className={`absolute -right-4 -bottom-10 text-[180px] font-black leading-none bg-gradient-to-br ${c.grad} bg-clip-text text-transparent opacity-[0.12] pointer-events-none select-none`}>
+              <div className={`absolute -right-4 -bottom-10 text-[clamp(60px,20vw,180px)] font-black leading-none bg-gradient-to-br ${c.grad} bg-clip-text text-transparent opacity-[0.12] pointer-events-none select-none`}>
                 {c.k}
               </div>
               <div className="relative flex items-center gap-3 mb-4">
@@ -1334,7 +1334,7 @@ function Nlu() {
   const ROW_H = 60; // px per row
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 max-w-full overflow-hidden">
       <SectionHead title="Пирамида Дилтса" subtitle="Неврологические уровни изменений" />
 
       {/* Header row */}
@@ -1646,7 +1646,7 @@ function Balance({ scores, onChange }: { scores: Record<number, number>; onChang
     BALANCE_AREAS.reduce((s, a) => s + scores[a.n], 0) / BALANCE_AREAS.length
   ).toFixed(1);
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 max-w-full overflow-hidden">
       <SectionHead
         title="Колесо баланса жизни"
         subtitle="Оцените каждую сферу вашей жизни по шкале от 1 до 10 и создайте свою гармоничную и наполненную жизнь"
@@ -1727,7 +1727,7 @@ const VALUES_SELF = [
 
 function Values() {
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 max-w-full overflow-hidden">
       <SectionHead title="Ценности" subtitle="Опоры, которые двигают вперёд" />
 
       {/* ===== ROOT NODE ===== */}
@@ -1878,7 +1878,7 @@ function Supervision() {
   const debrief = SUP_TYPES[2];
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 max-w-full overflow-hidden">
       <SectionHead title="Виды супервизии" subtitle="Система профессиональной поддержки и развития специалиста" />
 
       {/* ===== HIERARCHY DIAGRAM ===== */}
@@ -2119,7 +2119,7 @@ const ROLES = [
 function Sos() {
   const [active, setActive] = useState<string | null>(null);
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 max-w-full overflow-hidden">
       <SectionHead title="SOS · Треугольник Карпмана" subtitle="Шпаргалка-предохранитель для растождествления" />
 
       <div className="bg-card rounded-2xl border border-border p-4 sm:p-6">
@@ -2271,7 +2271,7 @@ function Rapport() {
   const [activeVaik, setActiveVaik] = useState<string>("В");
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 max-w-full overflow-hidden">
       <SectionHead title="Раппорт и Коммуникация" subtitle="Контакт · типология · сенсорные системы" />
 
       {/* 4 шага */}
@@ -2529,7 +2529,7 @@ const BURGER_LAYERS = [
 function Burger() {
   const [active, setActive] = useState<string>("top");
   return (
-    <div className="space-y-5 max-w-3xl">
+    <div className="space-y-5 max-w-3xl max-w-full overflow-hidden">
       <SectionHead title="Гамбургер ОСВК" subtitle="Обратная связь высокого качества · три слоя" />
 
       <div className="bg-gradient-to-br from-amber-50 via-orange-100 to-amber-200 text-stone-900 rounded-3xl border border-amber-300 p-4 sm:p-6 space-y-3">
@@ -2597,7 +2597,7 @@ const OSVK_RULES = [
 function BurgerRules() {
   const [openIdx, setOpenIdx] = useState<number | null>(null);
   return (
-    <div className="space-y-5 max-w-4xl">
+    <div className="space-y-5 max-w-4xl max-w-full overflow-hidden">
       <SectionHead title="8 Золотых Правил ОСВК" subtitle="Чек-лист развивающей обратной связи высокого качества" />
 
       <div className="rounded-2xl border border-amber-500/30 bg-gradient-to-br from-amber-500/10 via-orange-500/5 to-transparent p-5 flex items-center gap-4">
@@ -2689,7 +2689,7 @@ ${disliked || "—"}
   };
 
   return (
-    <div className="space-y-6 max-w-3xl">
+    <div className="space-y-6 max-w-3xl max-w-full overflow-hidden">
       <SectionHead
         title="Обратная связь по приложению"
         subtitle="Поделитесь впечатлениями — это поможет сделать Coach Space лучше."
@@ -2802,7 +2802,7 @@ function EricksonStar() {
   const principle = ERICKSON_PRINCIPLES[active];
 
   return (
-    <div className="space-y-5 max-w-4xl mx-auto">
+    <div className="space-y-5 max-w-4xl mx-auto max-w-full overflow-hidden">
       <SectionHead title="Звезда Принципов Эриксона" subtitle="Философский фундамент коучинга · 5 опор" />
 
       <div className="relative rounded-3xl border border-amber-500/40 bg-gradient-to-br from-indigo-950 via-violet-900 to-slate-800 p-4 sm:p-8 overflow-hidden">
@@ -3036,7 +3036,7 @@ function Eisenhower({ notes, setNotes }: { notes: string; setNotes: (v: string) 
   };
 
   return (
-    <div className="max-w-5xl mx-auto rounded-2xl border border-border bg-gradient-to-br from-sky-50 via-indigo-100 to-violet-200 text-slate-900 p-3 sm:p-5 space-y-4">
+    <div className="max-w-5xl mx-auto rounded-2xl border border-border bg-gradient-to-br from-sky-50 via-indigo-100 to-violet-200 text-slate-900 p-3 sm:p-5 space-y-4 max-w-full overflow-hidden">
       <div className="flex items-start gap-3">
         <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-500 to-rose-600 grid place-items-center shadow-lg shrink-0">
           <LayoutGrid size={22} className="text-white" />
@@ -3313,7 +3313,7 @@ function SmartGoal({ notes, setNotes }: { notes: string; setNotes: (v: string) =
   };
 
   return (
-    <div className="rounded-3xl bg-gradient-to-br from-indigo-50 via-fuchsia-50 to-amber-50 text-slate-900 border border-fuchsia-200 p-4 sm:p-6 shadow-xl">
+    <div className="rounded-3xl bg-gradient-to-br from-indigo-50 via-fuchsia-50 to-amber-50 text-slate-900 border border-fuchsia-200 p-4 sm:p-6 shadow-xl max-w-full overflow-hidden">
       <div className="flex items-start justify-between gap-3 mb-4">
         <div>
           <h2 className="text-xl sm:text-2xl font-bold flex items-center gap-2">
@@ -3593,7 +3593,7 @@ function Competencies() {
   const list = tab === "leonard" ? LEONARD_COMPS : ICU_COMPS;
 
   return (
-    <div className="max-w-3xl mx-auto space-y-3">
+    <div className="max-w-3xl mx-auto space-y-3 max-w-full overflow-hidden">
       <div className="flex items-center gap-2 px-1">
         <GraduationCap size={20} className="text-primary" />
         <h2 className="text-lg font-bold">16 Компетенций Коуча</h2>
