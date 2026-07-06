@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { CheckCircle2, Flag, Flower2, Footprints, Gem, Home, Lightbulb, Mountain, Target, TrendingUp, User, Wrench } from "lucide-react";
-import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerDescription } from "@/components/ui/drawer";
 import { SectionHead } from "./_shared";
 
 type DiltsLevel = {
