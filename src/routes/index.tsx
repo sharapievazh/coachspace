@@ -2871,6 +2871,7 @@ ${disliked || "—"}
             value={name}
             onChange={(e) => setName(e.target.value)}
             placeholder="Как к вам обращаться"
+            autoComplete="off" autoCorrect="off" spellCheck={false}
             className="mt-1 w-full px-3 py-2 rounded-lg bg-secondary border border-border focus:outline-none focus:ring-2 focus:ring-primary"
           />
         </div>
@@ -2883,6 +2884,7 @@ ${disliked || "—"}
             onChange={(e) => setLiked(e.target.value)}
             rows={4}
             placeholder="Что работает хорошо, что удобно, что радует…"
+            autoComplete="off" autoCorrect="off" spellCheck={false}
             className="mt-1 w-full px-3 py-2 rounded-lg bg-secondary border border-border focus:outline-none focus:ring-2 focus:ring-primary resize-y"
           />
         </div>
@@ -2895,9 +2897,11 @@ ${disliked || "—"}
             onChange={(e) => setDisliked(e.target.value)}
             rows={4}
             placeholder="Что мешает, чего не хватает, что добавить…"
+            autoComplete="off" autoCorrect="off" spellCheck={false}
             className="mt-1 w-full px-3 py-2 rounded-lg bg-secondary border border-border focus:outline-none focus:ring-2 focus:ring-primary resize-y"
           />
         </div>
+
         <div className="flex items-center gap-3 pt-2">
           <button
             onClick={send}
