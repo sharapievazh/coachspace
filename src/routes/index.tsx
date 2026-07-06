@@ -583,7 +583,7 @@ ${notes || "—"}
             {tab === "sos" && <SosMemo />}
             {tab === "rapport" && <RapportMemo />}
             {tab === "smart" && <SmartGoalMemo />}
-            {tab === "eisenhower" && <EisenhowerMemo notes={notes} setNotes={setNotes} />}
+            {tab === "eisenhower" && <EisenhowerMemo />}
             {tab === "burger" && <BurgerMemo />}
             {tab === "erickson" && <EricksonStarMemo />}
             {tab === "rules" && <BurgerRulesMemo />}
@@ -3028,246 +3028,197 @@ function EricksonStar() {
 }
 
 // ============ EISENHOWER MATRIX ============
-type EisenTask = { id: string; text: string; important: boolean; urgent: boolean; done: boolean };
-const EISEN_STORAGE = "coach-space-eisenhower-tasks";
-
-const QUADRANTS = [
+const EISENHOWER_DATA = [
   {
-    key: "do", important: true, urgent: true,
-    title: "Важные и срочные", action: "Сделай немедленно",
-    en: "DO", icon: Flame,
-    bg: "from-red-100 via-orange-100 to-red-200",
-    ring: "border-red-400", chip: "bg-red-200 text-red-900 border-red-400",
-    dot: "bg-red-500",
+    key: "do",
+    title: "Важные и срочные",
+    action: "Сделай немедленно",
+    en: "DO",
+    icon: Flame,
+    color: "bg-rose-500",
+    lightBg: "bg-rose-50",
+    border: "border-rose-200",
+    text: "text-rose-900",
+    desc: "Эти задачи требуют немедленного внимания и имеют серьёзные последствия, если их не выполнить. Обычно возникают из-за срочных проблем, дедлайнов или кризисов. Работа в этом квадранте создаёт стресс, но иногда неизбежна.",
+    examples: [
+      "Срочный дедлайн по проекту сегодня",
+      "Технический сбой, требующий немедленного решения",
+      "Звонок клиента с критической проблемой",
+      "Предупреждение о возможном увольнении",
+    ],
+    questions: [
+      "Что произойдёт, если это не сделать прямо сейчас?",
+      "Это действительно кризис или созданная спешка?",
+      "Какие задачи из этого квадранта можно было запланировать заранее?",
+    ],
   },
   {
-    key: "schedule", important: true, urgent: false,
-    title: "Важные и несрочные", action: "Запланируй",
-    en: "SCHEDULE", icon: CalendarCheck,
-    bg: "from-emerald-100 via-green-100 to-emerald-200",
-    ring: "border-emerald-400", chip: "bg-emerald-200 text-emerald-900 border-emerald-400",
-    dot: "bg-emerald-500",
+    key: "schedule",
+    title: "Важные и несрочные",
+    action: "Запланируй",
+    en: "SCHEDULE",
+    icon: CalendarCheck,
+    color: "bg-emerald-500",
+    lightBg: "bg-emerald-50",
+    border: "border-emerald-200",
+    text: "text-emerald-900",
+    desc: "Здесь лежит стратегическое планирование, профессиональное развитие, отношения и здоровье. Эти задачи не горят, но определяют долгосрочный успех. Именно этот квадрант отличает эффективного профессионала от пожарного.",
+    examples: [
+      "Планирование квартальных целей",
+      "Обучение и повышение квалификации",
+      "Нетворкинг и укрепление отношений",
+      "Спорт, сон и профилактика выгорания",
+    ],
+    questions: [
+      "Какие задачи из этого квадранта дадут максимальный результат через 3 месяца?",
+      "Что мешает вам уделять им время сейчас?",
+      "Какие привычки помогут регулярно возвращаться сюда?",
+    ],
   },
   {
-    key: "delegate", important: false, urgent: true,
-    title: "Неважные и срочные", action: "Делегируй",
-    en: "DELEGATE", icon: UserPlus,
-    bg: "from-indigo-100 via-violet-100 to-indigo-200",
-    ring: "border-indigo-400", chip: "bg-indigo-200 text-indigo-900 border-indigo-400",
-    dot: "bg-indigo-500",
+    key: "delegate",
+    title: "Неважные и срочные",
+    action: "Делегируй",
+    en: "DELEGATE",
+    icon: UserPlus,
+    color: "bg-sky-500",
+    lightBg: "bg-sky-50",
+    border: "border-sky-200",
+    text: "text-sky-900",
+    desc: "Срочные, но не важные для вас лично задачи. Чужие приоритеты, которые вы чувствуете обязанным сделать. Классический источник прокрастинации и отвлечения. Лучшее решение — передать другим или автоматизировать.",
+    examples: [
+      "Ответы на непрерывные рабочие чаты",
+      "Перепроверка работы коллеги",
+      "Участие в собрании без чёткой повестки",
+      "Срочные просьбы, которые не ваши приоритеты",
+    ],
+    questions: [
+      "Это действительно моя ответственность?",
+      "Кто ещё может это сделать?",
+      "Какие границы помогут защитить ваше время?",
+    ],
   },
   {
-    key: "delete", important: false, urgent: false,
-    title: "Неважные и несрочные", action: "Удали / минимизируй",
-    en: "DELETE", icon: Trash2,
-    bg: "from-slate-100 via-slate-200 to-slate-300",
-    ring: "border-slate-400", chip: "bg-slate-200 text-slate-800 border-slate-400",
-    dot: "bg-slate-500",
+    key: "delete",
+    title: "Неважные и несрочные",
+    action: "Удали / минимизируй",
+    en: "DELETE",
+    icon: Trash2,
+    color: "bg-slate-500",
+    lightBg: "bg-slate-50",
+    border: "border-slate-200",
+    text: "text-slate-900",
+    desc: "Безделье, привычки-вампиры и бессмысленная трата времени. Бесконечный скроллинг, пересмотр сериалов, непродуктивные переживания. Это не отдых — это побег. Настоящий отдых относится к квадранту SCHEDULE.",
+    examples: [
+      "Бесконечный скроллинг соцсетей",
+      "Пересмотр сериалов без радости",
+      "Переживания о невозможном контроле",
+      "Участие в спорах без смысла",
+    ],
+    questions: [
+      "Что из этого я делаю по привычке, а не по выбору?",
+      "Какие активности здесь можно заменить настоящим отдыхом?",
+      "Что я теряю, пока трачу время на это?",
+    ],
   },
 ] as const;
 
-function Eisenhower({ notes, setNotes }: { notes: string; setNotes: (v: string) => void }) {
-  const [tasks, setTasks] = useState<EisenTask[]>([]);
-  const [text, setText] = useState("");
-  const [important, setImportant] = useState(true);
-  const [urgent, setUrgent] = useState(false);
-  const [mobileTab, setMobileTab] = useState<typeof QUADRANTS[number]["key"]>("do");
-
-  useEffect(() => {
-    try {
-      const raw = localStorage.getItem(EISEN_STORAGE);
-      if (raw) setTasks(JSON.parse(raw));
-    } catch {}
-  }, []);
-  useEffect(() => {
-    try { localStorage.setItem(EISEN_STORAGE, JSON.stringify(tasks)); } catch {}
-  }, [tasks]);
-
-  const add = () => {
-    const t = text.trim();
-    if (!t) return;
-    setTasks((arr) => [
-      { id: Math.random().toString(36).slice(2), text: t, important, urgent, done: false },
-      ...arr,
-    ]);
-    setText("");
-  };
-  const toggleDone = (id: string) =>
-    setTasks((arr) => arr.map((t) => (t.id === id ? { ...t, done: !t.done } : t)));
-  const remove = (id: string) => setTasks((arr) => arr.filter((t) => t.id !== id));
-
-  const byQuad = (q: typeof QUADRANTS[number]) =>
-    tasks.filter((t) => t.important === q.important && t.urgent === q.urgent);
-
-  const sendToNotes = () => {
-    const lines = ["", "[Матрица Эйзенхауэра]"];
-    for (const q of QUADRANTS) {
-      const items = byQuad(q);
-      if (!items.length) continue;
-      lines.push(`\n— ${q.title} · ${q.action}:`);
-      for (const t of items) lines.push(`   ${t.done ? "✓" : "•"} ${t.text}`);
-    }
-    setNotes((notes ? notes + "\n" : "") + lines.join("\n") + "\n");
-  };
+function Eisenhower() {
+  const [openKey, setOpenKey] = useState<string | null>(null);
+  const active = openKey ? EISENHOWER_DATA.find((q) => q.key === openKey) : null;
 
   return (
-    <div className="max-w-5xl mx-auto rounded-2xl border border-border bg-gradient-to-br from-sky-50 via-indigo-100 to-violet-200 text-slate-900 p-3 sm:p-5 space-y-4 max-w-full overflow-hidden">
-      <div className="flex items-start gap-3">
-        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-500 to-rose-600 grid place-items-center shadow-lg shrink-0">
-          <LayoutGrid size={22} className="text-white" />
-        </div>
-        <div className="min-w-0">
-          <h2 className="text-lg sm:text-xl font-bold leading-tight">Матрица Эйзенхауэра</h2>
-          <p className="text-xs text-muted-foreground">Таск-менеджер с автосортировкой по важности и срочности</p>
-        </div>
+    <div className="max-w-full overflow-hidden">
+      <div className="mb-4">
+        <h2 className="text-xl font-bold flex items-center gap-2">
+          <LayoutGrid className="text-accent" size={22} />
+          Матрица Эйзенхауэра
+        </h2>
+        <p className="text-sm text-secondary-foreground mt-1">
+          Тапните квадрант, чтобы увидеть описание, примеры и наводящие вопросы.
+        </p>
       </div>
 
-      {/* Add form */}
-      <div className="rounded-xl border border-border bg-card/60 p-3 space-y-2">
-        <div className="flex gap-2">
-          <input
-            value={text}
-            onChange={(e) => setText(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && add()}
-            placeholder="Новая задача…"
-            className="flex-1 bg-background border border-border rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-primary"
-          />
-          <button
-            onClick={add}
-            className="px-3 py-2 rounded-lg bg-primary text-primary-foreground text-sm font-medium flex items-center gap-1 hover:opacity-90"
-          >
-            <Plus size={16} /> <span className="hidden sm:inline">Добавить</span>
-          </button>
-        </div>
-        <div className="flex flex-wrap gap-2">
-          <button
-            onClick={() => setImportant((v) => !v)}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs border transition-colors ${
-              important
-                ? "bg-rose-200 border-rose-500 text-rose-900"
-                : "bg-card border-border text-muted-foreground"
-            }`}
-          >
-            <Flame size={13} /> Важно {important ? "✓" : ""}
-          </button>
-          <button
-            onClick={() => setUrgent((v) => !v)}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs border transition-colors ${
-              urgent
-                ? "bg-amber-200 border-amber-500 text-amber-900"
-                : "bg-card border-border text-muted-foreground"
-            }`}
-          >
-            <Clock size={13} /> Срочно {urgent ? "✓" : ""}
-          </button>
-          <button
-            onClick={sendToNotes}
-            className="ml-auto flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs border border-primary/40 bg-primary/10 text-primary hover:bg-primary/20"
-            title="Скопировать матрицу в блокнот сессии"
-          >
-            <BadgePlus size={13} /> В блокнот
-          </button>
-        </div>
-      </div>
-
-      {/* Mobile tabs */}
-      <div className="sm:hidden flex gap-1 overflow-x-auto -mx-1 px-1 pb-1">
-        {QUADRANTS.map((q) => (
-          <button
-            key={q.key}
-            onClick={() => setMobileTab(q.key)}
-            className={`shrink-0 flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[11px] border ${
-              mobileTab === q.key ? q.chip : "bg-card border-border text-muted-foreground"
-            }`}
-          >
-            <span className={`w-2 h-2 rounded-full ${q.dot}`} />
-            {q.en}
-            <span className="opacity-70">({byQuad(q).length})</span>
-          </button>
-        ))}
-      </div>
-
-      {/* Matrix with axes (desktop) */}
-      <div className="hidden sm:grid grid-cols-[auto_1fr] gap-2">
-        <div className="flex items-center justify-center">
-          <div className="rotate-180 [writing-mode:vertical-rl] text-[10px] uppercase tracking-widest text-muted-foreground flex items-center gap-2">
-            <ArrowRight size={12} className="rotate-90" /> Важность
-          </div>
-        </div>
-        <div>
-          <div className="grid grid-cols-2 grid-rows-2 gap-2">
-            {QUADRANTS.map((q) => (
-              <QuadrantCard key={q.key} q={q} items={byQuad(q)} onToggle={toggleDone} onRemove={remove} />
-            ))}
-          </div>
-          <div className="mt-2 text-center text-[10px] uppercase tracking-widest text-muted-foreground flex items-center justify-center gap-2">
-            Срочность <ArrowRight size={12} />
-          </div>
-        </div>
-      </div>
-
-      {/* Mobile: single quadrant */}
-      <div className="sm:hidden">
-        {QUADRANTS.filter((q) => q.key === mobileTab).map((q) => (
-          <QuadrantCard key={q.key} q={q} items={byQuad(q)} onToggle={toggleDone} onRemove={remove} />
-        ))}
-      </div>
-
-      <div className="text-[11px] text-muted-foreground text-center">
-        Всего задач: <b className="text-foreground">{tasks.length}</b> · сохраняется локально на устройстве
-      </div>
-    </div>
-  );
-}
-
-function QuadrantCard({
-  q, items, onToggle, onRemove,
-}: {
-  q: typeof QUADRANTS[number];
-  items: EisenTask[];
-  onToggle: (id: string) => void;
-  onRemove: (id: string) => void;
-}) {
-  const Icon = q.icon;
-  return (
-    <div className={`rounded-xl border ${q.ring} bg-gradient-to-br ${q.bg} text-slate-900 p-2.5 sm:p-3 min-h-[180px] flex flex-col`}>
-      <div className="flex items-center gap-2 mb-2">
-        <div className="w-7 h-7 rounded-lg bg-slate-900/80 grid place-items-center">
-          <Icon size={14} className="text-white" />
-        </div>
-        <div className="min-w-0 flex-1">
-          <div className="text-[10px] font-mono uppercase tracking-widest text-slate-600">{q.en}</div>
-          <div className="text-xs font-semibold leading-tight truncate text-slate-900">{q.title}</div>
-        </div>
-        <span className={`text-[10px] px-1.5 py-0.5 rounded-full border ${q.chip}`}>{items.length}</span>
-      </div>
-      <div className={`text-[11px] mb-2 px-2 py-1 rounded-md border ${q.chip} self-start`}>
-        → {q.action}
-      </div>
-      <div className="flex-1 space-y-1.5 overflow-auto">
-        {items.length === 0 && (
-          <div className="text-[11px] text-slate-500 italic py-2 text-center">пусто</div>
-        )}
-        {items.map((t) => (
-          <div
-            key={t.id}
-            className="group flex items-center gap-2 bg-white/80 border border-slate-300 rounded-lg px-2 py-1.5"
-          >
-            <button onClick={() => onToggle(t.id)} className="shrink-0 text-slate-700 hover:text-slate-900">
-              {t.done ? <CheckSquare size={14} /> : <Square size={14} />}
-            </button>
-            <span className={`text-xs flex-1 ${t.done ? "line-through text-slate-400" : "text-slate-900"}`}>
-              {t.text}
-            </span>
+      <div className="grid grid-cols-2 grid-rows-2 gap-3 h-[calc(100vh-280px)] min-h-[360px] max-h-[680px]">
+        {EISENHOWER_DATA.map((q) => {
+          const Icon = q.icon;
+          return (
             <button
-              onClick={() => onRemove(t.id)}
-              className="shrink-0 text-slate-500 hover:text-red-600 opacity-0 group-hover:opacity-100 transition-opacity"
+              key={q.key}
+              onClick={() => setOpenKey(q.key)}
+              className={`rounded-2xl border ${q.border} ${q.lightBg} p-4 sm:p-5 text-left flex flex-col gap-2 active:scale-[0.98] transition-transform shadow-sm hover:shadow-md`}
             >
-              <X size={13} />
+              <div className="flex items-center gap-2">
+                <div className={`w-8 h-8 rounded-lg ${q.color} grid place-items-center shadow-sm`}>
+                  <Icon size={16} className="text-white" />
+                </div>
+                <div className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground">
+                  {q.en}
+                </div>
+              </div>
+              <div className={`text-sm font-semibold leading-tight ${q.text}`}>
+                {q.title}
+              </div>
+              <div className="text-xs text-muted-foreground leading-relaxed">
+                {q.action}
+              </div>
             </button>
-          </div>
-        ))}
+          );
+        })}
       </div>
+
+      <Drawer open={!!openKey} onOpenChange={(v) => !v && setOpenKey(null)}>
+        <DrawerContent>
+          {active && (
+            <>
+              <DrawerHeader>
+                <div className="flex items-center gap-2 mb-1">
+                  <div className={`w-8 h-8 rounded-lg ${active.color} grid place-items-center shadow-sm`}>
+                    <active.icon size={16} className="text-white" />
+                  </div>
+                  <DrawerTitle className="text-lg">
+                    {active.en} — {active.title}
+                  </DrawerTitle>
+                </div>
+                <DrawerDescription className="text-sm font-medium text-foreground mt-0">
+                  {active.action}
+                </DrawerDescription>
+              </DrawerHeader>
+              <div className="px-4 pb-6 space-y-4">
+                <p className="text-sm text-secondary-foreground leading-relaxed">
+                  {active.desc}
+                </p>
+                <div>
+                  <div className="text-xs font-semibold text-secondary-foreground uppercase tracking-wider mb-2">
+                    Примеры задач
+                  </div>
+                  <ul className="space-y-2">
+                    {active.examples.map((ex, idx) => (
+                      <li key={idx} className="flex items-start gap-2 text-sm text-foreground">
+                        <span className={`shrink-0 mt-1.5 w-1.5 h-1.5 rounded-full ${active.color}`} />
+                        <span>{ex}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+                <div>
+                  <div className="text-xs font-semibold text-secondary-foreground uppercase tracking-wider mb-2">
+                    Наводящие вопросы для клиента
+                  </div>
+                  <ul className="space-y-2">
+                    {active.questions.map((q, idx) => (
+                      <li key={idx} className="flex items-start gap-2 text-sm text-foreground">
+                        <span className="shrink-0 mt-1 text-muted-foreground">•</span>
+                        <span>{q}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+            </>
+          )}
+        </DrawerContent>
+      </Drawer>
     </div>
   );
 }
