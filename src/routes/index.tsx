@@ -466,26 +466,27 @@ ${notes || "—"}
   return (
     <div className="min-h-screen bg-background text-foreground">
       <header className="border-b border-border bg-card/60 backdrop-blur sticky top-0 z-20">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 pt-[env(safe-area-inset-top)] pb-4 flex items-center justify-between gap-4">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-primary text-primary-foreground grid place-items-center font-bold">CS</div>
-            <div>
-              <h1 className="text-lg font-semibold leading-tight">Coach Space</h1>
-              <p className="text-xs text-muted-foreground">Рабочее пространство коуча</p>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-[env(safe-area-inset-top)] pb-4 flex items-center justify-between gap-4">
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="w-11 h-11 rounded-xl bg-primary text-primary-foreground grid place-items-center font-bold shrink-0">CS</div>
+            <div className="min-w-0">
+              <h1 className="text-lg font-semibold leading-tight truncate">Coach Space</h1>
+              <p className="text-xs text-muted-foreground truncate">Рабочее пространство коуча</p>
             </div>
           </div>
-          <div className="flex items-center gap-2 sm:gap-3 px-2 sm:px-3 py-1.5 sm:py-2 rounded-lg bg-secondary">
+          <div className="flex items-center gap-2 sm:gap-3 px-3 py-2 rounded-lg bg-secondary shrink-0">
             <div className="font-mono text-base sm:text-xl tabular-nums">{mmss}</div>
             <button
               onClick={toggleTimer}
-              className="p-1.5 sm:p-2 rounded-md bg-primary text-primary-foreground hover:opacity-90"
+              className="min-w-11 min-h-11 grid place-items-center rounded-md bg-primary text-primary-foreground hover:opacity-90"
               aria-label="toggle"
             >
-              {running ? <Pause size={14} /> : <Play size={14} />}
+              {running ? <Pause size={18} /> : <Play size={18} />}
             </button>
           </div>
         </div>
-        <nav className="max-w-6xl mx-auto px-2 sm:px-4 flex gap-1 overflow-x-auto pb-2">
+        {/* Mobile top-tabs (hidden on iPad+) */}
+        <nav className="md:hidden max-w-7xl mx-auto px-2 sm:px-4 flex gap-1 overflow-x-auto pb-2">
           {TABS.map((t) => {
             const Icon = t.icon;
             const active = tab === t.id;
@@ -493,7 +494,7 @@ ${notes || "—"}
               <button
                 key={t.id}
                 onClick={() => setTab(t.id)}
-                className={`flex items-center gap-2 px-3 py-2 text-sm rounded-lg whitespace-nowrap transition-colors ${
+                className={`flex items-center gap-2 px-3 min-h-11 text-sm rounded-lg whitespace-nowrap transition-colors ${
                   active
                     ? "bg-primary text-primary-foreground"
                     : "text-muted-foreground hover:bg-secondary"
@@ -507,47 +508,73 @@ ${notes || "—"}
         </nav>
       </header>
 
-      <main className="max-w-6xl mx-auto px-4 sm:px-6 py-6">
-        {tab === "session" && (
-          <SessionPanelMemo
-            duration={duration}
-            setDuration={changeDuration}
-            remaining={remaining}
-            running={running}
-            setRunning={handleSetRunning}
-            reset={resetTimer}
-            mmss={mmss}
-            clientName={clientName}
-            setClientName={setClientName}
-            topic={topic}
-            setTopic={setTopic}
-            notes={notes}
-            setNotes={setNotes}
-            exportSession={exportSession}
-            testSound={testSound}
-          />
-        )}
-        {tab === "grow" && <GrowMemo />}
-        {tab === "swot" && <SwotMemo />}
-        {tab === "nlu" && <NluMemo />}
-        {tab === "sos" && <SosMemo />}
-        {tab === "rapport" && <RapportMemo />}
-        {tab === "smart" && <SmartGoalMemo notes={notes} setNotes={setNotes} />}
-        {tab === "eisenhower" && <EisenhowerMemo notes={notes} setNotes={setNotes} />}
-        {tab === "burger" && <BurgerMemo />}
-        {tab === "erickson" && <EricksonStarMemo />}
-        {tab === "rules" && <BurgerRulesMemo />}
-        {tab === "balance" && <BalanceMemo scores={balanceScores} onChange={setBalanceScores} />}
-        {tab === "values" && <ValuesMemo />}
-        {tab === "supervision" && <SupervisionMemo />}
-        {tab === "feedback" && <FeedbackMemo />}
-        {tab === "competencies" && <CompetenciesMemo />}
+      <div className="max-w-7xl mx-auto md:flex md:gap-6 md:px-6">
+        {/* iPad+ sidebar nav */}
+        <aside className="hidden md:block md:w-56 lg:w-64 shrink-0 py-6 sticky top-[calc(env(safe-area-inset-top)+72px)] self-start max-h-[calc(100vh-72px)] overflow-y-auto">
+          <nav className="flex flex-col gap-1">
+            {TABS.map((t) => {
+              const Icon = t.icon;
+              const active = tab === t.id;
+              return (
+                <button
+                  key={t.id}
+                  onClick={() => setTab(t.id)}
+                  className={`flex items-center gap-3 px-3 min-h-11 text-sm rounded-lg text-left transition-colors ${
+                    active
+                      ? "bg-primary text-primary-foreground"
+                      : "text-muted-foreground hover:bg-secondary"
+                  }`}
+                >
+                  <Icon size={18} className="shrink-0" />
+                  <span className="truncate">{t.label}</span>
+                </button>
+              );
+            })}
+          </nav>
+        </aside>
 
-      </main>
+        <main className="flex-1 min-w-0 px-4 sm:px-6 md:px-0 py-6">
+          {tab === "session" && (
+            <SessionPanelMemo
+              duration={duration}
+              setDuration={changeDuration}
+              remaining={remaining}
+              running={running}
+              setRunning={handleSetRunning}
+              reset={resetTimer}
+              mmss={mmss}
+              clientName={clientName}
+              setClientName={setClientName}
+              topic={topic}
+              setTopic={setTopic}
+              notes={notes}
+              setNotes={setNotes}
+              exportSession={exportSession}
+              testSound={testSound}
+            />
+          )}
+          {tab === "grow" && <GrowMemo />}
+          {tab === "swot" && <SwotMemo />}
+          {tab === "nlu" && <NluMemo />}
+          {tab === "sos" && <SosMemo />}
+          {tab === "rapport" && <RapportMemo />}
+          {tab === "smart" && <SmartGoalMemo notes={notes} setNotes={setNotes} />}
+          {tab === "eisenhower" && <EisenhowerMemo notes={notes} setNotes={setNotes} />}
+          {tab === "burger" && <BurgerMemo />}
+          {tab === "erickson" && <EricksonStarMemo />}
+          {tab === "rules" && <BurgerRulesMemo />}
+          {tab === "balance" && <BalanceMemo scores={balanceScores} onChange={setBalanceScores} />}
+          {tab === "values" && <ValuesMemo />}
+          {tab === "supervision" && <SupervisionMemo />}
+          {tab === "feedback" && <FeedbackMemo />}
+          {tab === "competencies" && <CompetenciesMemo />}
+        </main>
+      </div>
 
       {timeUp && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in">
-          <div className="relative max-w-md w-full rounded-2xl border border-primary/40 bg-card p-6 sm:p-8 text-center shadow-2xl">
+          <div className="relative w-full max-w-md md:max-w-[680px] rounded-2xl border border-primary/40 bg-card p-6 sm:p-8 text-center shadow-2xl">
+
             <div className="absolute inset-0 rounded-2xl ring-2 ring-primary/60 animate-ping pointer-events-none" />
             <div className="relative">
               <div className="mx-auto mb-4 w-16 h-16 rounded-full bg-primary/15 text-primary grid place-items-center animate-pulse">
