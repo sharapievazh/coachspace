@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { CalendarCheck, Flame, LayoutGrid, Trash2, UserPlus } from "lucide-react";
-import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerDescription } from "@/components/ui/drawer";
 
 const EISENHOWER_DATA = [
   {
