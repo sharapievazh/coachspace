@@ -1532,12 +1532,23 @@ const BALANCE_AREAS = [
 
 const BALANCE_COLORS = ["#10b981", "#f43f5e", "#f97316", "#3b82f6", "#d97706", "#ef4444", "#a855f7", "#0ea5e9"];
 
-function RadarWithTooltip({ scores }: { scores: Record<number, number> }) {
+function RadarWithTooltip({ scores, compareValues }: { scores: Record<number, number>; compareValues?: number[] }) {
   const [active, setActive] = useState<number | null>(null);
   const area = active != null ? BALANCE_AREAS[active] : null;
   const I = area?.icon;
   const values = useMemo(() => BALANCE_AREAS.map((a) => scores[a.n]), [scores]);
   const labels = useMemo(() => BALANCE_AREAS.map((a) => a.name), []);
+  return (
+    <div className="relative w-full max-w-md">
+      <BalanceRadar
+        values={values}
+        labels={labels}
+        colors={BALANCE_COLORS}
+        active={active}
+        onSelect={setActive}
+        compareValues={compareValues}
+      />
+
   return (
     <div className="relative w-full max-w-md">
       <BalanceRadar
