@@ -582,7 +582,7 @@ ${notes || "—"}
             {tab === "nlu" && <NluMemo />}
             {tab === "sos" && <SosMemo />}
             {tab === "rapport" && <RapportMemo />}
-            {tab === "smart" && <SmartGoalMemo notes={notes} setNotes={setNotes} />}
+            {tab === "smart" && <SmartGoalMemo />}
             {tab === "eisenhower" && <EisenhowerMemo notes={notes} setNotes={setNotes} />}
             {tab === "burger" && <BurgerMemo />}
             {tab === "erickson" && <EricksonStarMemo />}
@@ -3276,292 +3276,194 @@ function QuadrantCard({
    SMART-цель — интерактивный тренажёр
    ============================================================ */
 
-const SMART_STEPS: {
-  key: keyof Pick<SmartData, "s" | "m" | "a" | "r" | "t">;
+const SMART_CRITERIA: {
   letter: string;
   title: string;
   subtitle: string;
-  hint: string;
-  example: string;
   color: string;
   ring: string;
-  placeholder: string;
+  textColor: string;
+  questions: string[];
 }[] = [
   {
-    key: "s",
     letter: "S",
     title: "Specific",
     subtitle: "Конкретная",
-    hint: "Каких именно результатов необходимо достичь? Опиши характеристики результата.",
-    example: "«Создаю личное веб-приложение для тайм-менеджмента на 4 квадранта матрицы Эйзенхауэра».",
     color: "bg-rose-500",
     ring: "ring-rose-400/50",
-    placeholder: "Что именно делаем? Конкретный результат…",
+    textColor: "text-rose-600",
+    questions: [
+      "Каких именно результатов необходимо достичь?",
+      "Опиши характеристики результата конкретно и однозначно.",
+      "Что именно будет по-другому, когда цель достигнута?",
+      "Кто конкретно вовлечён в достижение цели?",
+      "Где и в каком контексте происходит работа над целью?",
+    ],
   },
   {
-    key: "m",
     letter: "M",
     title: "Measurable",
     subtitle: "Измеримая",
-    hint: "Что даст возможность судить о достижении цели? Критерии MVP, метрики, признаки готовности.",
-    example: "«Приложение готово, когда в браузере можно добавить задачу с параметрами важно/срочно, и она автоматически сортируется».",
     color: "bg-amber-500",
     ring: "ring-amber-400/50",
-    placeholder: "По каким признакам/метрикам поймём, что цель достигнута?",
+    textColor: "text-amber-600",
+    questions: [
+      "Что даст возможность судить о достижении цели?",
+      "Какие критерии, метрики или признаки готовности используем?",
+      "Как мы поймём, что цель достигнута на 50%, 80%, 100%?",
+      "Какое количественное или качественное подтверждение нужно?",
+      "Как будем отслеживать прогресс?",
+    ],
   },
   {
-    key: "a",
     letter: "A",
     title: "Achievable",
     subtitle: "Достижимая",
-    hint: "За счёт чего цель будет достигнута? Какие ресурсы, навыки и инструменты используем?",
-    example: "«Используя ИИ-конструктор Lovable и уделяя составлению промптов по 1 часу каждый вечер».",
     color: "bg-emerald-500",
     ring: "ring-emerald-400/50",
-    placeholder: "Какие ресурсы и шаги делают цель достижимой?",
+    textColor: "text-emerald-600",
+    questions: [
+      "За счёт чего цель будет достигнута?",
+      "Какие ресурсы, навыки и инструменты уже есть?",
+      "Что нужно дополнительно освоить или привлечь?",
+      "Есть ли у клиента контроль над этой целью?",
+      "Какие внутренние и внешние препятствия возможны?",
+    ],
   },
   {
-    key: "r",
     letter: "R",
     title: "Relevant",
     subtitle: "Актуальная",
-    hint: "Почему цель важна для успеха именно сейчас? Связь с практикой, ценностями, текущей ситуацией.",
-    example: "«Поможет структурировать дела в период обучения коучингу и снизит уровень стресса».",
     color: "bg-sky-500",
     ring: "ring-sky-400/50",
-    placeholder: "Почему это важно именно сейчас?",
+    textColor: "text-sky-600",
+    questions: [
+      "Почему цель важна для успеха именно сейчас?",
+      "Как эта цель связана с ценностями клиента?",
+      "Какие последствия будут, если цель не достигнута?",
+      "Какие выгоды принесёт достижение цели?",
+      "Эта цель соответствует текущей ситуации и приоритетам?",
+    ],
   },
   {
-    key: "t",
     letter: "T",
     title: "Time-framed",
     subtitle: "Определена во времени",
-    hint: "Когда и к какому моменту цель должна быть достигнута? Точный дедлайн или вехи.",
-    example: "«Первая рабочая версия будет готова через 14 дней, к 23 июня 2026 года».",
     color: "bg-violet-500",
     ring: "ring-violet-400/50",
-    placeholder: "К какой дате? Какие промежуточные вехи?",
+    textColor: "text-violet-600",
+    questions: [
+      "Когда и к какому моменту цель должна быть достигнута?",
+      "Какой точный дедлайн или конечная дата?",
+      "Какие промежуточные вехи и контрольные точки?",
+      "Что клиент готов делать уже сегодня/на этой неделе?",
+      "Как часто будем проверять прогресс?",
+    ],
   },
 ];
 
-function SmartGoal({ notes, setNotes }: { notes: string; setNotes: (v: string) => void }) {
-  const [data, setData] = useState<SmartData>(SMART_EMPTY);
-  const [openHint, setOpenHint] = useState<string | null>(null);
-  const [copied, setCopied] = useState(false);
-  const [sent, setSent] = useState(false);
+function SmartGoal() {
+  const [openKey, setOpenKey] = useState<string | null>(null);
 
-  useEffect(() => {
-    try {
-      const raw = localStorage.getItem(SMART_STORAGE);
-      if (raw) setData({ ...SMART_EMPTY, ...JSON.parse(raw) });
-    } catch {}
-  }, []);
-  useEffect(() => {
-    try {
-      localStorage.setItem(SMART_STORAGE, JSON.stringify(data));
-    } catch {}
-  }, [data]);
-
-  const paragraph = useMemo(() => buildSmartParagraph(data), [data]);
-  const filled = SMART_STEPS.filter((s) => data[s.key].trim().length > 0).length;
-  const progress = (filled / SMART_STEPS.length) * 100;
-
-  const update = (k: keyof SmartData, v: any) => setData((d) => ({ ...d, [k]: v }));
-
-  const copy = async () => {
-    if (!paragraph) return;
-    try {
-      await navigator.clipboard.writeText(paragraph);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 1500);
-    } catch {}
-  };
-
-  const sendToNotes = () => {
-    if (!paragraph) return;
-    const block = `\n[SMART-цель]\n${paragraph}\n${
-      data.positive ? "✓ Позитивная формулировка\n" : ""
-    }${data.balanced ? "✓ Баланс вызова и реальности\n" : ""}`;
-    setNotes((notes ? notes.trimEnd() + "\n" : "") + block);
-    setSent(true);
-    setTimeout(() => setSent(false), 1500);
+  const toggle = (key: string) => {
+    setOpenKey((prev) => (prev === key ? null : key));
   };
 
   return (
-    <div className="rounded-3xl bg-gradient-to-br from-indigo-50 via-fuchsia-50 to-amber-50 text-slate-900 border border-fuchsia-200 p-4 sm:p-6 shadow-xl max-w-full overflow-hidden">
-      <div className="flex items-start justify-between gap-3 mb-4">
-        <div>
-          <h2 className="text-xl sm:text-2xl font-bold flex items-center gap-2">
-            <CheckCircle2 className="text-fuchsia-600" size={22} />
-            Интерактивный SMART-тренажёр цели
-          </h2>
-          <p className="text-xs sm:text-sm text-slate-600 mt-1">
-            Пошагово оцифруйте цель клиента — каждый критерий превращает желание в проектный план.
-          </p>
-        </div>
-        <div className="hidden sm:flex flex-col items-end text-xs text-slate-600">
-          <span className="font-semibold text-slate-800">{filled}/5</span>
-          <span>заполнено</span>
-        </div>
+    <div className="rounded-3xl bg-surface-1 text-foreground border border-border p-4 sm:p-5 shadow-sm max-w-full overflow-hidden">
+      <div className="mb-5">
+        <h2 className="text-xl font-bold flex items-center gap-2">
+          <CheckCircle2 className="text-accent" size={22} />
+          SMART — справочник для коуча
+        </h2>
+        <p className="text-sm text-secondary-foreground mt-1">
+          Тапните по критерию, чтобы увидеть наводящие вопросы для сессии.
+        </p>
       </div>
 
-      <div className="h-1.5 rounded-full bg-white/70 overflow-hidden mb-5">
-        <div
-          className="h-full bg-gradient-to-r from-rose-500 via-amber-500 via-emerald-500 via-sky-500 to-violet-500 transition-all"
-          style={{ width: `${progress}%` }}
-        />
-      </div>
-
-      <div className="grid gap-2.5">
-        {SMART_STEPS.map((step) => {
-          const value = data[step.key];
-          const isOpen = openHint === step.key;
-          const filled = value.trim().length > 0;
+      <div className="grid gap-2">
+        {SMART_CRITERIA.map((item) => {
+          const isOpen = openKey === item.letter;
           return (
             <div
-              key={step.key}
-              className={`rounded-xl bg-white/80 backdrop-blur border ${
-                filled ? "border-fuchsia-300 shadow-sm" : "border-slate-200"
-              } p-3 transition-all`}
+              key={item.letter}
+              className={"rounded-2xl border transition-all overflow-hidden " + (isOpen ? "border-border bg-surface-0 shadow-sm" : "border-border/50 bg-surface-0/60")}
             >
-              <div className="flex items-start gap-3">
+              <button
+                onClick={() => toggle(item.letter)}
+                className="w-full flex items-center gap-3 p-3 sm:p-4 text-left active:scale-[0.98] transition-transform"
+                aria-expanded={isOpen}
+              >
                 <div
-                  className={`shrink-0 w-10 h-10 rounded-xl ${step.color} text-white font-black text-lg grid place-items-center shadow-md ${
-                    filled ? "ring-2 " + step.ring : ""
-                  }`}
+                  className={"shrink-0 w-10 h-10 rounded-xl " + item.color + " text-white font-black text-lg grid place-items-center shadow-sm " + (isOpen ? "ring-2 " + item.ring : "")}
                 >
-                  {step.letter}
+                  {item.letter}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <div className="flex items-center justify-between gap-2">
-                    <div className="text-sm font-semibold text-slate-800 leading-tight">
-                      {step.title} <span className="text-slate-500 font-normal">— {step.subtitle}</span>
-                    </div>
-                    <button
-                      onClick={() => setOpenHint(isOpen ? null : step.key)}
-                      className={`shrink-0 grid place-items-center w-7 h-7 rounded-full transition-colors ${
-                        isOpen ? "bg-fuchsia-600 text-white" : "bg-slate-100 text-slate-600 hover:bg-slate-200"
-                      }`}
-                      aria-label="Подсказка"
-                    >
-                      <HelpCircle size={14} />
-                    </button>
+                  <div className="text-sm font-semibold leading-tight">
+                    {item.title}{" "}
+                    <span className="font-normal text-secondary-foreground">
+                      — {item.subtitle}
+                    </span>
                   </div>
-                  {isOpen && (
-                    <div className="mt-2 rounded-lg bg-slate-900 text-slate-100 text-xs p-3 leading-relaxed animate-in fade-in slide-in-from-top-1">
-                      <div className="mb-1.5 opacity-90">{step.hint}</div>
-                      <div className="text-amber-200">
-                        <span className="font-semibold">Пример:</span> {step.example}
-                      </div>
-                    </div>
-                  )}
-                  <textarea
-                    value={value}
-                    onChange={(e) => update(step.key, e.target.value)}
-                    placeholder={step.placeholder}
-                    rows={2}
-                    className="mt-2 w-full text-sm rounded-lg border border-slate-200 bg-white px-3 py-2 resize-none focus:outline-none focus:ring-2 focus:ring-fuchsia-400/50 focus:border-fuchsia-400 placeholder:text-slate-400"
-                  />
                 </div>
-              </div>
+                <div
+                  className={"shrink-0 text-muted-foreground transition-transform duration-200 " + (isOpen ? "rotate-180" : "")}
+                >
+                  <ChevronDown size={18} />
+                </div>
+              </button>
+
+              {isOpen && (
+                <div className="px-4 pb-4 sm:px-5 sm:pb-5 animate-in fade-in slide-in-from-top-1">
+                  <div className="border-t border-border/40 pt-3">
+                    <div className="text-xs font-semibold text-secondary-foreground uppercase tracking-wider mb-2">
+                      Наводящие вопросы
+                    </div>
+                    <ul className="space-y-2">
+                      {item.questions.map((q, idx) => (
+                        <li
+                          key={idx}
+                          className="flex items-start gap-2 text-sm text-foreground leading-relaxed"
+                        >
+                          <span
+                            className={"shrink-0 mt-1 w-1.5 h-1.5 rounded-full " + item.color}
+                          />
+                          <span>{q}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
+              )}
             </div>
           );
         })}
       </div>
 
       {/* Whitmore rules */}
-      <div className="mt-5 rounded-xl bg-white/80 border border-emerald-200 p-3">
-        <div className="text-xs font-semibold text-emerald-800 mb-2 flex items-center gap-1.5">
-          <ShieldCheck size={14} /> Правила Джона Уитмора
+      <div className="mt-5 rounded-2xl border border-border bg-surface-0/60 p-4">
+        <div className="text-xs font-semibold text-secondary-foreground mb-3 flex items-center gap-1.5">
+          <ShieldCheck size={14} className="text-accent" /> Правила Джона Уитмора
         </div>
         <div className="grid gap-2 sm:grid-cols-2">
-          {[
-            {
-              k: "positive" as const,
-              title: "Позитивная формулировка",
-              desc: "Без частицы «НЕ». Направлена на достижение, а не на избегание.",
-            },
-            {
-              k: "balanced" as const,
-              title: "Баланс вызова и реальности",
-              desc: "Мотивирует (бросает вызов), но остаётся выполнимой.",
-            },
-          ].map((rule) => {
-            const on = data[rule.k];
-            return (
-              <button
-                key={rule.k}
-                onClick={() => update(rule.k, !on)}
-                className={`text-left rounded-lg p-2.5 border transition-all flex items-start gap-2 ${
-                  on
-                    ? "bg-emerald-500 text-white border-emerald-600 shadow"
-                    : "bg-white text-slate-700 border-slate-200 hover:border-emerald-400"
-                }`}
-              >
-                <div
-                  className={`shrink-0 mt-0.5 w-4 h-4 rounded grid place-items-center border ${
-                    on ? "bg-white border-white text-emerald-600" : "border-slate-300 bg-white"
-                  }`}
-                >
-                  {on && <CheckCircle2 size={14} />}
-                </div>
-                <div className="min-w-0">
-                  <div className="text-xs font-bold leading-tight">{rule.title}</div>
-                  <div className={`text-[11px] mt-0.5 leading-snug ${on ? "text-white/90" : "text-slate-500"}`}>
-                    {rule.desc}
-                  </div>
-                </div>
-              </button>
-            );
-          })}
-        </div>
-      </div>
-
-      {/* Final paragraph */}
-      <div className="mt-5 rounded-2xl bg-gradient-to-br from-slate-900 via-indigo-950 to-fuchsia-950 text-white p-4 sm:p-5 shadow-lg">
-        <div className="flex items-center justify-between gap-2 mb-2">
-          <div className="flex items-center gap-2">
-            <Sparkles size={16} className="text-amber-300" />
-            <h3 className="text-sm font-bold">Итоговая SMART-формулировка</h3>
+          <div className="rounded-xl p-3 border border-border bg-surface-0">
+            <div className="text-sm font-semibold">Позитивная формулировка</div>
+            <div className="text-xs text-secondary-foreground mt-1 leading-relaxed">
+              Без частицы «НЕ». Направлена на достижение, а не на избегание.
+            </div>
           </div>
-          <span className="text-[10px] uppercase tracking-wider text-white/50">
-            обновляется автоматически
-          </span>
-        </div>
-        <p className="text-sm sm:text-base leading-relaxed min-h-[3.5rem] text-white/95">
-          {paragraph || (
-            <span className="text-white/40 italic">
-              Заполните поля выше — итог соберётся в один связный абзац…
-            </span>
-          )}
-        </p>
-        <div className="mt-3 flex flex-wrap gap-2">
-          <button
-            onClick={copy}
-            disabled={!paragraph}
-            className="text-xs px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 disabled:opacity-40 disabled:cursor-not-allowed border border-white/20 flex items-center gap-1.5"
-          >
-            <ClipboardList size={13} /> {copied ? "Скопировано!" : "Скопировать"}
-          </button>
-          <button
-            onClick={sendToNotes}
-            disabled={!paragraph}
-            className="text-xs px-3 py-1.5 rounded-lg bg-fuchsia-500 hover:bg-fuchsia-400 disabled:opacity-40 disabled:cursor-not-allowed text-white flex items-center gap-1.5 font-semibold"
-          >
-            <Send size={13} /> {sent ? "Перенесено в заметки" : "Перенести в заметки сессии"}
-          </button>
-          <button
-            onClick={() => setData(SMART_EMPTY)}
-            className="text-xs px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-white/70 flex items-center gap-1.5 ml-auto"
-          >
-            <RotateCcw size={13} /> Очистить
-          </button>
+          <div className="rounded-xl p-3 border border-border bg-surface-0">
+            <div className="text-sm font-semibold">Баланс вызова и реальности</div>
+            <div className="text-xs text-secondary-foreground mt-1 leading-relaxed">
+              Мотивирует (бросает вызов), но остаётся выполнимой.
+            </div>
+          </div>
         </div>
       </div>
     </div>
   );
 }
-
 /* ---------- 16 Компетенций Коуча ---------- */
 
 type Comp = { n: number; icon: any; title: string; example: string; questions: string };
