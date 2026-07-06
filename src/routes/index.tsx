@@ -558,42 +558,66 @@ ${notes || "—"}
               if (i > 0) setTab(TABS[i - 1].id);
             }}
           >
-            {tab === "session" && (
-              <SessionPanelMemo
-                duration={duration}
-                setDuration={changeDuration}
-                remaining={remaining}
-                running={running}
-                setRunning={handleSetRunning}
-                reset={resetTimer}
-                mmss={mmss}
-                clientName={clientName}
-                setClientName={setClientName}
-                topic={topic}
-                setTopic={setTopic}
-                notes={notes}
-                setNotes={setNotes}
-                exportSession={exportSession}
-                testSound={testSound}
-              />
-            )}
-            {tab === "grow" && <GrowMemo />}
-            {tab === "swot" && <SwotMemo />}
-            {tab === "nlu" && <NluMemo />}
-            {tab === "sos" && <SosMemo />}
-            {tab === "rapport" && <RapportMemo />}
-            {tab === "smart" && <SmartGoalMemo />}
-            {tab === "eisenhower" && <EisenhowerMemo />}
-            {tab === "burger" && <BurgerMemo />}
-            {tab === "erickson" && <EricksonStarMemo />}
-            {tab === "rules" && <BurgerRulesMemo />}
-            {tab === "balance" && <BalanceMemo scores={balanceScores} onChange={setBalanceScores} />}
-            {tab === "values" && <ValuesMemo />}
-            {tab === "supervision" && <SupervisionMemo />}
-            {tab === "feedback" && <FeedbackMemo />}
-            {tab === "competencies" && <CompetenciesMemo />}
+            {(() => {
+              const activeIdx = TABS.findIndex((t) => t.id === tab);
+              const panels: { id: TabId; node: React.ReactNode }[] = [
+                { id: "session", node: (
+                  <SessionPanelMemo
+                    duration={duration}
+                    setDuration={changeDuration}
+                    remaining={remaining}
+                    running={running}
+                    setRunning={handleSetRunning}
+                    reset={resetTimer}
+                    mmss={mmss}
+                    clientName={clientName}
+                    setClientName={setClientName}
+                    topic={topic}
+                    setTopic={setTopic}
+                    notes={notes}
+                    setNotes={setNotes}
+                    exportSession={exportSession}
+                    testSound={testSound}
+                  />
+                )},
+                { id: "grow", node: <GrowMemo /> },
+                { id: "swot", node: <SwotMemo /> },
+                { id: "nlu", node: <NluMemo /> },
+                { id: "sos", node: <SosMemo /> },
+                { id: "rapport", node: <RapportMemo /> },
+                { id: "smart", node: <SmartGoalMemo /> },
+                { id: "eisenhower", node: <EisenhowerMemo /> },
+                { id: "burger", node: <BurgerMemo /> },
+                { id: "erickson", node: <EricksonStarMemo /> },
+                { id: "rules", node: <BurgerRulesMemo /> },
+                { id: "balance", node: <BalanceMemo scores={balanceScores} onChange={setBalanceScores} /> },
+                { id: "values", node: <ValuesMemo /> },
+                { id: "supervision", node: <SupervisionMemo /> },
+                { id: "feedback", node: <FeedbackMemo /> },
+                { id: "competencies", node: <CompetenciesMemo /> },
+              ];
+              return panels.map((p, idx) => {
+                const isActive = p.id === tab;
+                const isAdjacent = Math.abs(idx - activeIdx) === 1;
+                if (!isActive && !isAdjacent) return null;
+                return (
+                  <div
+                    key={p.id}
+                    style={{
+                      display: isActive ? "block" : "none",
+                      contentVisibility: isActive ? "visible" : ("auto" as any),
+                      transform: "translateZ(0)",
+                      willChange: "transform, opacity",
+                    }}
+                  >
+                    {p.node}
+                  </div>
+                );
+              });
+            })()}
           </SwipeableTabContent>
         </main>
+
 
       </div>
 
