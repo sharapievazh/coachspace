@@ -466,88 +466,134 @@ ${notes || "—"}
   return (
     <div className="min-h-screen bg-background text-foreground">
       <header className="border-b border-border bg-card/60 backdrop-blur sticky top-0 z-20">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between gap-4">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-primary text-primary-foreground grid place-items-center font-bold">CS</div>
-            <div>
-              <h1 className="text-lg font-semibold leading-tight">Coach Space</h1>
-              <p className="text-xs text-muted-foreground">Рабочее пространство коуча</p>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-[env(safe-area-inset-top)] pb-4 flex items-center justify-between gap-4">
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="w-11 h-11 rounded-xl bg-primary text-primary-foreground grid place-items-center font-bold shrink-0">CS</div>
+            <div className="min-w-0">
+              <h1 className="text-lg font-semibold leading-tight truncate">Coach Space</h1>
+              <p className="text-xs text-muted-foreground truncate">Рабочее пространство коуча</p>
             </div>
           </div>
-          <div className="flex items-center gap-2 sm:gap-3 px-2 sm:px-3 py-1.5 sm:py-2 rounded-lg bg-secondary">
+          <div className="flex items-center gap-2 sm:gap-3 px-3 py-2 rounded-lg bg-secondary shrink-0">
             <div className="font-mono text-base sm:text-xl tabular-nums">{mmss}</div>
             <button
               onClick={toggleTimer}
-              className="p-1.5 sm:p-2 rounded-md bg-primary text-primary-foreground hover:opacity-90"
+              className="min-w-11 min-h-11 grid place-items-center rounded-md bg-primary text-primary-foreground hover:opacity-90"
               aria-label="toggle"
             >
-              {running ? <Pause size={14} /> : <Play size={14} />}
+              {running ? <Pause size={18} /> : <Play size={18} />}
             </button>
           </div>
         </div>
-        <nav className="max-w-6xl mx-auto px-2 sm:px-4 flex gap-1 overflow-x-auto pb-2">
+        {/* Mobile top-tabs (hidden on iPad+) */}
+        <nav className="md:hidden max-w-7xl mx-auto px-2 sm:px-4 flex gap-1 overflow-x-auto pb-2">
           {TABS.map((t) => {
             const Icon = t.icon;
             const active = tab === t.id;
             return (
               <button
                 key={t.id}
+                ref={(el) => {
+                  if (active && el) {
+                    el.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "center" });
+                  }
+                }}
                 onClick={() => setTab(t.id)}
-                className={`flex items-center gap-2 px-3 py-2 text-sm rounded-lg whitespace-nowrap transition-colors ${
+                className={`flex items-center gap-2 px-3 min-h-11 text-xs rounded-lg transition-all duration-200 max-w-[140px] ${
                   active
-                    ? "bg-primary text-primary-foreground"
+                    ? "bg-primary text-primary-foreground scale-[1.02]"
                     : "text-muted-foreground hover:bg-secondary"
                 }`}
               >
                 <Icon size={16} />
-                {t.label}
+                <span className="truncate min-w-0">{t.label}</span>
               </button>
             );
           })}
         </nav>
+
       </header>
 
-      <main className="max-w-6xl mx-auto px-4 sm:px-6 py-6">
-        {tab === "session" && (
-          <SessionPanelMemo
-            duration={duration}
-            setDuration={changeDuration}
-            remaining={remaining}
-            running={running}
-            setRunning={handleSetRunning}
-            reset={resetTimer}
-            mmss={mmss}
-            clientName={clientName}
-            setClientName={setClientName}
-            topic={topic}
-            setTopic={setTopic}
-            notes={notes}
-            setNotes={setNotes}
-            exportSession={exportSession}
-            testSound={testSound}
-          />
-        )}
-        {tab === "grow" && <GrowMemo />}
-        {tab === "swot" && <SwotMemo />}
-        {tab === "nlu" && <NluMemo />}
-        {tab === "sos" && <SosMemo />}
-        {tab === "rapport" && <RapportMemo />}
-        {tab === "smart" && <SmartGoalMemo notes={notes} setNotes={setNotes} />}
-        {tab === "eisenhower" && <EisenhowerMemo notes={notes} setNotes={setNotes} />}
-        {tab === "burger" && <BurgerMemo />}
-        {tab === "erickson" && <EricksonStarMemo />}
-        {tab === "rules" && <BurgerRulesMemo />}
-        {tab === "balance" && <BalanceMemo scores={balanceScores} onChange={setBalanceScores} />}
-        {tab === "values" && <ValuesMemo />}
-        {tab === "supervision" && <SupervisionMemo />}
-        {tab === "feedback" && <FeedbackMemo />}
-        {tab === "competencies" && <CompetenciesMemo />}
+      <div className="max-w-7xl mx-auto md:flex md:gap-6 md:px-6">
+        {/* iPad+ sidebar nav */}
+        <aside className="hidden md:block md:w-56 lg:w-64 shrink-0 py-6 sticky top-[calc(env(safe-area-inset-top)+72px)] self-start max-h-[calc(100vh-72px)] overflow-y-auto">
+          <nav className="flex flex-col gap-1">
+            {TABS.map((t) => {
+              const Icon = t.icon;
+              const active = tab === t.id;
+              return (
+                <button
+                  key={t.id}
+                  onClick={() => setTab(t.id)}
+                  className={`flex items-center gap-3 px-3 min-h-11 text-sm rounded-lg text-left transition-colors ${
+                    active
+                      ? "bg-primary text-primary-foreground"
+                      : "text-muted-foreground hover:bg-secondary"
+                  }`}
+                >
+                  <Icon size={18} className="shrink-0" />
+                  <span className="truncate">{t.label}</span>
+                </button>
+              );
+            })}
+          </nav>
+        </aside>
 
-      </main>
+        <main className="flex-1 min-w-0 px-4 sm:px-6 md:px-0 py-6">
+          <SwipeableTabContent
+            tabId={tab}
+            onSwipeLeft={() => {
+              const i = TABS.findIndex((t) => t.id === tab);
+              if (i < TABS.length - 1) setTab(TABS[i + 1].id);
+            }}
+            onSwipeRight={() => {
+              const i = TABS.findIndex((t) => t.id === tab);
+              if (i > 0) setTab(TABS[i - 1].id);
+            }}
+          >
+            {tab === "session" && (
+              <SessionPanelMemo
+                duration={duration}
+                setDuration={changeDuration}
+                remaining={remaining}
+                running={running}
+                setRunning={handleSetRunning}
+                reset={resetTimer}
+                mmss={mmss}
+                clientName={clientName}
+                setClientName={setClientName}
+                topic={topic}
+                setTopic={setTopic}
+                notes={notes}
+                setNotes={setNotes}
+                exportSession={exportSession}
+                testSound={testSound}
+              />
+            )}
+            {tab === "grow" && <GrowMemo />}
+            {tab === "swot" && <SwotMemo />}
+            {tab === "nlu" && <NluMemo />}
+            {tab === "sos" && <SosMemo />}
+            {tab === "rapport" && <RapportMemo />}
+            {tab === "smart" && <SmartGoalMemo notes={notes} setNotes={setNotes} />}
+            {tab === "eisenhower" && <EisenhowerMemo notes={notes} setNotes={setNotes} />}
+            {tab === "burger" && <BurgerMemo />}
+            {tab === "erickson" && <EricksonStarMemo />}
+            {tab === "rules" && <BurgerRulesMemo />}
+            {tab === "balance" && <BalanceMemo scores={balanceScores} onChange={setBalanceScores} />}
+            {tab === "values" && <ValuesMemo />}
+            {tab === "supervision" && <SupervisionMemo />}
+            {tab === "feedback" && <FeedbackMemo />}
+            {tab === "competencies" && <CompetenciesMemo />}
+          </SwipeableTabContent>
+        </main>
+
+      </div>
 
       {timeUp && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in">
-          <div className="relative max-w-md w-full rounded-2xl border border-primary/40 bg-card p-6 sm:p-8 text-center shadow-2xl">
+          <div className="relative w-full max-w-md md:max-w-[680px] rounded-2xl border border-primary/40 bg-card p-6 sm:p-8 text-center shadow-2xl">
+
             <div className="absolute inset-0 rounded-2xl ring-2 ring-primary/60 animate-ping pointer-events-none" />
             <div className="relative">
               <div className="mx-auto mb-4 w-16 h-16 rounded-full bg-primary/15 text-primary grid place-items-center animate-pulse">
@@ -577,41 +623,151 @@ ${notes || "—"}
   );
 }
 
+/* ---------- Swipeable tab content (iOS-like horizontal swipe) ---------- */
+function SwipeableTabContent({
+  tabId,
+  onSwipeLeft,
+  onSwipeRight,
+  children,
+}: {
+  tabId: string;
+  onSwipeLeft: () => void;
+  onSwipeRight: () => void;
+  children: React.ReactNode;
+}) {
+  const startX = useRef(0);
+  const startY = useRef(0);
+  const deltaX = useRef(0);
+  const tracking = useRef(false);
+  const decidedHorizontal = useRef<null | boolean>(null);
+  const innerRef = useRef<HTMLDivElement>(null);
+  const [dragX, setDragX] = useState(0);
+  const [animKey, setAnimKey] = useState(tabId);
+  const [enterFrom, setEnterFrom] = useState<"left" | "right" | null>(null);
+
+  useEffect(() => {
+    setAnimKey(tabId);
+  }, [tabId]);
+
+  const THRESHOLD = 50;
+
+  const onTouchStart = (e: React.TouchEvent) => {
+    const t = e.touches[0];
+    startX.current = t.clientX;
+    startY.current = t.clientY;
+    deltaX.current = 0;
+    tracking.current = true;
+    decidedHorizontal.current = null;
+  };
+
+  const onTouchMove = (e: React.TouchEvent) => {
+    if (!tracking.current) return;
+    const t = e.touches[0];
+    const dx = t.clientX - startX.current;
+    const dy = t.clientY - startY.current;
+
+    if (decidedHorizontal.current === null) {
+      if (Math.abs(dx) < 8 && Math.abs(dy) < 8) return;
+      decidedHorizontal.current = Math.abs(dx) > Math.abs(dy) * 1.2;
+    }
+
+    if (!decidedHorizontal.current) return;
+
+    deltaX.current = dx;
+    // Damped follow
+    setDragX(Math.max(-120, Math.min(120, dx * 0.5)));
+  };
+
+  const onTouchEnd = () => {
+    if (!tracking.current) return;
+    tracking.current = false;
+    const dx = deltaX.current;
+    setDragX(0);
+    if (decidedHorizontal.current && Math.abs(dx) >= THRESHOLD) {
+      if (dx < 0) {
+        setEnterFrom("right");
+        onSwipeLeft();
+      } else {
+        setEnterFrom("left");
+        onSwipeRight();
+      }
+    }
+    decidedHorizontal.current = null;
+  };
+
+  return (
+    <div
+      onTouchStart={onTouchStart}
+      onTouchMove={onTouchMove}
+      onTouchEnd={onTouchEnd}
+      onTouchCancel={onTouchEnd}
+      style={{ touchAction: "pan-y" }}
+    >
+      <div
+        ref={innerRef}
+        key={animKey}
+        className="will-change-transform"
+        style={{
+          transform: `translateX(${dragX}px)`,
+          transition: dragX === 0 ? "transform 250ms cubic-bezier(0.22, 1, 0.36, 1)" : "none",
+          animation: enterFrom
+            ? `${enterFrom === "right" ? "swipe-in-right" : "swipe-in-left"} 250ms cubic-bezier(0.22, 1, 0.36, 1)`
+            : undefined,
+        }}
+      >
+        {children}
+      </div>
+      <style>{`
+        @keyframes swipe-in-right {
+          from { transform: translateX(24px); opacity: 0.6; }
+          to   { transform: translateX(0);    opacity: 1; }
+        }
+        @keyframes swipe-in-left {
+          from { transform: translateX(-24px); opacity: 0.6; }
+          to   { transform: translateX(0);     opacity: 1; }
+        }
+      `}</style>
+    </div>
+  );
+}
+
+
 /* ---------- Session ---------- */
 function SessionPanel(p: any) {
   return (
-    <div className="grid lg:grid-cols-3 gap-6">
-      <section className="lg:col-span-1 bg-card rounded-2xl border border-border p-5 space-y-4">
+    <div className="grid md:grid-cols-3 gap-6 max-w-full overflow-hidden">
+      <section className="md:col-span-1 bg-card rounded-2xl border border-border p-5 space-y-4">
         <h2 className="font-semibold flex items-center gap-2"><Sparkles size={18} className="text-primary" /> Таймер сессии</h2>
         <div className="text-center py-6 rounded-xl bg-secondary">
-          <div className="font-mono text-5xl tabular-nums text-foreground">{p.mmss}</div>
+          <div className="font-mono text-7xl tabular-nums text-foreground">{p.mmss}</div>
           <div className="text-xs text-muted-foreground mt-1">из {Math.floor(p.duration/60)} мин</div>
         </div>
         <div className="flex gap-2">
-          <button onClick={() => p.setRunning(!p.running)} className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg bg-primary text-primary-foreground hover:opacity-90">
+          <button onClick={() => p.setRunning(!p.running)} className="flex-1 inline-flex items-center justify-center gap-2 px-4 min-h-11 rounded-lg bg-primary text-primary-foreground hover:opacity-90">
             {p.running ? <Pause size={16}/> : <Play size={16}/>} {p.running ? "Пауза" : "Старт"}
           </button>
-          <button onClick={p.reset} className="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg bg-secondary hover:bg-muted">
+          <button onClick={p.reset} className="inline-flex items-center justify-center gap-2 px-4 min-h-11 min-w-11 rounded-lg bg-secondary hover:bg-muted">
             <RotateCcw size={16}/> Сброс
           </button>
         </div>
         <button
           onClick={p.testSound}
-          className="w-full inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg border border-border bg-background hover:bg-secondary text-sm"
+          className="w-full inline-flex items-center justify-center gap-2 px-4 min-h-11 rounded-lg border border-border bg-background hover:bg-secondary text-sm"
         >
           <Bell size={16} className="text-primary" /> Тест звука
         </button>
         <div className="flex gap-2 flex-wrap">
           {[20, 30, 45, 60, 90].map((m) => (
             <button key={m} onClick={() => p.setDuration(m*60)}
-              className={`px-3 py-1.5 text-xs rounded-md border ${p.duration===m*60 ? "bg-primary text-primary-foreground border-primary" : "border-border hover:bg-secondary"}`}>
+              className={`px-3 min-h-11 min-w-11 text-xs rounded-md border ${p.duration===m*60 ? "bg-primary text-primary-foreground border-primary" : "border-border hover:bg-secondary"}`}>
               {m} мин
             </button>
           ))}
         </div>
       </section>
 
-      <section className="lg:col-span-2 bg-card rounded-2xl border border-border p-5 space-y-4">
+      <section className="md:col-span-2 bg-card rounded-2xl border border-border p-5 space-y-4">
+
         <div className="grid sm:grid-cols-2 gap-3">
           <Field label="Клиент">
             <input value={p.clientName} onChange={(e)=>p.setClientName(e.target.value)}
@@ -633,13 +789,14 @@ function SessionPanel(p: any) {
         <div className="flex items-center justify-between gap-2 flex-wrap">
           <button
             onClick={() => p.setNotes((p.notes || "") + OSVK_TEMPLATE)}
-            className="inline-flex items-center gap-2 px-3 py-2 rounded-lg border border-amber-500/40 bg-gradient-to-r from-amber-500/15 to-orange-500/10 hover:from-amber-500/25 hover:to-orange-500/20 text-sm text-amber-200"
+            className="inline-flex items-center gap-2 px-4 min-h-11 rounded-lg border border-amber-500/40 bg-gradient-to-r from-amber-500/15 to-orange-500/10 hover:from-amber-500/25 hover:to-orange-500/20 text-sm text-amber-700 dark:text-amber-300"
           >
             <Sandwich size={16}/> Маркер ОСВК
           </button>
-          <button onClick={p.exportSession} className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-primary text-primary-foreground hover:opacity-90">
+          <button onClick={p.exportSession} className="inline-flex items-center gap-2 px-4 min-h-11 rounded-lg bg-primary text-primary-foreground hover:opacity-90">
             <Download size={16}/> Экспорт .txt
           </button>
+
         </div>
       </section>
     </div>
@@ -953,7 +1110,7 @@ function Grow() {
   const step = GROW_STEPS.find((s) => s.id === active)!;
   void step.icon;
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 max-w-full overflow-hidden">
       <SectionHead title="Модель GROW" subtitle="Структура эффективной коуч-сессии (60 мин)" />
 
       {/* верхняя дублирующая панель убрана — структура встроена в каждую карточку шага */}
@@ -994,7 +1151,7 @@ function Grow() {
                 </div>
                 <div className="min-w-0">
                   <div className="text-xs uppercase tracking-wide opacity-80 font-semibold">{step.label}</div>
-                  <h3 className="text-3xl font-extrabold text-foreground tracking-tight leading-none">{step.title}</h3>
+                  <h3 className="text-[clamp(28px,8vw,56px)] font-extrabold text-foreground tracking-tight leading-none">{step.title}</h3>
                   {meta && (
                     <div className="mt-2 flex flex-wrap items-center gap-2">
                       <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-primary text-primary-foreground text-[11px] font-bold">
@@ -1061,15 +1218,15 @@ function Swot() {
   ];
   const qIcons = [HelpCircle, Compass, Eye];
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 max-w-full overflow-hidden">
       <SectionHead title="Матрица SWOT" subtitle="Внутренняя и внешняя среда клиента" />
       <div className="grid sm:grid-cols-2 gap-4">
         {cells.map((c) => {
           const C = c.Icon;
           return (
-            <div key={c.k} className={`relative overflow-hidden p-5 rounded-2xl border ${c.ring}`}>
+            <div key={c.k} className={`relative overflow-hidden p-5 rounded-2xl border ${c.ring} max-w-full`}>
               {/* huge faded letter */}
-              <div className={`absolute -right-4 -bottom-10 text-[180px] font-black leading-none bg-gradient-to-br ${c.grad} bg-clip-text text-transparent opacity-[0.12] pointer-events-none select-none`}>
+              <div className={`absolute -right-4 -bottom-10 text-[clamp(60px,20vw,180px)] font-black leading-none bg-gradient-to-br ${c.grad} bg-clip-text text-transparent opacity-[0.12] pointer-events-none select-none`}>
                 {c.k}
               </div>
               <div className="relative flex items-center gap-3 mb-4">
@@ -1177,7 +1334,7 @@ function Nlu() {
   const ROW_H = 60; // px per row
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 max-w-full overflow-hidden">
       <SectionHead title="Пирамида Дилтса" subtitle="Неврологические уровни изменений" />
 
       {/* Header row */}
@@ -1489,7 +1646,7 @@ function Balance({ scores, onChange }: { scores: Record<number, number>; onChang
     BALANCE_AREAS.reduce((s, a) => s + scores[a.n], 0) / BALANCE_AREAS.length
   ).toFixed(1);
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 max-w-full overflow-hidden">
       <SectionHead
         title="Колесо баланса жизни"
         subtitle="Оцените каждую сферу вашей жизни по шкале от 1 до 10 и создайте свою гармоничную и наполненную жизнь"
@@ -1570,7 +1727,7 @@ const VALUES_SELF = [
 
 function Values() {
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 max-w-full overflow-hidden">
       <SectionHead title="Ценности" subtitle="Опоры, которые двигают вперёд" />
 
       {/* ===== ROOT NODE ===== */}
@@ -1721,7 +1878,7 @@ function Supervision() {
   const debrief = SUP_TYPES[2];
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 max-w-full overflow-hidden">
       <SectionHead title="Виды супервизии" subtitle="Система профессиональной поддержки и развития специалиста" />
 
       {/* ===== HIERARCHY DIAGRAM ===== */}
@@ -1962,7 +2119,7 @@ const ROLES = [
 function Sos() {
   const [active, setActive] = useState<string | null>(null);
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 max-w-full overflow-hidden">
       <SectionHead title="SOS · Треугольник Карпмана" subtitle="Шпаргалка-предохранитель для растождествления" />
 
       <div className="bg-card rounded-2xl border border-border p-4 sm:p-6">
@@ -2114,7 +2271,7 @@ function Rapport() {
   const [activeVaik, setActiveVaik] = useState<string>("В");
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 max-w-full overflow-hidden">
       <SectionHead title="Раппорт и Коммуникация" subtitle="Контакт · типология · сенсорные системы" />
 
       {/* 4 шага */}
@@ -2372,7 +2529,7 @@ const BURGER_LAYERS = [
 function Burger() {
   const [active, setActive] = useState<string>("top");
   return (
-    <div className="space-y-5 max-w-3xl">
+    <div className="space-y-5 max-w-3xl max-w-full overflow-hidden">
       <SectionHead title="Гамбургер ОСВК" subtitle="Обратная связь высокого качества · три слоя" />
 
       <div className="bg-gradient-to-br from-amber-50 via-orange-100 to-amber-200 text-stone-900 rounded-3xl border border-amber-300 p-4 sm:p-6 space-y-3">
@@ -2438,8 +2595,9 @@ const OSVK_RULES = [
 ];
 
 function BurgerRules() {
+  const [openIdx, setOpenIdx] = useState<number | null>(null);
   return (
-    <div className="space-y-5 max-w-4xl">
+    <div className="space-y-5 max-w-4xl max-w-full overflow-hidden">
       <SectionHead title="8 Золотых Правил ОСВК" subtitle="Чек-лист развивающей обратной связи высокого качества" />
 
       <div className="rounded-2xl border border-amber-500/30 bg-gradient-to-br from-amber-500/10 via-orange-500/5 to-transparent p-5 flex items-center gap-4">
@@ -2452,30 +2610,38 @@ function BurgerRules() {
         </div>
       </div>
 
-      <ol className="grid sm:grid-cols-2 gap-3 list-none">
+      <div className="space-y-2">
         {OSVK_RULES.map((r, i) => {
-          const Icon = r.icon;
+          const isOpen = openIdx === i;
           return (
-            <li
+            <div
               key={i}
-              className={`relative rounded-xl border ${r.border} bg-gradient-to-br ${r.color} p-4 flex gap-3 overflow-hidden`}
+              className="rounded-xl border border-border bg-card overflow-hidden"
             >
-              <div className="absolute -right-4 -bottom-4 text-7xl opacity-10 select-none">{r.emoji}</div>
-              <div className={`w-10 h-10 rounded-lg bg-background/50 border ${r.border} grid place-items-center shrink-0 ${r.tint}`}>
-                <Icon size={18} />
-              </div>
-              <div className="relative flex-1 min-w-0">
-                <div className="flex items-center gap-2 mb-1">
-                  <span className={`text-xs font-mono font-bold ${r.tint}`}>0{i + 1}</span>
-                  <span className="text-base">{r.emoji}</span>
-                  <span className="font-semibold text-sm sm:text-base">{r.title}</span>
+              <button
+                onClick={() => setOpenIdx(prev => prev === i ? null : i)}
+                className="w-full flex items-center gap-3 px-4 py-3.5 text-left min-h-11"
+              >
+                <div className={`w-1.5 self-stretch rounded-full ${r.tint.replace("text-", "bg-").replace("-300", "-500")}`} />
+                <span className={`text-xs font-mono font-bold ${r.tint}`}>0{i + 1}</span>
+                <span className="text-base leading-none">{r.emoji}</span>
+                <span className="font-semibold text-sm sm:text-base flex-1">{r.title}</span>
+                <ChevronDown
+                  size={18}
+                  className={`text-muted-foreground transition-transform duration-200 shrink-0 ${isOpen ? "rotate-180" : ""}`}
+                />
+              </button>
+              <div
+                className={`overflow-hidden transition-[max-height] duration-200 ease-out ${isOpen ? "max-h-60" : "max-h-0"}`}
+              >
+                <div className={`px-4 pb-3.5 pt-2 text-sm text-muted-foreground leading-relaxed border-t ${r.border} bg-gradient-to-br ${r.color}`}>
+                  {r.text}
                 </div>
-                <div className="text-xs sm:text-sm text-muted-foreground leading-snug">{r.text}</div>
               </div>
-            </li>
+            </div>
           );
         })}
-      </ol>
+      </div>
 
       <div className="rounded-xl bg-secondary/60 border border-border p-4 text-sm text-muted-foreground flex gap-3">
         <ShieldCheck size={18} className="text-primary shrink-0 mt-0.5" />
@@ -2523,7 +2689,7 @@ ${disliked || "—"}
   };
 
   return (
-    <div className="space-y-6 max-w-3xl">
+    <div className="space-y-6 max-w-3xl max-w-full overflow-hidden">
       <SectionHead
         title="Обратная связь по приложению"
         subtitle="Поделитесь впечатлениями — это поможет сделать Coach Space лучше."
@@ -2636,7 +2802,7 @@ function EricksonStar() {
   const principle = ERICKSON_PRINCIPLES[active];
 
   return (
-    <div className="space-y-5 max-w-4xl mx-auto">
+    <div className="space-y-5 max-w-4xl mx-auto max-w-full overflow-hidden">
       <SectionHead title="Звезда Принципов Эриксона" subtitle="Философский фундамент коучинга · 5 опор" />
 
       <div className="relative rounded-3xl border border-amber-500/40 bg-gradient-to-br from-indigo-950 via-violet-900 to-slate-800 p-4 sm:p-8 overflow-hidden">
@@ -2870,7 +3036,7 @@ function Eisenhower({ notes, setNotes }: { notes: string; setNotes: (v: string) 
   };
 
   return (
-    <div className="max-w-5xl mx-auto rounded-2xl border border-border bg-gradient-to-br from-sky-50 via-indigo-100 to-violet-200 text-slate-900 p-3 sm:p-5 space-y-4">
+    <div className="max-w-5xl mx-auto rounded-2xl border border-border bg-gradient-to-br from-sky-50 via-indigo-100 to-violet-200 text-slate-900 p-3 sm:p-5 space-y-4 max-w-full overflow-hidden">
       <div className="flex items-start gap-3">
         <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-500 to-rose-600 grid place-items-center shadow-lg shrink-0">
           <LayoutGrid size={22} className="text-white" />
@@ -3147,7 +3313,7 @@ function SmartGoal({ notes, setNotes }: { notes: string; setNotes: (v: string) =
   };
 
   return (
-    <div className="rounded-3xl bg-gradient-to-br from-indigo-50 via-fuchsia-50 to-amber-50 text-slate-900 border border-fuchsia-200 p-4 sm:p-6 shadow-xl">
+    <div className="rounded-3xl bg-gradient-to-br from-indigo-50 via-fuchsia-50 to-amber-50 text-slate-900 border border-fuchsia-200 p-4 sm:p-6 shadow-xl max-w-full overflow-hidden">
       <div className="flex items-start justify-between gap-3 mb-4">
         <div>
           <h2 className="text-xl sm:text-2xl font-bold flex items-center gap-2">
@@ -3427,7 +3593,7 @@ function Competencies() {
   const list = tab === "leonard" ? LEONARD_COMPS : ICU_COMPS;
 
   return (
-    <div className="max-w-3xl mx-auto space-y-3">
+    <div className="max-w-3xl mx-auto space-y-3 max-w-full overflow-hidden">
       <div className="flex items-center gap-2 px-1">
         <GraduationCap size={20} className="text-primary" />
         <h2 className="text-lg font-bold">16 Компетенций Коуча</h2>
