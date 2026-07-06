@@ -1417,48 +1417,101 @@ function Nlu() {
     <div className="space-y-6 max-w-full overflow-hidden">
       <SectionHead title="Пирамида Дилтса" subtitle="Неврологические уровни изменений — коснитесь уровня" />
 
-      {/* PYRAMID — tappable trapezoids with labels */}
-      <div className="mx-auto w-full max-w-[360px]">
-        <div className="relative" style={{ height: rows * ROW_H }}>
+      {/* PYRAMID — SVG tappable trapezoids with labels */}
+      <div className="mx-auto w-full max-w-[360px]" style={{ height: rows * ROW_H }}>
+        <svg viewBox={`0 0 360 ${rows * ROW_H}`} width="100%" height="100%" className="block">
           {DILTS.map((lv, i) => {
             const Icon = lv.icon;
             const isActive = active === lv.n;
             const topHalf = (i / rows) * 50;
             const botHalf = ((i + 1) / rows) * 50;
-            const clip = `polygon(${50 - topHalf}% 0%, ${50 + topHalf}% 0%, ${50 + botHalf}% 100%, ${50 - botHalf}% 100%)`;
-            const iconSize = i === 0 ? 14 : i === 1 ? 18 : 22;
-            const showLabel = i >= 1; // top apex too narrow for text
+            const W = 360;
+            const leftTop = (50 - topHalf) / 100 * W;
+            const rightTop = (50 + topHalf) / 100 * W;
+            const leftBottom = (50 - botHalf) / 100 * W;
+            const rightBottom = (50 + botHalf) / 100 * W;
+            const points = `${leftTop},0 ${rightTop},0 ${rightBottom},${ROW_H} ${leftBottom},${ROW_H}`;
+            const bandLeft = Math.min(leftTop, leftBottom);
+            const bandRight = Math.max(rightTop, rightBottom);
+            const bandWidth = bandRight - bandLeft;
+            const pad = 8;
+            const foX = bandLeft + pad;
+            const foWidth = Math.max(24, bandWidth - pad * 2);
+            const foY = 4;
+            const foHeight = ROW_H - 8;
+            const showIcon = true;
+            const showLabel = i >= 2;
+            const iconSize = i === 0 ? 16 : i === 1 ? 24 : 22;
+            const fontSize = i === 2 ? 10 : 11;
+            const textViewBox = i === 2 ? "0 0 120 40" : "0 0 120 24";
+            const textBaseY = i === 2 ? 14 : "50%";
             return (
-              <button
-                key={lv.n}
-                onClick={() => setActive(lv.n)}
-                className="absolute left-0 right-0 flex items-center justify-center gap-2 transition-all duration-200 active:scale-[0.98]"
-                style={{
-                  top: i * ROW_H,
-                  height: ROW_H,
-                  background: lv.hex,
-                  clipPath: clip,
-                  filter: isActive ? "brightness(1.15) saturate(1.2)" : "none",
-                  boxShadow: isActive
-                    ? `inset 0 0 0 2px rgba(255,255,255,0.7), 0 0 24px ${lv.hex}80`
-                    : "none",
-                }}
-                aria-label={lv.name}
-              >
-                <Icon size={iconSize} className="text-white drop-shadow shrink-0" strokeWidth={2.4} />
-                {showLabel && (
-                  <span
-                    className="text-white font-extrabold tracking-wide drop-shadow whitespace-nowrap"
-                    style={{ fontSize: i === 1 ? 9 : i === 2 ? 10 : 11 }}
-                  >
-                    {lv.name}
-                  </span>
-                )}
-
-              </button>
+              <g key={lv.n} transform={`translate(0, ${i * ROW_H})`}>
+                <g className="transition-transform duration-100 active:scale-[0.98]" style={{ transformOrigin: "50% 50%", transformBox: "fill-box" }}>
+                  <polygon
+                    points={points}
+                    fill={lv.hex}
+                    style={{
+                      filter: isActive
+                        ? `brightness(1.15) saturate(1.2) drop-shadow(0 0 24px ${lv.hex})`
+                        : "none",
+                    }}
+                  />
+                  <foreignObject x={foX} y={foY} width={foWidth} height={foHeight} style={{ pointerEvents: "none" }}>
+                    <div className="flex items-center justify-center h-full w-full gap-1">
+                      <Icon size={iconSize} className="text-white drop-shadow shrink-0" strokeWidth={2.4} />
+                      {showLabel && (
+                        <svg width="100%" height="100%" viewBox={textViewBox} style={{ pointerEvents: "none" }}>
+                          <text
+                            x="60"
+                            y={textBaseY}
+                            textAnchor="middle"
+                            fill="white"
+                            dominantBaseline={i === 2 ? "auto" : "middle"}
+                            style={{
+                              fontSize,
+                              fontWeight: 800,
+                              textShadow: "0 1px 2px rgba(0,0,0,0.4)",
+                              pointerEvents: "none",
+                            }}
+                          >
+                            {i === 2 ? (
+                              <>
+                                <tspan x="60" dy="0">УБЕЖДЕНИЯ</tspan>
+                                <tspan x="60" dy="1.2em">И ЦЕННОСТИ</tspan>
+                              </>
+                            ) : (
+                              lv.name
+                            )}
+                          </text>
+                        </svg>
+                      )}
+                    </div>
+                  </foreignObject>
+                  <rect
+                    x={bandLeft}
+                    y={0}
+                    width={bandWidth}
+                    height={ROW_H}
+                    fill="transparent"
+                    className="cursor-pointer"
+                    style={{ pointerEvents: "all" }}
+                    onClick={() => setActive(lv.n)}
+                    role="button"
+                    aria-label={lv.name}
+                    tabIndex={0}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" || e.key === " ") {
+                        e.preventDefault();
+                        setActive(lv.n);
+                      }
+                    }}
+                  />
+                </g>
+              </g>
             );
           })}
-        </div>
+        </svg>
         <p className="text-center text-xs text-muted-foreground mt-3">
           Коснитесь уровня, чтобы узнать больше
         </p>
