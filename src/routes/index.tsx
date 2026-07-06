@@ -583,7 +583,7 @@ ${notes || "—"}
             {tab === "sos" && <SosMemo />}
             {tab === "rapport" && <RapportMemo />}
             {tab === "smart" && <SmartGoalMemo />}
-            {tab === "eisenhower" && <EisenhowerMemo notes={notes} setNotes={setNotes} />}
+            {tab === "eisenhower" && <EisenhowerMemo />}
             {tab === "burger" && <BurgerMemo />}
             {tab === "erickson" && <EricksonStarMemo />}
             {tab === "rules" && <BurgerRulesMemo />}
