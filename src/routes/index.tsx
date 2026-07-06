@@ -693,7 +693,8 @@ function SwipeableTabContent({
       tracking.current = false;
       return;
     }
-    containerRef.current.setPointerCapture(e.pointerId);
+    // NOTE: do NOT setPointerCapture here — it would steal click events from buttons.
+    // We capture only after we've decided the gesture is a horizontal swipe (in onPointerMove).
     startX.current = e.clientX;
     startY.current = e.clientY;
     startTime.current = e.timeStamp;
@@ -701,6 +702,7 @@ function SwipeableTabContent({
     tracking.current = true;
     decidedHorizontal.current = null;
   };
+
 
 
   const rafId = useRef<number | null>(null);
@@ -714,7 +716,11 @@ function SwipeableTabContent({
     if (decidedHorizontal.current === null) {
       if (Math.abs(dx) < 6 && Math.abs(dy) < 6) return;
       decidedHorizontal.current = Math.abs(dx) > Math.abs(dy) * 1.2;
+      if (decidedHorizontal.current && containerRef.current) {
+        try { containerRef.current.setPointerCapture(e.pointerId); } catch {}
+      }
     }
+
 
     if (!decidedHorizontal.current) return;
 
@@ -1411,55 +1417,65 @@ function Nlu() {
     <div className="space-y-6 max-w-full overflow-hidden">
       <SectionHead title="Пирамида Дилтса" subtitle="Неврологические уровни изменений — коснитесь уровня" />
 
-      {/* PYRAMID — tappable trapezoids with labels */}
-      <div className="mx-auto w-full max-w-[360px]">
-        <div className="relative" style={{ height: rows * ROW_H }}>
+      {/* PYRAMID — SVG trapezoids + HTML icon/tap overlay (reliable on iOS Safari) */}
+      <div className="relative mx-auto w-full max-w-[360px]" style={{ height: rows * ROW_H }}>
+        <svg viewBox={`0 0 360 ${rows * ROW_H}`} width="100%" height="100%" className="block absolute inset-0" preserveAspectRatio="none">
           {DILTS.map((lv, i) => {
-            const Icon = lv.icon;
             const isActive = active === lv.n;
             const topHalf = (i / rows) * 50;
             const botHalf = ((i + 1) / rows) * 50;
-            const clip = `polygon(${50 - topHalf}% 0%, ${50 + topHalf}% 0%, ${50 + botHalf}% 100%, ${50 - botHalf}% 100%)`;
-            const iconSize = i === 0 ? 14 : i === 1 ? 18 : 22;
-            const showLabel = i >= 1; // top apex too narrow for text
+            const W = 360;
+            const leftTop = (50 - topHalf) / 100 * W;
+            const rightTop = (50 + topHalf) / 100 * W;
+            const leftBottom = (50 - botHalf) / 100 * W;
+            const rightBottom = (50 + botHalf) / 100 * W;
+            const points = `${leftTop},${i * ROW_H} ${rightTop},${i * ROW_H} ${rightBottom},${(i + 1) * ROW_H} ${leftBottom},${(i + 1) * ROW_H}`;
+            return (
+              <polygon
+                key={lv.n}
+                points={points}
+                fill={lv.hex}
+                style={{
+                  filter: isActive
+                    ? `brightness(1.15) saturate(1.2) drop-shadow(0 0 24px ${lv.hex})`
+                    : "none",
+                }}
+              />
+            );
+          })}
+        </svg>
+        {/* HTML overlay — icons + tap targets */}
+        <div className="absolute inset-0">
+          {DILTS.map((lv, i) => {
+            const Icon = lv.icon;
+            const topHalf = (i / rows) * 50;
+            const botHalf = ((i + 1) / rows) * 50;
+            const bandWidthPct = Math.max(topHalf, botHalf) * 2; // %
+            const iconSize = Math.max(18, Math.min(30, Math.floor((bandWidthPct / 100) * 360 / 4)));
             return (
               <button
                 key={lv.n}
+                type="button"
                 onClick={() => setActive(lv.n)}
-                className="absolute left-0 right-0 flex items-center justify-center gap-2 transition-all duration-200 active:scale-[0.98]"
-                style={{
-                  top: i * ROW_H,
-                  height: ROW_H,
-                  background: lv.hex,
-                  clipPath: clip,
-                  filter: isActive ? "brightness(1.15) saturate(1.2)" : "none",
-                  boxShadow: isActive
-                    ? `inset 0 0 0 2px rgba(255,255,255,0.7), 0 0 24px ${lv.hex}80`
-                    : "none",
-                }}
                 aria-label={lv.name}
+                className="absolute left-0 right-0 flex items-center justify-center cursor-pointer transition-transform duration-100 active:scale-[0.97]"
+                style={{ top: i * ROW_H, height: ROW_H, background: "transparent", border: 0, padding: 0 }}
               >
                 <Icon size={iconSize} className="text-white drop-shadow shrink-0" strokeWidth={2.4} />
-                {showLabel && (
-                  <span
-                    className="text-white font-extrabold tracking-wide drop-shadow truncate"
-                    style={{ fontSize: i === 1 ? 10 : i === 2 ? 11 : 12 }}
-                  >
-                    {lv.name}
-                  </span>
-                )}
               </button>
             );
           })}
         </div>
-        <p className="text-center text-xs text-muted-foreground mt-3">
-          Коснитесь уровня, чтобы узнать больше
-        </p>
       </div>
+      <p className="text-center text-xs text-muted-foreground mt-3">
+        Коснитесь уровня, чтобы узнать больше
+      </p>
+
 
       {/* iOS-style bottom sheet */}
       <Drawer open={active != null} onOpenChange={(o) => { if (!o) setActive(null); }}>
-        <DrawerContent>
+        <DrawerContent className="z-[9999]">
+
           {activeLevel && (
             <>
               <DrawerHeader className="text-left">
@@ -2258,40 +2274,93 @@ const ROLES = [
 ];
 function Sos() {
   const [active, setActive] = useState<string | null>(null);
+  const [sosOpen, setSosOpen] = useState(false);
+  const activeRole = ROLES.find((r) => r.name === active) || null;
+  const roleAccent: Record<string, string> = {
+    "Спасатель": "#0ea5e9",
+    "Жертва": "#f59e0b",
+    "Преследователь": "#e11d48",
+  };
   return (
     <div className="space-y-6 max-w-full overflow-hidden">
       <SectionHead title="SOS · Треугольник Карпмана" subtitle="Шпаргалка-предохранитель для растождествления" />
 
       <div className="bg-card rounded-2xl border border-border p-4 sm:p-6">
         <p className="text-xs text-center text-muted-foreground mb-3">
-          Нажмите на роль, чтобы увидеть признаки, антидот и SOS-вопросы. В центре — точка растождествления.
+          Нажмите на роль или на центр SOS, чтобы увидеть подробности.
         </p>
-        <KarpmanTriangleSvg active={active} onSelect={(r) => setActive(active === r ? null : r)} />
+        <KarpmanTriangleSvg
+          active={active}
+          onSelect={(r) => setActive(r)}
+          onSosSelect={() => setSosOpen(true)}
+        />
       </div>
 
-      <div className="grid md:grid-cols-3 gap-4">
-        {ROLES.map((r) => {
-          const isActive = active === r.name;
-          return (
-            <div
-              key={r.name}
-              onClick={() => setActive(isActive ? null : r.name)}
-              className={`p-5 rounded-2xl border-2 cursor-pointer transition-all ${r.color} ${isActive ? "ring-2 ring-primary scale-[1.02]" : ""}`}
-            >
-              <div className="flex items-center gap-2 mb-3">
-                <AlertTriangle size={18} />
-                <h3 className="font-semibold">{r.name}</h3>
+      <Drawer open={!!activeRole} onOpenChange={(o) => { if (!o) setActive(null); }}>
+        <DrawerContent className="z-[9999]">
+          {activeRole && (
+            <>
+              <DrawerHeader className="text-left">
+                <div className="flex items-center gap-3">
+                  <div
+                    className="w-11 h-11 rounded-xl grid place-items-center shrink-0"
+                    style={{ background: roleAccent[activeRole.name] }}
+                  >
+                    <AlertTriangle size={22} className="text-white" />
+                  </div>
+                  <div className="min-w-0">
+                    <DrawerTitle className="text-xl font-extrabold">{activeRole.name}</DrawerTitle>
+                    <DrawerDescription className="text-sm">Роль в треугольнике</DrawerDescription>
+                  </div>
+                </div>
+              </DrawerHeader>
+              <div className="px-4 pb-8 space-y-4">
+                <div>
+                  <div className="text-xs uppercase tracking-wide text-muted-foreground mb-1">Признаки</div>
+                  <ul className="text-sm space-y-1">{activeRole.signs.map((s, i) => <li key={i}>· {s}</li>)}</ul>
+                </div>
+                <div className="rounded-xl p-3" style={{ background: roleAccent[activeRole.name] + "1A" }}>
+                  <div className="text-xs uppercase tracking-wide text-muted-foreground mb-1">Антидот</div>
+                  <p className="text-sm font-semibold">{activeRole.antidote}</p>
+                </div>
+                <div>
+                  <div className="text-xs uppercase tracking-wide text-muted-foreground mb-1">SOS-вопросы</div>
+                  <ul className="text-sm space-y-1">{activeRole.q.map((s, i) => <li key={i}>→ {s}</li>)}</ul>
+                </div>
               </div>
-              <div className="text-xs uppercase tracking-wide text-muted-foreground mb-1">Признаки</div>
-              <ul className="text-sm space-y-1 mb-4">{r.signs.map((s, i) => <li key={i}>· {s}</li>)}</ul>
-              <div className="text-xs uppercase tracking-wide text-muted-foreground mb-1">Антидот</div>
-              <p className="text-sm mb-4 font-medium">{r.antidote}</p>
-              <div className="text-xs uppercase tracking-wide text-muted-foreground mb-1">SOS-вопросы</div>
-              <ul className="text-sm space-y-1">{r.q.map((s, i) => <li key={i}>→ {s}</li>)}</ul>
+            </>
+          )}
+        </DrawerContent>
+      </Drawer>
+
+      <Drawer open={sosOpen} onOpenChange={setSosOpen}>
+        <DrawerContent className="z-[9999]">
+          <DrawerHeader className="text-left">
+            <div className="flex items-center gap-3">
+              <div className="w-11 h-11 rounded-xl grid place-items-center shrink-0 bg-foreground text-background font-black">
+                SOS
+              </div>
+              <div className="min-w-0">
+                <DrawerTitle className="text-xl font-extrabold">Растождествление</DrawerTitle>
+                <DrawerDescription className="text-sm">Точка выхода из треугольника</DrawerDescription>
+              </div>
             </div>
-          );
-        })}
-      </div>
+          </DrawerHeader>
+          <div className="px-4 pb-8 space-y-4">
+            <p className="text-[15px] leading-relaxed text-foreground/90">
+              Растождествление — это способность заметить: «я сейчас в роли», сделать шаг в сторону и увидеть ситуацию со стороны. Не роль управляет тобой, а ты выбираешь ответ.
+            </p>
+            <div className="rounded-xl p-3 bg-muted">
+              <div className="text-xs uppercase tracking-wide text-muted-foreground mb-2">Коуч-вопросы</div>
+              <ul className="text-sm space-y-1.5">
+                <li>→ В какой роли я сейчас нахожусь?</li>
+                <li>→ Что я выбираю вместо этой роли?</li>
+                <li>→ Какой мой следующий взрослый шаг?</li>
+              </ul>
+            </div>
+          </div>
+        </DrawerContent>
+      </Drawer>
     </div>
   );
 }
@@ -3245,7 +3314,7 @@ function Eisenhower() {
             <button
               key={q.key}
               onClick={() => setOpenKey(q.key)}
-              className={`rounded-2xl border ${q.border} ${q.lightBg} p-4 sm:p-5 text-left flex flex-col gap-2 active:scale-[0.98] transition-transform shadow-sm hover:shadow-md`}
+              className={`rounded-2xl border ${q.border} ${q.lightBg} p-4 sm:p-5 text-left flex flex-col gap-2 active:scale-[0.97] transition-transform duration-100 shadow-sm hover:shadow-md cursor-pointer`}
             >
               <div className="flex items-center gap-2">
                 <div className={`w-8 h-8 rounded-lg ${q.color} grid place-items-center shadow-sm`}>
@@ -3267,7 +3336,7 @@ function Eisenhower() {
       </div>
 
       <Drawer open={!!openKey} onOpenChange={(v) => !v && setOpenKey(null)}>
-        <DrawerContent>
+        <DrawerContent className="z-[9999]">
           {active && (
             <>
               <DrawerHeader>
