@@ -696,6 +696,9 @@ function SwipeableTabContent({
     decidedHorizontal.current = null;
   };
 
+  const rafId = useRef<number | null>(null);
+  const pendingDrag = useRef(0);
+
   const onPointerMove = (e: React.PointerEvent) => {
     if (!tracking.current) return;
     const dx = e.clientX - startX.current;
@@ -709,8 +712,15 @@ function SwipeableTabContent({
     if (!decidedHorizontal.current) return;
 
     deltaX.current = dx;
-    setDragX(Math.max(-120, Math.min(120, dx * 0.5)));
+    pendingDrag.current = Math.max(-120, Math.min(120, dx * 0.5));
+    if (rafId.current == null) {
+      rafId.current = requestAnimationFrame(() => {
+        rafId.current = null;
+        setDragX(pendingDrag.current);
+      });
+    }
   };
+
 
   const onPointerUp = (e: React.PointerEvent) => {
     if (!tracking.current) return;
