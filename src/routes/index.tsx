@@ -499,7 +499,7 @@ ${notes || "—"}
                   }
                 }}
                 onClick={() => setTab(t.id)}
-                className={`flex items-center gap-2 px-3 min-h-11 text-xs rounded-lg transition-all duration-200 min-w-0 max-w-[140px] ${
+                className={`flex items-center gap-2 px-3 min-h-11 text-xs rounded-lg transition-all duration-200 max-w-[140px] ${
                   active
                     ? "bg-primary text-primary-foreground scale-[1.02]"
                     : "text-muted-foreground hover:bg-secondary"
