@@ -1417,7 +1417,7 @@ function Nlu() {
     <div className="space-y-6 max-w-full overflow-hidden">
       <SectionHead title="Пирамида Дилтса" subtitle="Неврологические уровни изменений — коснитесь уровня" />
 
-      {/* PYRAMID — SVG tappable trapezoids with labels */}
+      {/* PYRAMID — SVG tappable trapezoids, icon-only */}
       <div className="mx-auto w-full max-w-[360px]" style={{ height: rows * ROW_H }}>
         <svg viewBox={`0 0 360 ${rows * ROW_H}`} width="100%" height="100%" className="block">
           {DILTS.map((lv, i) => {
@@ -1439,12 +1439,7 @@ function Nlu() {
             const foWidth = Math.max(24, bandWidth - pad * 2);
             const foY = 4;
             const foHeight = ROW_H - 8;
-            const showIcon = true;
-            const showLabel = i >= 2;
-            const iconSize = i === 0 ? 16 : i === 1 ? 24 : 22;
-            const fontSize = i === 2 ? 10 : 11;
-            const textViewBox = i === 2 ? "0 0 120 40" : "0 0 120 24";
-            const textBaseY = i === 2 ? 14 : "50%";
+            const iconSize = Math.max(18, Math.min(30, Math.floor(bandWidth / 4)));
             return (
               <g key={lv.n} transform={`translate(0, ${i * ROW_H})`}>
                 <g className="transition-transform duration-100 active:scale-[0.98]" style={{ transformOrigin: "50% 50%", transformBox: "fill-box" }}>
@@ -1458,34 +1453,8 @@ function Nlu() {
                     }}
                   />
                   <foreignObject x={foX} y={foY} width={foWidth} height={foHeight} style={{ pointerEvents: "none" }}>
-                    <div className="flex items-center justify-center h-full w-full gap-1">
+                    <div className="flex items-center justify-center h-full w-full">
                       <Icon size={iconSize} className="text-white drop-shadow shrink-0" strokeWidth={2.4} />
-                      {showLabel && (
-                        <svg width="100%" height="100%" viewBox={textViewBox} style={{ pointerEvents: "none" }}>
-                          <text
-                            x="60"
-                            y={textBaseY}
-                            textAnchor="middle"
-                            fill="white"
-                            dominantBaseline={i === 2 ? "auto" : "middle"}
-                            style={{
-                              fontSize,
-                              fontWeight: 800,
-                              textShadow: "0 1px 2px rgba(0,0,0,0.4)",
-                              pointerEvents: "none",
-                            }}
-                          >
-                            {i === 2 ? (
-                              <>
-                                <tspan x="60" dy="0">УБЕЖДЕНИЯ</tspan>
-                                <tspan x="60" dy="1.2em">И ЦЕННОСТИ</tspan>
-                              </>
-                            ) : (
-                              lv.name
-                            )}
-                          </text>
-                        </svg>
-                      )}
                     </div>
                   </foreignObject>
                   <rect
