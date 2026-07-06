@@ -121,47 +121,41 @@ function Nlu() {
       </p>
 
 
-      {/* iOS-style bottom sheet */}
-      <Drawer open={active != null} onOpenChange={(o) => { if (!o) setActive(null); }}>
-        <DrawerContent className="z-[9999]">
-
-          {activeLevel && (
-            <>
-              <DrawerHeader className="text-left">
-                <div className="flex items-center gap-3 mb-1">
-                  <div
-                    className="w-11 h-11 rounded-xl grid place-items-center shrink-0"
-                    style={{ background: activeLevel.hex }}
-                  >
-                    <span className="text-white font-black text-lg">{activeLevel.n}</span>
-                  </div>
-                  <div className="min-w-0">
-                    <DrawerTitle className={`text-xl font-extrabold ${activeLevel.textColor}`}>
-                      {activeLevel.name}
-                    </DrawerTitle>
-                    <DrawerDescription className="text-sm">
-                      {activeLevel.q}
-                    </DrawerDescription>
-                  </div>
-                </div>
-              </DrawerHeader>
-              <div className="px-4 pb-8 space-y-3">
-                <p className="text-[15px] leading-relaxed text-foreground/90">
-                  {activeLevel.desc}
-                </p>
-                <div
-                  className="rounded-xl p-3"
-                  style={{ background: activeLevel.hex + "1A" }}
-                >
-                  <p className={`text-sm font-semibold ${activeLevel.textColor}`}>
-                    ▸ {activeLevel.focus}
-                  </p>
-                </div>
+      {/* Inline expand for active level */}
+      {activeLevel && (
+        <div className="rounded-2xl border border-border bg-card p-4 space-y-3">
+          <div className="flex items-center gap-3">
+            <div
+              className="w-11 h-11 rounded-xl grid place-items-center shrink-0"
+              style={{ background: activeLevel.hex }}
+            >
+              <span className="text-white font-black text-lg">{activeLevel.n}</span>
+            </div>
+            <div className="min-w-0 flex-1">
+              <div className={`text-lg font-extrabold ${activeLevel.textColor}`}>
+                {activeLevel.name}
               </div>
-            </>
-          )}
-        </DrawerContent>
-      </Drawer>
+              <div className="text-sm text-muted-foreground">{activeLevel.q}</div>
+            </div>
+            <button
+              type="button"
+              onClick={() => setActive(null)}
+              className="text-xs text-muted-foreground px-2 py-1 rounded-md hover:bg-muted"
+              aria-label="Закрыть"
+            >
+              ✕
+            </button>
+          </div>
+          <p className="text-[15px] leading-relaxed text-foreground/90">
+            {activeLevel.desc}
+          </p>
+          <div className="rounded-xl p-3" style={{ background: activeLevel.hex + "1A" }}>
+            <p className={`text-sm font-semibold ${activeLevel.textColor}`}>
+              ▸ {activeLevel.focus}
+            </p>
+          </div>
+        </div>
+      )}
 
 
       {/* HOW-TO — 4 colored cards as in reference */}
