@@ -547,75 +547,45 @@ ${notes || "—"}
         </aside>
 
         <main className="flex-1 min-w-0 px-4 sm:px-6 md:px-0 py-6">
-          <SwipeableTabContent
-            tabId={tab}
-            onSwipeLeft={() => {
-              const i = TABS.findIndex((t) => t.id === tab);
-              if (i < TABS.length - 1) setTab(TABS[i + 1].id);
-            }}
-            onSwipeRight={() => {
-              const i = TABS.findIndex((t) => t.id === tab);
-              if (i > 0) setTab(TABS[i - 1].id);
-            }}
-          >
-            {(() => {
-              const activeIdx = TABS.findIndex((t) => t.id === tab);
-              const panels: { id: TabId; node: React.ReactNode }[] = [
-                { id: "session", node: (
-                  <SessionPanelMemo
-                    duration={duration}
-                    setDuration={changeDuration}
-                    remaining={remaining}
-                    running={running}
-                    setRunning={handleSetRunning}
-                    reset={resetTimer}
-                    mmss={mmss}
-                    clientName={clientName}
-                    setClientName={setClientName}
-                    topic={topic}
-                    setTopic={setTopic}
-                    notes={notes}
-                    setNotes={setNotes}
-                    exportSession={exportSession}
-                    testSound={testSound}
-                  />
-                )},
-                { id: "grow", node: <GrowMemo /> },
-                { id: "swot", node: <SwotMemo /> },
-                { id: "nlu", node: <NluMemo /> },
-                { id: "sos", node: <SosMemo /> },
-                { id: "rapport", node: <RapportMemo /> },
-                { id: "smart", node: <SmartGoalMemo /> },
-                { id: "eisenhower", node: <EisenhowerMemo /> },
-                { id: "burger", node: <BurgerMemo /> },
-                { id: "erickson", node: <EricksonStarMemo /> },
-                { id: "rules", node: <BurgerRulesMemo /> },
-                { id: "balance", node: <BalanceMemo scores={balanceScores} onChange={setBalanceScores} /> },
-                { id: "values", node: <ValuesMemo /> },
-                { id: "supervision", node: <SupervisionMemo /> },
-                { id: "feedback", node: <FeedbackMemo /> },
-                { id: "competencies", node: <CompetenciesMemo /> },
-              ];
-              return panels.map((p, idx) => {
-                const isActive = p.id === tab;
-                const isAdjacent = Math.abs(idx - activeIdx) === 1;
-                if (!isActive && !isAdjacent) return null;
-                return (
-                  <div
-                    key={p.id}
-                    style={{
-                      display: isActive ? "block" : "none",
-                      contentVisibility: isActive ? "visible" : ("auto" as any),
-                      transform: "translateZ(0)",
-                      willChange: "transform, opacity",
-                    }}
-                  >
-                    {p.node}
-                  </div>
-                );
-              });
-            })()}
-          </SwipeableTabContent>
+          {(() => {
+            const panels: { id: TabId; node: React.ReactNode }[] = [
+              { id: "session", node: (
+                <SessionPanelMemo
+                  duration={duration}
+                  setDuration={changeDuration}
+                  remaining={remaining}
+                  running={running}
+                  setRunning={handleSetRunning}
+                  reset={resetTimer}
+                  mmss={mmss}
+                  clientName={clientName}
+                  setClientName={setClientName}
+                  topic={topic}
+                  setTopic={setTopic}
+                  notes={notes}
+                  setNotes={setNotes}
+                  exportSession={exportSession}
+                  testSound={testSound}
+                />
+              )},
+              { id: "grow", node: <GrowMemo /> },
+              { id: "swot", node: <SwotMemo /> },
+              { id: "nlu", node: <NluMemo /> },
+              { id: "sos", node: <SosMemo /> },
+              { id: "rapport", node: <RapportMemo /> },
+              { id: "smart", node: <SmartGoalMemo /> },
+              { id: "eisenhower", node: <EisenhowerMemo /> },
+              { id: "burger", node: <BurgerMemo /> },
+              { id: "erickson", node: <EricksonStarMemo /> },
+              { id: "rules", node: <BurgerRulesMemo /> },
+              { id: "balance", node: <BalanceMemo scores={balanceScores} onChange={setBalanceScores} /> },
+              { id: "values", node: <ValuesMemo /> },
+              { id: "supervision", node: <SupervisionMemo /> },
+              { id: "feedback", node: <FeedbackMemo /> },
+              { id: "competencies", node: <CompetenciesMemo /> },
+            ];
+            return panels.find((p) => p.id === tab)?.node ?? null;
+          })()}
         </main>
 
 
@@ -653,183 +623,6 @@ ${notes || "—"}
     </div>
   );
 }
-
-/* ---------- Swipeable tab content (iOS-like horizontal swipe) ---------- */
-function SwipeableTabContent({
-  tabId,
-  onSwipeLeft,
-  onSwipeRight,
-  children,
-}: {
-  tabId: string;
-  onSwipeLeft: () => void;
-  onSwipeRight: () => void;
-  children: React.ReactNode;
-}) {
-  const startX = useRef(0);
-  const startY = useRef(0);
-  const startTime = useRef(0);
-  const deltaX = useRef(0);
-  const tracking = useRef(false);
-  const decidedHorizontal = useRef<null | boolean>(null);
-  const innerRef = useRef<HTMLDivElement>(null);
-  const [dragX, setDragX] = useState(0);
-  const [animKey, setAnimKey] = useState(tabId);
-  const [enterFrom, setEnterFrom] = useState<"left" | "right" | null>(null);
-  const containerRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    setAnimKey(tabId);
-  }, [tabId]);
-
-  const THRESHOLD = 20;
-  const VELOCITY_THRESHOLD = 0.3; // px/ms
-  const rafId = useRef<number | null>(null);
-  const pendingDrag = useRef(0);
-
-
-
-  // Native listeners with { passive: true } so iOS WebKit never has to wait
-  // for a possible preventDefault. We never call preventDefault here.
-  useEffect(() => {
-    const el = containerRef.current;
-    if (!el) return;
-
-    const handleStart = (clientX: number, clientY: number, timeStamp: number, target: EventTarget | null) => {
-      const t = target as HTMLElement | null;
-      if (t && t.closest('input, textarea, select, [contenteditable="true"]')) {
-        tracking.current = false;
-        return;
-      }
-      startX.current = clientX;
-      startY.current = clientY;
-      startTime.current = timeStamp;
-      deltaX.current = 0;
-      tracking.current = true;
-      decidedHorizontal.current = null;
-    };
-
-    const handleMove = (clientX: number, clientY: number, e: Event) => {
-      if (!tracking.current) return;
-      const dx = clientX - startX.current;
-      const dy = clientY - startY.current;
-
-      if (decidedHorizontal.current === null) {
-        if (Math.abs(dx) < 6 && Math.abs(dy) < 6) return;
-        decidedHorizontal.current = Math.abs(dx) > Math.abs(dy) * 1.2;
-        // Only after we've confirmed a horizontal swipe do we stop propagation
-        // to sibling handlers. We still do NOT preventDefault — the listener
-        // is passive and iOS keeps native scroll behavior.
-        if (decidedHorizontal.current) {
-          e.stopPropagation();
-        }
-      }
-      if (!decidedHorizontal.current) return;
-
-      deltaX.current = dx;
-      pendingDrag.current = Math.max(-120, Math.min(120, dx * 0.5));
-      if (rafId.current == null) {
-        rafId.current = requestAnimationFrame(() => {
-          rafId.current = null;
-          setDragX(pendingDrag.current);
-        });
-      }
-    };
-
-    const handleEnd = (timeStamp: number) => {
-      if (!tracking.current) return;
-      tracking.current = false;
-      const dx = deltaX.current;
-      const elapsed = timeStamp - startTime.current;
-      const velocity = elapsed > 0 ? Math.abs(dx) / elapsed : 0;
-      setDragX(0);
-
-      const fastFlick = velocity > VELOCITY_THRESHOLD;
-      const farEnough = Math.abs(dx) >= THRESHOLD;
-
-      if (decidedHorizontal.current && (farEnough || fastFlick)) {
-        if (dx < 0) {
-          setEnterFrom("right");
-          onSwipeLeft();
-        } else {
-          setEnterFrom("left");
-          onSwipeRight();
-        }
-      }
-      decidedHorizontal.current = null;
-    };
-
-    const handleCancel = () => {
-      tracking.current = false;
-      setDragX(0);
-      decidedHorizontal.current = null;
-    };
-
-    const onTouchStart = (e: TouchEvent) => {
-      const t = e.touches[0];
-      if (!t) return;
-      handleStart(t.clientX, t.clientY, e.timeStamp, e.target);
-    };
-    const onTouchMove = (e: TouchEvent) => {
-      const t = e.touches[0];
-      if (!t) return;
-      handleMove(t.clientX, t.clientY, e);
-    };
-    const onTouchEnd = (e: TouchEvent) => handleEnd(e.timeStamp);
-
-    // Passive listeners — iOS will never block the main thread waiting for
-    // a possible preventDefault call.
-    el.addEventListener("touchstart", onTouchStart, { passive: true });
-    el.addEventListener("touchmove", onTouchMove, { passive: true });
-    el.addEventListener("touchend", onTouchEnd, { passive: true });
-    el.addEventListener("touchcancel", handleCancel, { passive: true });
-
-    return () => {
-      el.removeEventListener("touchstart", onTouchStart);
-      el.removeEventListener("touchmove", onTouchMove);
-      el.removeEventListener("touchend", onTouchEnd);
-      el.removeEventListener("touchcancel", handleCancel);
-    };
-  }, [onSwipeLeft, onSwipeRight]);
-
-  return (
-    <div
-      ref={containerRef}
-      style={{ touchAction: "pan-y", transform: "translateZ(0)", willChange: "transform" }}
-    >
-
-      <div
-        ref={innerRef}
-        key={animKey}
-        style={{
-          transform: `translate3d(${dragX}px, 0, 0)`,
-          transition: dragX === 0
-            ? "transform 150ms ease-out, opacity 150ms ease-out"
-            : "none",
-          willChange: "transform, opacity",
-          backfaceVisibility: "hidden",
-          animation: enterFrom
-            ? `${enterFrom === "right" ? "swipe-in-right" : "swipe-in-left"} 150ms ease-out`
-            : undefined,
-        }}
-      >
-        {children}
-      </div>
-      <style>{`
-        @keyframes swipe-in-right {
-          from { transform: translate3d(24px, 0, 0); opacity: 0.6; }
-          to   { transform: translate3d(0, 0, 0);    opacity: 1; }
-        }
-        @keyframes swipe-in-left {
-          from { transform: translate3d(-24px, 0, 0); opacity: 0.6; }
-          to   { transform: translate3d(0, 0, 0);     opacity: 1; }
-        }
-      `}</style>
-    </div>
-  );
-}
-
-
 
 /* ---------- Session ---------- */
 function SessionPanel(p: any) {
