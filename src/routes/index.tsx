@@ -1448,12 +1448,13 @@ function Nlu() {
                 <Icon size={iconSize} className="text-white drop-shadow shrink-0" strokeWidth={2.4} />
                 {showLabel && (
                   <span
-                    className="text-white font-extrabold tracking-wide drop-shadow truncate"
-                    style={{ fontSize: i === 1 ? 10 : i === 2 ? 11 : 12 }}
+                    className="text-white font-extrabold tracking-wide drop-shadow whitespace-nowrap"
+                    style={{ fontSize: i === 1 ? 9 : i === 2 ? 10 : 11 }}
                   >
                     {lv.name}
                   </span>
                 )}
+
               </button>
             );
           })}
