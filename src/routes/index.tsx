@@ -693,7 +693,8 @@ function SwipeableTabContent({
       tracking.current = false;
       return;
     }
-    containerRef.current.setPointerCapture(e.pointerId);
+    // NOTE: do NOT setPointerCapture here — it would steal click events from buttons.
+    // We capture only after we've decided the gesture is a horizontal swipe (in onPointerMove).
     startX.current = e.clientX;
     startY.current = e.clientY;
     startTime.current = e.timeStamp;
@@ -701,6 +702,7 @@ function SwipeableTabContent({
     tracking.current = true;
     decidedHorizontal.current = null;
   };
+
 
 
   const rafId = useRef<number | null>(null);
@@ -714,7 +716,11 @@ function SwipeableTabContent({
     if (decidedHorizontal.current === null) {
       if (Math.abs(dx) < 6 && Math.abs(dy) < 6) return;
       decidedHorizontal.current = Math.abs(dx) > Math.abs(dy) * 1.2;
+      if (decidedHorizontal.current && containerRef.current) {
+        try { containerRef.current.setPointerCapture(e.pointerId); } catch {}
+      }
     }
+
 
     if (!decidedHorizontal.current) return;
 
@@ -1442,12 +1448,13 @@ function Nlu() {
                 <Icon size={iconSize} className="text-white drop-shadow shrink-0" strokeWidth={2.4} />
                 {showLabel && (
                   <span
-                    className="text-white font-extrabold tracking-wide drop-shadow truncate"
-                    style={{ fontSize: i === 1 ? 10 : i === 2 ? 11 : 12 }}
+                    className="text-white font-extrabold tracking-wide drop-shadow whitespace-nowrap"
+                    style={{ fontSize: i === 1 ? 9 : i === 2 ? 10 : 11 }}
                   >
                     {lv.name}
                   </span>
                 )}
+
               </button>
             );
           })}
@@ -1459,7 +1466,8 @@ function Nlu() {
 
       {/* iOS-style bottom sheet */}
       <Drawer open={active != null} onOpenChange={(o) => { if (!o) setActive(null); }}>
-        <DrawerContent>
+        <DrawerContent className="z-[9999]">
+
           {activeLevel && (
             <>
               <DrawerHeader className="text-left">
