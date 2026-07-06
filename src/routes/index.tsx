@@ -2622,7 +2622,7 @@ function BurgerRules() {
                 onClick={() => setOpenIdx(prev => prev === i ? null : i)}
                 className="w-full flex items-center gap-3 px-4 py-3.5 text-left min-h-11"
               >
-                <div className={`w-1 self-stretch rounded-full ${r.tint.replace("text-", "bg-")}`} />
+                <div className={`w-1.5 self-stretch rounded-full ${r.tint.replace("text-", "bg-").replace("-300", "-500")}`} />
                 <span className={`text-xs font-mono font-bold ${r.tint}`}>0{i + 1}</span>
                 <span className="text-base leading-none">{r.emoji}</span>
                 <span className="font-semibold text-sm sm:text-base flex-1">{r.title}</span>
