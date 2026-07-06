@@ -506,7 +506,7 @@ ${notes || "—"}
                 }`}
               >
                 <Icon size={16} />
-                <span className="truncate">{t.label}</span>
+                <span className="truncate min-w-0">{t.label}</span>
               </button>
             );
           })}
