@@ -1548,16 +1548,6 @@ function RadarWithTooltip({ scores, compareValues }: { scores: Record<number, nu
         onSelect={setActive}
         compareValues={compareValues}
       />
-
-  return (
-    <div className="relative w-full max-w-md">
-      <BalanceRadar
-        values={values}
-        labels={labels}
-        colors={BALANCE_COLORS}
-        active={active}
-        onSelect={setActive}
-      />
       {area && I && (
         <div
           className="absolute left-1/2 -translate-x-1/2 -bottom-2 sm:bottom-2 w-[88%] max-w-sm rounded-xl border bg-card/95 backdrop-blur shadow-xl p-3 animate-in fade-in zoom-in-95 duration-200"
