@@ -684,6 +684,10 @@ function SwipeableTabContent({
 
   const THRESHOLD = 20;
   const VELOCITY_THRESHOLD = 0.3; // px/ms
+  const rafId = useRef<number | null>(null);
+  const pendingDrag = useRef(0);
+
+
 
   // Native listeners with { passive: true } so iOS WebKit never has to wait
   // for a possible preventDefault. We never call preventDefault here.
