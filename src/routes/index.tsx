@@ -617,6 +617,115 @@ ${notes || "—"}
   );
 }
 
+/* ---------- Swipeable tab content (iOS-like horizontal swipe) ---------- */
+function SwipeableTabContent({
+  tabId,
+  onSwipeLeft,
+  onSwipeRight,
+  children,
+}: {
+  tabId: string;
+  onSwipeLeft: () => void;
+  onSwipeRight: () => void;
+  children: React.ReactNode;
+}) {
+  const startX = useRef(0);
+  const startY = useRef(0);
+  const deltaX = useRef(0);
+  const tracking = useRef(false);
+  const decidedHorizontal = useRef<null | boolean>(null);
+  const innerRef = useRef<HTMLDivElement>(null);
+  const [dragX, setDragX] = useState(0);
+  const [animKey, setAnimKey] = useState(tabId);
+  const [enterFrom, setEnterFrom] = useState<"left" | "right" | null>(null);
+
+  useEffect(() => {
+    setAnimKey(tabId);
+  }, [tabId]);
+
+  const THRESHOLD = 50;
+
+  const onTouchStart = (e: React.TouchEvent) => {
+    const t = e.touches[0];
+    startX.current = t.clientX;
+    startY.current = t.clientY;
+    deltaX.current = 0;
+    tracking.current = true;
+    decidedHorizontal.current = null;
+  };
+
+  const onTouchMove = (e: React.TouchEvent) => {
+    if (!tracking.current) return;
+    const t = e.touches[0];
+    const dx = t.clientX - startX.current;
+    const dy = t.clientY - startY.current;
+
+    if (decidedHorizontal.current === null) {
+      if (Math.abs(dx) < 8 && Math.abs(dy) < 8) return;
+      decidedHorizontal.current = Math.abs(dx) > Math.abs(dy) * 1.2;
+    }
+
+    if (!decidedHorizontal.current) return;
+
+    deltaX.current = dx;
+    // Damped follow
+    setDragX(Math.max(-120, Math.min(120, dx * 0.5)));
+  };
+
+  const onTouchEnd = () => {
+    if (!tracking.current) return;
+    tracking.current = false;
+    const dx = deltaX.current;
+    setDragX(0);
+    if (decidedHorizontal.current && Math.abs(dx) >= THRESHOLD) {
+      if (dx < 0) {
+        setEnterFrom("right");
+        onSwipeLeft();
+      } else {
+        setEnterFrom("left");
+        onSwipeRight();
+      }
+    }
+    decidedHorizontal.current = null;
+  };
+
+  return (
+    <div
+      onTouchStart={onTouchStart}
+      onTouchMove={onTouchMove}
+      onTouchEnd={onTouchEnd}
+      onTouchCancel={onTouchEnd}
+      style={{ touchAction: "pan-y" }}
+    >
+      <div
+        ref={innerRef}
+        key={animKey}
+        className="will-change-transform"
+        style={{
+          transform: `translateX(${dragX}px)`,
+          transition: dragX === 0 ? "transform 250ms cubic-bezier(0.22, 1, 0.36, 1)" : "none",
+          animation: enterFrom
+            ? `${enterFrom === "right" ? "swipe-in-right" : "swipe-in-left"} 250ms cubic-bezier(0.22, 1, 0.36, 1)`
+            : undefined,
+        }}
+      >
+        {children}
+      </div>
+      <style>{`
+        @keyframes swipe-in-right {
+          from { transform: translateX(24px); opacity: 0.6; }
+          to   { transform: translateX(0);    opacity: 1; }
+        }
+        @keyframes swipe-in-left {
+          from { transform: translateX(-24px); opacity: 0.6; }
+          to   { transform: translateX(0);     opacity: 1; }
+        }
+      `}</style>
+    </div>
+  );
+}
+
+
 /* ---------- Session ---------- */
 function SessionPanel(p: any) {
   return (
