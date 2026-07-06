@@ -3253,7 +3253,7 @@ function Eisenhower() {
             <button
               key={q.key}
               onClick={() => setOpenKey(q.key)}
-              className={`rounded-2xl border ${q.border} ${q.lightBg} p-4 sm:p-5 text-left flex flex-col gap-2 active:scale-[0.98] transition-transform shadow-sm hover:shadow-md`}
+              className={`rounded-2xl border ${q.border} ${q.lightBg} p-4 sm:p-5 text-left flex flex-col gap-2 active:scale-[0.97] transition-transform duration-100 shadow-sm hover:shadow-md cursor-pointer`}
             >
               <div className="flex items-center gap-2">
                 <div className={`w-8 h-8 rounded-lg ${q.color} grid place-items-center shadow-sm`}>
