@@ -296,6 +296,19 @@ export function BalanceRadar({
       })}
       {/* perfect circle reference (ideal wheel) */}
       <circle cx={cx} cy={cy} r={R} fill="none" stroke="#64748b" strokeWidth="1.2" strokeDasharray="4 4" opacity="0.7" />
+      {/* compare polygon (previous snapshot) */}
+      {comparePolygon && (
+        <polygon
+          points={comparePolygon}
+          fill="#64748b"
+          fillOpacity="0.18"
+          stroke="#64748b"
+          strokeWidth="1.6"
+          strokeDasharray="4 3"
+          strokeLinejoin="round"
+          pointerEvents="none"
+        />
+      )}
       {/* user polygon */}
       <polygon points={polygon} fill="url(#radar-fill)" stroke="#c2410c" strokeWidth="2.2" strokeLinejoin="round" pointerEvents="none" />
       {/* invisible wedge hit areas for click/hover */}
