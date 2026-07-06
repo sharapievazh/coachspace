@@ -644,6 +644,7 @@ function SwipeableTabContent({
 }) {
   const startX = useRef(0);
   const startY = useRef(0);
+  const startTime = useRef(0);
   const deltaX = useRef(0);
   const tracking = useRef(false);
   const decidedHorizontal = useRef<null | boolean>(null);
@@ -651,46 +652,54 @@ function SwipeableTabContent({
   const [dragX, setDragX] = useState(0);
   const [animKey, setAnimKey] = useState(tabId);
   const [enterFrom, setEnterFrom] = useState<"left" | "right" | null>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     setAnimKey(tabId);
   }, [tabId]);
 
-  const THRESHOLD = 50;
+  const THRESHOLD = 20;
+  const VELOCITY_THRESHOLD = 0.3; // px/ms
 
-  const onTouchStart = (e: React.TouchEvent) => {
-    const t = e.touches[0];
-    startX.current = t.clientX;
-    startY.current = t.clientY;
+  const onPointerDown = (e: React.PointerEvent) => {
+    if (!containerRef.current) return;
+    containerRef.current.setPointerCapture(e.pointerId);
+    startX.current = e.clientX;
+    startY.current = e.clientY;
+    startTime.current = e.timeStamp;
     deltaX.current = 0;
     tracking.current = true;
     decidedHorizontal.current = null;
   };
 
-  const onTouchMove = (e: React.TouchEvent) => {
+  const onPointerMove = (e: React.PointerEvent) => {
     if (!tracking.current) return;
-    const t = e.touches[0];
-    const dx = t.clientX - startX.current;
-    const dy = t.clientY - startY.current;
+    const dx = e.clientX - startX.current;
+    const dy = e.clientY - startY.current;
 
     if (decidedHorizontal.current === null) {
-      if (Math.abs(dx) < 8 && Math.abs(dy) < 8) return;
+      if (Math.abs(dx) < 6 && Math.abs(dy) < 6) return;
       decidedHorizontal.current = Math.abs(dx) > Math.abs(dy) * 1.2;
     }
 
     if (!decidedHorizontal.current) return;
 
     deltaX.current = dx;
-    // Damped follow
     setDragX(Math.max(-120, Math.min(120, dx * 0.5)));
   };
 
-  const onTouchEnd = () => {
+  const onPointerUp = (e: React.PointerEvent) => {
     if (!tracking.current) return;
     tracking.current = false;
     const dx = deltaX.current;
+    const elapsed = e.timeStamp - startTime.current;
+    const velocity = elapsed > 0 ? Math.abs(dx) / elapsed : 0;
     setDragX(0);
-    if (decidedHorizontal.current && Math.abs(dx) >= THRESHOLD) {
+
+    const fastFlick = velocity > VELOCITY_THRESHOLD;
+    const farEnough = Math.abs(dx) >= THRESHOLD;
+
+    if (decidedHorizontal.current && (farEnough || fastFlick)) {
       if (dx < 0) {
         setEnterFrom("right");
         onSwipeLeft();
@@ -702,12 +711,19 @@ function SwipeableTabContent({
     decidedHorizontal.current = null;
   };
 
+  const onPointerCancel = () => {
+    tracking.current = false;
+    setDragX(0);
+    decidedHorizontal.current = null;
+  };
+
   return (
     <div
-      onTouchStart={onTouchStart}
-      onTouchMove={onTouchMove}
-      onTouchEnd={onTouchEnd}
-      onTouchCancel={onTouchEnd}
+      ref={containerRef}
+      onPointerDown={onPointerDown}
+      onPointerMove={onPointerMove}
+      onPointerUp={onPointerUp}
+      onPointerCancel={onPointerCancel}
       style={{ touchAction: "pan-y" }}
     >
       <div
@@ -716,9 +732,9 @@ function SwipeableTabContent({
         className="will-change-transform"
         style={{
           transform: `translateX(${dragX}px)`,
-          transition: dragX === 0 ? "transform 250ms cubic-bezier(0.22, 1, 0.36, 1)" : "none",
+          transition: dragX === 0 ? "transform 150ms ease-out" : "none",
           animation: enterFrom
-            ? `${enterFrom === "right" ? "swipe-in-right" : "swipe-in-left"} 250ms cubic-bezier(0.22, 1, 0.36, 1)`
+            ? `${enterFrom === "right" ? "swipe-in-right" : "swipe-in-left"} 150ms ease-out`
             : undefined,
         }}
       >
