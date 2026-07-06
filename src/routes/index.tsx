@@ -748,15 +748,18 @@ function SwipeableTabContent({
       onPointerMove={onPointerMove}
       onPointerUp={onPointerUp}
       onPointerCancel={onPointerCancel}
-      style={{ touchAction: "pan-y" }}
+      style={{ touchAction: "pan-y", transform: "translateZ(0)", willChange: "transform" }}
     >
       <div
         ref={innerRef}
         key={animKey}
-        className="will-change-transform"
         style={{
-          transform: `translateX(${dragX}px)`,
-          transition: dragX === 0 ? "transform 150ms ease-out" : "none",
+          transform: `translate3d(${dragX}px, 0, 0)`,
+          transition: dragX === 0
+            ? "transform 150ms ease-out, opacity 150ms ease-out"
+            : "none",
+          willChange: "transform, opacity",
+          backfaceVisibility: "hidden",
           animation: enterFrom
             ? `${enterFrom === "right" ? "swipe-in-right" : "swipe-in-left"} 150ms ease-out`
             : undefined,
@@ -766,17 +769,18 @@ function SwipeableTabContent({
       </div>
       <style>{`
         @keyframes swipe-in-right {
-          from { transform: translateX(24px); opacity: 0.6; }
-          to   { transform: translateX(0);    opacity: 1; }
+          from { transform: translate3d(24px, 0, 0); opacity: 0.6; }
+          to   { transform: translate3d(0, 0, 0);    opacity: 1; }
         }
         @keyframes swipe-in-left {
-          from { transform: translateX(-24px); opacity: 0.6; }
-          to   { transform: translateX(0);     opacity: 1; }
+          from { transform: translate3d(-24px, 0, 0); opacity: 0.6; }
+          to   { transform: translate3d(0, 0, 0);     opacity: 1; }
         }
       `}</style>
     </div>
   );
 }
+
 
 
 /* ---------- Session ---------- */
