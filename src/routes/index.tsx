@@ -22,6 +22,13 @@ import {
   KarpmanTriangleSvg,
   RadarChartIcon,
 } from "@/components/coach/CoachVisuals";
+import {
+  Drawer,
+  DrawerContent,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerDescription,
+} from "@/components/ui/drawer";
 
 export const Route = createFileRoute("/")({
   component: CoachSpace,
