@@ -493,10 +493,15 @@ ${notes || "—"}
             return (
               <button
                 key={t.id}
+                ref={(el) => {
+                  if (active && el) {
+                    el.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "center" });
+                  }
+                }}
                 onClick={() => setTab(t.id)}
-                className={`flex items-center gap-2 px-3 min-h-11 text-sm rounded-lg whitespace-nowrap transition-colors ${
+                className={`flex items-center gap-2 px-3 min-h-11 text-sm rounded-lg whitespace-nowrap transition-all duration-200 ${
                   active
-                    ? "bg-primary text-primary-foreground"
+                    ? "bg-primary text-primary-foreground scale-[1.02]"
                     : "text-muted-foreground hover:bg-secondary"
                 }`}
               >
@@ -506,6 +511,7 @@ ${notes || "—"}
             );
           })}
         </nav>
+
       </header>
 
       <div className="max-w-7xl mx-auto md:flex md:gap-6 md:px-6">
