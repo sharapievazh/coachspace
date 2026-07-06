@@ -1,0 +1,119 @@
+{
+  "version": 1,
+  "sdk_version": "0.20.0",
+  "path": "/mcp",
+  "auth": {
+    "type": "none"
+  },
+  "mcp": {
+    "server": {
+      "name": "coach-space-mcp",
+      "version": "0.1.0",
+      "title": "Coach Space MCP"
+    },
+    "tools": [
+      {
+        "name": "grow_questions",
+        "title": "GROW: коучинговые вопросы",
+        "description": "Возвращает подборку сильных коучинговых вопросов по модели GROW для одного из этапов: Goal, Reality, Options, Will.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "step": {
+              "type": "string",
+              "enum": [
+                "G",
+                "R",
+                "O",
+                "W"
+              ],
+              "description": "Этап GROW: G = Goal, R = Reality, O = Options, W = Will"
+            }
+          },
+          "required": [
+            "step"
+          ],
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "smart_goal",
+        "title": "SMART-цель: рефрейминг",
+        "description": "Принимает черновик цели клиента и возвращает шаблон SMART-цели с проверочными вопросами по каждому критерию (Specific, Measurable, Achievable, Relevant, Time-bound).",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "draft": {
+              "type": "string",
+              "minLength": 1,
+              "description": "Черновая формулировка цели клиента"
+            },
+            "deadline": {
+              "type": "string",
+              "description": "Опциональный дедлайн (например, '3 месяца' или '01.03.2026')"
+            }
+          },
+          "required": [
+            "draft"
+          ],
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "balance_wheel_analysis",
+        "title": "Колесо баланса: анализ",
+        "description": "Принимает 8 оценок по 10-балльной шкале и (опционально) названия сфер. Возвращает средний балл, самые сильные и слабые сферы, разрыв и рекомендации по фокусу.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "scores": {
+              "type": "array",
+              "items": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 10
+              },
+              "minItems": 8,
+              "maxItems": 8,
+              "description": "Массив из 8 оценок (0..10) по сферам колеса баланса"
+            },
+            "labels": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "minItems": 8,
+              "maxItems": 8,
+              "description": "Опциональные названия 8 сфер. По умолчанию используются стандартные."
+            }
+          },
+          "required": [
+            "scores"
+          ],
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "outputSchema": null
+      }
+    ]
+  }
+}
