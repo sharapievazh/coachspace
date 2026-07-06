@@ -693,7 +693,8 @@ function SwipeableTabContent({
       tracking.current = false;
       return;
     }
-    containerRef.current.setPointerCapture(e.pointerId);
+    // NOTE: do NOT setPointerCapture here — it would steal click events from buttons.
+    // We capture only after we've decided the gesture is a horizontal swipe (in onPointerMove).
     startX.current = e.clientX;
     startY.current = e.clientY;
     startTime.current = e.timeStamp;
@@ -701,6 +702,7 @@ function SwipeableTabContent({
     tracking.current = true;
     decidedHorizontal.current = null;
   };
+
 
 
   const rafId = useRef<number | null>(null);
