@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { CalendarCheck, Flame, LayoutGrid, Trash2, UserPlus } from "lucide-react";
-import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerDescription } from "@/components/ui/drawer";
 
 const EISENHOWER_DATA = [
   {
@@ -141,58 +140,58 @@ function Eisenhower() {
         })}
       </div>
 
-      <Drawer open={!!openKey} onOpenChange={(v) => !v && setOpenKey(null)}>
-        <DrawerContent className="z-[9999]">
-          {active && (
-            <>
-              <DrawerHeader>
-                <div className="flex items-center gap-2 mb-1">
-                  <div className={`w-8 h-8 rounded-lg ${active.color} grid place-items-center shadow-sm`}>
-                    <active.icon size={16} className="text-white" />
-                  </div>
-                  <DrawerTitle className="text-lg">
-                    {active.en} — {active.title}
-                  </DrawerTitle>
-                </div>
-                <DrawerDescription className="text-sm font-medium text-foreground mt-0">
-                  {active.action}
-                </DrawerDescription>
-              </DrawerHeader>
-              <div className="px-4 pb-6 space-y-4">
-                <p className="text-sm text-secondary-foreground leading-relaxed">
-                  {active.desc}
-                </p>
-                <div>
-                  <div className="text-xs font-semibold text-secondary-foreground uppercase tracking-wider mb-2">
-                    Примеры задач
-                  </div>
-                  <ul className="space-y-2">
-                    {active.examples.map((ex, idx) => (
-                      <li key={idx} className="flex items-start gap-2 text-sm text-foreground">
-                        <span className={`shrink-0 mt-1.5 w-1.5 h-1.5 rounded-full ${active.color}`} />
-                        <span>{ex}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-                <div>
-                  <div className="text-xs font-semibold text-secondary-foreground uppercase tracking-wider mb-2">
-                    Наводящие вопросы для клиента
-                  </div>
-                  <ul className="space-y-2">
-                    {active.questions.map((q, idx) => (
-                      <li key={idx} className="flex items-start gap-2 text-sm text-foreground">
-                        <span className="shrink-0 mt-1 text-muted-foreground">•</span>
-                        <span>{q}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
+      {active && (
+        <div className={`mt-4 rounded-2xl border ${active.border} ${active.lightBg} p-4 space-y-4`}>
+          <div className="flex items-center gap-2">
+            <div className={`w-8 h-8 rounded-lg ${active.color} grid place-items-center shadow-sm`}>
+              <active.icon size={16} className="text-white" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className={`text-base font-bold ${active.text}`}>
+                {active.en} — {active.title}
               </div>
-            </>
-          )}
-        </DrawerContent>
-      </Drawer>
+              <div className="text-sm font-medium text-foreground">{active.action}</div>
+            </div>
+            <button
+              type="button"
+              onClick={() => setOpenKey(null)}
+              className="text-xs text-muted-foreground px-2 py-1 rounded-md hover:bg-white/40"
+              aria-label="Закрыть"
+            >
+              ✕
+            </button>
+          </div>
+          <p className="text-sm text-secondary-foreground leading-relaxed">
+            {active.desc}
+          </p>
+          <div>
+            <div className="text-xs font-semibold text-secondary-foreground uppercase tracking-wider mb-2">
+              Примеры задач
+            </div>
+            <ul className="space-y-2">
+              {active.examples.map((ex, idx) => (
+                <li key={idx} className="flex items-start gap-2 text-sm text-foreground">
+                  <span className={`shrink-0 mt-1.5 w-1.5 h-1.5 rounded-full ${active.color}`} />
+                  <span>{ex}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+          <div>
+            <div className="text-xs font-semibold text-secondary-foreground uppercase tracking-wider mb-2">
+              Наводящие вопросы для клиента
+            </div>
+            <ul className="space-y-2">
+              {active.questions.map((q, idx) => (
+                <li key={idx} className="flex items-start gap-2 text-sm text-foreground">
+                  <span className="shrink-0 mt-1 text-muted-foreground">•</span>
+                  <span>{q}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
