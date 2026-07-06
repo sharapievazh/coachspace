@@ -607,38 +607,39 @@ ${notes || "—"}
 /* ---------- Session ---------- */
 function SessionPanel(p: any) {
   return (
-    <div className="grid lg:grid-cols-3 gap-6">
-      <section className="lg:col-span-1 bg-card rounded-2xl border border-border p-5 space-y-4">
+    <div className="grid md:grid-cols-3 gap-6">
+      <section className="md:col-span-1 bg-card rounded-2xl border border-border p-5 space-y-4">
         <h2 className="font-semibold flex items-center gap-2"><Sparkles size={18} className="text-primary" /> Таймер сессии</h2>
         <div className="text-center py-6 rounded-xl bg-secondary">
           <div className="font-mono text-7xl tabular-nums text-foreground">{p.mmss}</div>
           <div className="text-xs text-muted-foreground mt-1">из {Math.floor(p.duration/60)} мин</div>
         </div>
         <div className="flex gap-2">
-          <button onClick={() => p.setRunning(!p.running)} className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg bg-primary text-primary-foreground hover:opacity-90">
+          <button onClick={() => p.setRunning(!p.running)} className="flex-1 inline-flex items-center justify-center gap-2 px-4 min-h-11 rounded-lg bg-primary text-primary-foreground hover:opacity-90">
             {p.running ? <Pause size={16}/> : <Play size={16}/>} {p.running ? "Пауза" : "Старт"}
           </button>
-          <button onClick={p.reset} className="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg bg-secondary hover:bg-muted">
+          <button onClick={p.reset} className="inline-flex items-center justify-center gap-2 px-4 min-h-11 min-w-11 rounded-lg bg-secondary hover:bg-muted">
             <RotateCcw size={16}/> Сброс
           </button>
         </div>
         <button
           onClick={p.testSound}
-          className="w-full inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg border border-border bg-background hover:bg-secondary text-sm"
+          className="w-full inline-flex items-center justify-center gap-2 px-4 min-h-11 rounded-lg border border-border bg-background hover:bg-secondary text-sm"
         >
           <Bell size={16} className="text-primary" /> Тест звука
         </button>
         <div className="flex gap-2 flex-wrap">
           {[20, 30, 45, 60, 90].map((m) => (
             <button key={m} onClick={() => p.setDuration(m*60)}
-              className={`px-3 py-1.5 text-xs rounded-md border ${p.duration===m*60 ? "bg-primary text-primary-foreground border-primary" : "border-border hover:bg-secondary"}`}>
+              className={`px-3 min-h-11 min-w-11 text-xs rounded-md border ${p.duration===m*60 ? "bg-primary text-primary-foreground border-primary" : "border-border hover:bg-secondary"}`}>
               {m} мин
             </button>
           ))}
         </div>
       </section>
 
-      <section className="lg:col-span-2 bg-card rounded-2xl border border-border p-5 space-y-4">
+      <section className="md:col-span-2 bg-card rounded-2xl border border-border p-5 space-y-4">
+
         <div className="grid sm:grid-cols-2 gap-3">
           <Field label="Клиент">
             <input value={p.clientName} onChange={(e)=>p.setClientName(e.target.value)}
