@@ -228,6 +228,16 @@ export function BalanceRadar({
     })
     .join(" ");
 
+  const comparePolygon = compareValues && compareValues.length === n
+    ? compareValues
+        .map((v, i) => {
+          const cv = Math.min(10, Math.max(0, Number(v) || 0));
+          const [x, y] = point(i, (R * cv) / 10);
+          return `${x.toFixed(1)},${y.toFixed(1)}`;
+        })
+        .join(" ")
+    : null;
+
   // Wedge path for a sector (hit area + active highlight)
   const wedgePath = (i: number, r: number) => {
     const half = Math.PI / n;
