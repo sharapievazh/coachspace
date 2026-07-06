@@ -1467,17 +1467,10 @@ function Nlu() {
           })}
         </div>
       </div>
-      {/* hidden legacy container removed */}
-      <div className="hidden">
-        {DILTS.map((lv) => (
-          <span key={lv.n}>
-            );
-          })}
-        </svg>
-        <p className="text-center text-xs text-muted-foreground mt-3">
-          Коснитесь уровня, чтобы узнать больше
-        </p>
-      </div>
+      <p className="text-center text-xs text-muted-foreground mt-3">
+        Коснитесь уровня, чтобы узнать больше
+      </p>
+
 
       {/* iOS-style bottom sheet */}
       <Drawer open={active != null} onOpenChange={(o) => { if (!o) setActive(null); }}>
