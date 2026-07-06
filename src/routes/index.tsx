@@ -1466,7 +1466,8 @@ function Nlu() {
 
       {/* iOS-style bottom sheet */}
       <Drawer open={active != null} onOpenChange={(o) => { if (!o) setActive(null); }}>
-        <DrawerContent>
+        <DrawerContent className="z-[9999]">
+
           {activeLevel && (
             <>
               <DrawerHeader className="text-left">
