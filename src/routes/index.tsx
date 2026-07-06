@@ -1342,146 +1342,104 @@ function Nlu() {
 
   return (
     <div className="space-y-6 max-w-full overflow-hidden">
-      <SectionHead title="Пирамида Дилтса" subtitle="Неврологические уровни изменений" />
+function Nlu() {
+  const [active, setActive] = useState<number | null>(null);
+  const rows = DILTS.length; // 6
+  const ROW_H = 64; // px per row
 
-      {/* Header row */}
-      <div className="hidden md:grid grid-cols-[1fr_280px_1fr] gap-4 items-end">
-        <div className="text-right pr-2">
-          <div className="text-[11px] uppercase tracking-widest text-muted-foreground">УРОВЕНЬ</div>
-          <div className="text-[10px] text-muted-foreground/70">что изменяем?</div>
-        </div>
-        <div />
-        <div className="pl-2">
-          <div className="text-[11px] uppercase tracking-widest text-muted-foreground">ОПИСАНИЕ</div>
-          <div className="text-[10px] text-muted-foreground/70">фокус вопросов</div>
-        </div>
-      </div>
+  const activeLevel = active != null ? DILTS.find((l) => l.n === active) ?? null : null;
 
-      {/* Main: left labels | pyramid | right descriptions */}
-      <div className="grid md:grid-cols-[1fr_280px_1fr] gap-3 md:gap-4 items-start">
-        {/* LEFT — labels (numbers + name + question) */}
-        <div className="hidden md:flex flex-col" style={{ height: rows * ROW_H }}>
-          {DILTS.map((lv) => {
+  return (
+    <div className="space-y-6 max-w-full overflow-hidden">
+      <SectionHead title="Пирамида Дилтса" subtitle="Неврологические уровни изменений — коснитесь уровня" />
+
+      {/* PYRAMID — tappable trapezoids with labels */}
+      <div className="mx-auto w-full max-w-[360px]">
+        <div className="relative" style={{ height: rows * ROW_H }}>
+          {DILTS.map((lv, i) => {
+            const Icon = lv.icon;
             const isActive = active === lv.n;
+            const topHalf = (i / rows) * 50;
+            const botHalf = ((i + 1) / rows) * 50;
+            const clip = `polygon(${50 - topHalf}% 0%, ${50 + topHalf}% 0%, ${50 + botHalf}% 100%, ${50 - botHalf}% 100%)`;
+            const iconSize = i === 0 ? 14 : i === 1 ? 18 : 22;
+            const showLabel = i >= 1; // top apex too narrow for text
             return (
               <button
                 key={lv.n}
                 onClick={() => setActive(lv.n)}
-                style={{ height: ROW_H }}
-                className={`group w-full flex items-center justify-end gap-3 pr-3 text-right transition-all ${
-                  isActive ? "scale-[1.02]" : "opacity-80 hover:opacity-100"
-                }`}
+                className="absolute left-0 right-0 flex items-center justify-center gap-2 transition-all duration-200 active:scale-[0.98]"
+                style={{
+                  top: i * ROW_H,
+                  height: ROW_H,
+                  background: lv.hex,
+                  clipPath: clip,
+                  filter: isActive ? "brightness(1.15) saturate(1.2)" : "none",
+                  boxShadow: isActive
+                    ? `inset 0 0 0 2px rgba(255,255,255,0.7), 0 0 24px ${lv.hex}80`
+                    : "none",
+                }}
+                aria-label={lv.name}
               >
-                <div>
-                  <div className={`text-sm font-extrabold leading-tight tracking-wide ${lv.textColor}`}>
+                <Icon size={iconSize} className="text-white drop-shadow shrink-0" strokeWidth={2.4} />
+                {showLabel && (
+                  <span
+                    className="text-white font-extrabold tracking-wide drop-shadow truncate"
+                    style={{ fontSize: i === 1 ? 10 : i === 2 ? 11 : 12 }}
+                  >
                     {lv.name}
-                  </div>
-                  <div className="text-xs text-muted-foreground leading-tight">{lv.q}</div>
-                </div>
-                <div
-                  className="text-3xl font-black leading-none shrink-0"
-                  style={{ color: lv.hex }}
-                >
-                  {lv.n}
-                </div>
+                  </span>
+                )}
               </button>
             );
           })}
         </div>
-
-        {/* PYRAMID — clip-path trapezoids, icons only */}
-        <div className="mx-auto w-full max-w-[300px]">
-          <div className="relative" style={{ height: rows * ROW_H }}>
-            {DILTS.map((lv, i) => {
-              const Icon = lv.icon;
-              const isActive = active === lv.n;
-              const topHalf = (i / rows) * 50;
-              const botHalf = ((i + 1) / rows) * 50;
-              const clip = `polygon(${50 - topHalf}% 0%, ${50 + topHalf}% 0%, ${50 + botHalf}% 100%, ${50 - botHalf}% 100%)`;
-              // Icon area shrinks for narrow top rows
-              const iconSize = i === 0 ? 18 : i === 1 ? 26 : 32;
-              return (
-                <button
-                  key={lv.n}
-                  onClick={() => setActive(lv.n)}
-                  className="absolute left-0 right-0 grid place-items-center transition-all"
-                  style={{
-                    top: i * ROW_H,
-                    height: ROW_H,
-                    background: lv.hex,
-                    clipPath: clip,
-                    filter: isActive ? "brightness(1.15) saturate(1.15)" : "none",
-                    boxShadow: isActive ? `inset 0 0 0 2px rgba(255,255,255,0.6)` : "none",
-                  }}
-                  aria-label={lv.name}
-                >
-                  <Icon size={iconSize} className="text-white drop-shadow" strokeWidth={2.2} />
-                </button>
-              );
-            })}
-          </div>
-        </div>
-
-        {/* RIGHT — description + focus question */}
-        <div className="hidden md:flex flex-col" style={{ height: rows * ROW_H }}>
-          {DILTS.map((lv) => {
-            const isActive = active === lv.n;
-            return (
-              <div
-                key={lv.n}
-                onClick={() => setActive(lv.n)}
-                style={{ height: ROW_H }}
-                className={`pl-3 pr-2 text-left cursor-pointer transition-all flex flex-col justify-center ${
-                  isActive ? "" : "opacity-75 hover:opacity-100"
-                }`}
-              >
-                <p className="text-[12px] leading-tight text-foreground/90">{lv.desc}</p>
-                <p className={`text-[11px] mt-1 leading-tight font-semibold ${lv.textColor}`}>
-                  ▸ {lv.focus}
-                </p>
-              </div>
-            );
-          })}
-        </div>
+        <p className="text-center text-xs text-muted-foreground mt-3">
+          Коснитесь уровня, чтобы узнать больше
+        </p>
       </div>
 
-      {/* MOBILE: list under pyramid */}
-      <div className="md:hidden space-y-2">
-        {DILTS.map((lv) => {
-          const isActive = active === lv.n;
-          const Icon = lv.icon;
-          return (
-            <button
-              key={lv.n}
-              onClick={() => setActive(lv.n)}
-              className={`w-full text-left rounded-xl border p-3 transition-all flex items-start gap-3 ${
-                isActive ? "border-transparent ring-2" : "bg-card border-border"
-              }`}
-              style={isActive ? { background: lv.hex + "22", borderColor: lv.hex } : undefined}
-            >
-              <div
-                className="w-9 h-9 rounded-lg grid place-items-center shrink-0"
-                style={{ background: lv.hex }}
-              >
-                <Icon size={18} className="text-white" />
-              </div>
-              <div className="flex-1 min-w-0">
-                <div className="flex items-baseline gap-2">
-                  <span className="text-lg font-black" style={{ color: lv.hex }}>{lv.n}</span>
-                  <span className={`text-sm font-extrabold ${lv.textColor}`}>{lv.name}</span>
-                </div>
-                <div className="text-xs text-muted-foreground">{lv.q}</div>
-                {isActive && (
-                  <div className="mt-2 space-y-1">
-                    <p className="text-xs text-foreground/90 leading-snug">{lv.desc}</p>
-                    <p className={`text-xs font-semibold ${lv.textColor}`}>▸ {lv.focus}</p>
+      {/* iOS-style bottom sheet */}
+      <Drawer open={active != null} onOpenChange={(o) => { if (!o) setActive(null); }}>
+        <DrawerContent>
+          {activeLevel && (
+            <>
+              <DrawerHeader className="text-left">
+                <div className="flex items-center gap-3 mb-1">
+                  <div
+                    className="w-11 h-11 rounded-xl grid place-items-center shrink-0"
+                    style={{ background: activeLevel.hex }}
+                  >
+                    <span className="text-white font-black text-lg">{activeLevel.n}</span>
                   </div>
-                )}
+                  <div className="min-w-0">
+                    <DrawerTitle className={`text-xl font-extrabold ${activeLevel.textColor}`}>
+                      {activeLevel.name}
+                    </DrawerTitle>
+                    <DrawerDescription className="text-sm">
+                      {activeLevel.q}
+                    </DrawerDescription>
+                  </div>
+                </div>
+              </DrawerHeader>
+              <div className="px-4 pb-8 space-y-3">
+                <p className="text-[15px] leading-relaxed text-foreground/90">
+                  {activeLevel.desc}
+                </p>
+                <div
+                  className="rounded-xl p-3"
+                  style={{ background: activeLevel.hex + "1A" }}
+                >
+                  <p className={`text-sm font-semibold ${activeLevel.textColor}`}>
+                    ▸ {activeLevel.focus}
+                  </p>
+                </div>
               </div>
-            </button>
-          );
-        })}
-      </div>
+            </>
+          )}
+        </DrawerContent>
+      </Drawer>
+
 
       {/* HOW-TO — 4 colored cards as in reference */}
       <div className="rounded-2xl border border-border bg-card/80 p-4 sm:p-5">
