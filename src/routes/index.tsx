@@ -558,42 +558,66 @@ ${notes || "—"}
               if (i > 0) setTab(TABS[i - 1].id);
             }}
           >
-            {tab === "session" && (
-              <SessionPanelMemo
-                duration={duration}
-                setDuration={changeDuration}
-                remaining={remaining}
-                running={running}
-                setRunning={handleSetRunning}
-                reset={resetTimer}
-                mmss={mmss}
-                clientName={clientName}
-                setClientName={setClientName}
-                topic={topic}
-                setTopic={setTopic}
-                notes={notes}
-                setNotes={setNotes}
-                exportSession={exportSession}
-                testSound={testSound}
-              />
-            )}
-            {tab === "grow" && <GrowMemo />}
-            {tab === "swot" && <SwotMemo />}
-            {tab === "nlu" && <NluMemo />}
-            {tab === "sos" && <SosMemo />}
-            {tab === "rapport" && <RapportMemo />}
-            {tab === "smart" && <SmartGoalMemo />}
-            {tab === "eisenhower" && <EisenhowerMemo />}
-            {tab === "burger" && <BurgerMemo />}
-            {tab === "erickson" && <EricksonStarMemo />}
-            {tab === "rules" && <BurgerRulesMemo />}
-            {tab === "balance" && <BalanceMemo scores={balanceScores} onChange={setBalanceScores} />}
-            {tab === "values" && <ValuesMemo />}
-            {tab === "supervision" && <SupervisionMemo />}
-            {tab === "feedback" && <FeedbackMemo />}
-            {tab === "competencies" && <CompetenciesMemo />}
+            {(() => {
+              const activeIdx = TABS.findIndex((t) => t.id === tab);
+              const panels: { id: TabId; node: React.ReactNode }[] = [
+                { id: "session", node: (
+                  <SessionPanelMemo
+                    duration={duration}
+                    setDuration={changeDuration}
+                    remaining={remaining}
+                    running={running}
+                    setRunning={handleSetRunning}
+                    reset={resetTimer}
+                    mmss={mmss}
+                    clientName={clientName}
+                    setClientName={setClientName}
+                    topic={topic}
+                    setTopic={setTopic}
+                    notes={notes}
+                    setNotes={setNotes}
+                    exportSession={exportSession}
+                    testSound={testSound}
+                  />
+                )},
+                { id: "grow", node: <GrowMemo /> },
+                { id: "swot", node: <SwotMemo /> },
+                { id: "nlu", node: <NluMemo /> },
+                { id: "sos", node: <SosMemo /> },
+                { id: "rapport", node: <RapportMemo /> },
+                { id: "smart", node: <SmartGoalMemo /> },
+                { id: "eisenhower", node: <EisenhowerMemo /> },
+                { id: "burger", node: <BurgerMemo /> },
+                { id: "erickson", node: <EricksonStarMemo /> },
+                { id: "rules", node: <BurgerRulesMemo /> },
+                { id: "balance", node: <BalanceMemo scores={balanceScores} onChange={setBalanceScores} /> },
+                { id: "values", node: <ValuesMemo /> },
+                { id: "supervision", node: <SupervisionMemo /> },
+                { id: "feedback", node: <FeedbackMemo /> },
+                { id: "competencies", node: <CompetenciesMemo /> },
+              ];
+              return panels.map((p, idx) => {
+                const isActive = p.id === tab;
+                const isAdjacent = Math.abs(idx - activeIdx) === 1;
+                if (!isActive && !isAdjacent) return null;
+                return (
+                  <div
+                    key={p.id}
+                    style={{
+                      display: isActive ? "block" : "none",
+                      contentVisibility: isActive ? "visible" : ("auto" as any),
+                      transform: "translateZ(0)",
+                      willChange: "transform, opacity",
+                    }}
+                  >
+                    {p.node}
+                  </div>
+                );
+              });
+            })()}
           </SwipeableTabContent>
         </main>
+
 
       </div>
 
@@ -672,6 +696,9 @@ function SwipeableTabContent({
     decidedHorizontal.current = null;
   };
 
+  const rafId = useRef<number | null>(null);
+  const pendingDrag = useRef(0);
+
   const onPointerMove = (e: React.PointerEvent) => {
     if (!tracking.current) return;
     const dx = e.clientX - startX.current;
@@ -685,8 +712,15 @@ function SwipeableTabContent({
     if (!decidedHorizontal.current) return;
 
     deltaX.current = dx;
-    setDragX(Math.max(-120, Math.min(120, dx * 0.5)));
+    pendingDrag.current = Math.max(-120, Math.min(120, dx * 0.5));
+    if (rafId.current == null) {
+      rafId.current = requestAnimationFrame(() => {
+        rafId.current = null;
+        setDragX(pendingDrag.current);
+      });
+    }
   };
+
 
   const onPointerUp = (e: React.PointerEvent) => {
     if (!tracking.current) return;
@@ -724,15 +758,18 @@ function SwipeableTabContent({
       onPointerMove={onPointerMove}
       onPointerUp={onPointerUp}
       onPointerCancel={onPointerCancel}
-      style={{ touchAction: "pan-y" }}
+      style={{ touchAction: "pan-y", transform: "translateZ(0)", willChange: "transform" }}
     >
       <div
         ref={innerRef}
         key={animKey}
-        className="will-change-transform"
         style={{
-          transform: `translateX(${dragX}px)`,
-          transition: dragX === 0 ? "transform 150ms ease-out" : "none",
+          transform: `translate3d(${dragX}px, 0, 0)`,
+          transition: dragX === 0
+            ? "transform 150ms ease-out, opacity 150ms ease-out"
+            : "none",
+          willChange: "transform, opacity",
+          backfaceVisibility: "hidden",
           animation: enterFrom
             ? `${enterFrom === "right" ? "swipe-in-right" : "swipe-in-left"} 150ms ease-out`
             : undefined,
@@ -742,17 +779,18 @@ function SwipeableTabContent({
       </div>
       <style>{`
         @keyframes swipe-in-right {
-          from { transform: translateX(24px); opacity: 0.6; }
-          to   { transform: translateX(0);    opacity: 1; }
+          from { transform: translate3d(24px, 0, 0); opacity: 0.6; }
+          to   { transform: translate3d(0, 0, 0);    opacity: 1; }
         }
         @keyframes swipe-in-left {
-          from { transform: translateX(-24px); opacity: 0.6; }
-          to   { transform: translateX(0);     opacity: 1; }
+          from { transform: translate3d(-24px, 0, 0); opacity: 0.6; }
+          to   { transform: translate3d(0, 0, 0);     opacity: 1; }
         }
       `}</style>
     </div>
   );
 }
+
 
 
 /* ---------- Session ---------- */
