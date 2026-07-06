@@ -1,5 +1,6 @@
 import React from "react";
 import { Bell, Download, Pause, Play, RotateCcw, Sandwich, Sparkles } from "lucide-react";
+import { OSVK_TEMPLATE } from "./_shared";
 
 function SessionPanel(p: any) {
   return (
