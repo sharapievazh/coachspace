@@ -11,7 +11,7 @@ import {
   HelpCircle, AlertOctagon, Hand, Mountain, Telescope, Glasses,
   Ear, Crown, Palette, Calculator, Smile, Wind, ChevronDown, Briefcase,
   Award, Handshake, ArrowRight, Plus, Minus, BadgePlus, LayoutGrid, Trash2, CheckSquare, Square, Clock, Flame, CalendarCheck, UserPlus, X,
-  Flower2,
+  Flower2, Share2,
 } from "lucide-react";
 import burgerTop from "@/assets/burger-top.png";
 import burgerPatty from "@/assets/burger-patty.png";
