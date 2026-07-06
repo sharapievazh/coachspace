@@ -687,6 +687,12 @@ function SwipeableTabContent({
 
   const onPointerDown = (e: React.PointerEvent) => {
     if (!containerRef.current) return;
+    // Do not hijack pointer events for editable fields — iOS needs the native tap to focus & open keyboard.
+    const target = e.target as HTMLElement | null;
+    if (target && target.closest('input, textarea, select, [contenteditable="true"]')) {
+      tracking.current = false;
+      return;
+    }
     containerRef.current.setPointerCapture(e.pointerId);
     startX.current = e.clientX;
     startY.current = e.clientY;
@@ -695,6 +701,7 @@ function SwipeableTabContent({
     tracking.current = true;
     decidedHorizontal.current = null;
   };
+
 
   const rafId = useRef<number | null>(null);
   const pendingDrag = useRef(0);
