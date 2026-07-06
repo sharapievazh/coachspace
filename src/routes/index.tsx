@@ -584,7 +584,7 @@ function SessionPanel(p: any) {
       <section className="lg:col-span-1 bg-card rounded-2xl border border-border p-5 space-y-4">
         <h2 className="font-semibold flex items-center gap-2"><Sparkles size={18} className="text-primary" /> Таймер сессии</h2>
         <div className="text-center py-6 rounded-xl bg-secondary">
-          <div className="font-mono text-5xl tabular-nums text-foreground">{p.mmss}</div>
+          <div className="font-mono text-7xl tabular-nums text-foreground">{p.mmss}</div>
           <div className="text-xs text-muted-foreground mt-1">из {Math.floor(p.duration/60)} мин</div>
         </div>
         <div className="flex gap-2">
