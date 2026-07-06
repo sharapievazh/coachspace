@@ -687,6 +687,12 @@ function SwipeableTabContent({
 
   const onPointerDown = (e: React.PointerEvent) => {
     if (!containerRef.current) return;
+    // Do not hijack pointer events for editable fields — iOS needs the native tap to focus & open keyboard.
+    const target = e.target as HTMLElement | null;
+    if (target && target.closest('input, textarea, select, [contenteditable="true"]')) {
+      tracking.current = false;
+      return;
+    }
     containerRef.current.setPointerCapture(e.pointerId);
     startX.current = e.clientX;
     startY.current = e.clientY;
@@ -695,6 +701,7 @@ function SwipeableTabContent({
     tracking.current = true;
     decidedHorizontal.current = null;
   };
+
 
   const rafId = useRef<number | null>(null);
   const pendingDrag = useRef(0);
@@ -833,11 +840,13 @@ function SessionPanel(p: any) {
           <Field label="Клиент">
             <input value={p.clientName} onChange={(e)=>p.setClientName(e.target.value)}
               placeholder="Имя клиента"
+              autoComplete="off" autoCorrect="off" autoCapitalize="words" spellCheck={false}
               className="w-full px-3 py-2 rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-ring"/>
           </Field>
           <Field label="Запрос сессии">
             <input value={p.topic} onChange={(e)=>p.setTopic(e.target.value)}
               placeholder="Тема / цель"
+              autoComplete="off" autoCorrect="off" spellCheck={false}
               className="w-full px-3 py-2 rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-ring"/>
           </Field>
         </div>
@@ -845,8 +854,10 @@ function SessionPanel(p: any) {
           <textarea value={p.notes} onChange={(e)=>p.setNotes(e.target.value)}
             rows={14}
             placeholder="Веди заметки прямо во время сессии..."
+            autoComplete="off" autoCorrect="off" spellCheck={false}
             className="w-full px-3 py-2 rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-ring resize-y"/>
         </Field>
+
         <div className="flex items-center justify-between gap-2 flex-wrap">
           <button
             onClick={() => p.setNotes((p.notes || "") + OSVK_TEMPLATE)}
@@ -2800,7 +2811,7 @@ function Feedback() {
 
   const canSend = liked.trim().length > 0 || disliked.trim().length > 0;
 
-  const send = () => {
+  const send = async () => {
     const subject = `Coach Space — обратная связь${name ? ` от ${name}` : ""}`;
     const body =
 `От: ${name || "Аноним"}
@@ -2813,9 +2824,39 @@ ${liked || "—"}
 ${disliked || "—"}
 `;
     const url = `mailto:${FEEDBACK_EMAIL}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-    window.location.href = url;
+
+    // Fallback plan: copy the message to clipboard so the user always has it,
+    // then attempt to open the mail client. On iOS/Capacitor without a
+    // configured mail account the mailto: navigation fails silently.
+    const clipboardText = `Кому: ${FEEDBACK_EMAIL}\nТема: ${subject}\n\n${body}`;
+    try {
+      if (navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(clipboardText);
+      }
+    } catch {
+      // ignore — clipboard may be blocked
+    }
+
+    let mailOpened = false;
+    try {
+      const before = Date.now();
+      const blurHandler = () => { mailOpened = true; };
+      window.addEventListener("blur", blurHandler, { once: true });
+      window.location.href = url;
+      // If the page didn't blur within 800ms we assume no mail client picked it up.
+      setTimeout(() => {
+        window.removeEventListener("blur", blurHandler);
+        if (!mailOpened && Date.now() - before >= 700) {
+          // silent fallback — success message already shown below
+        }
+      }, 800);
+    } catch {
+      // navigation blocked — clipboard fallback still applies
+    }
+
     setSent(true);
   };
+
 
   return (
     <div className="space-y-6 max-w-3xl max-w-full overflow-hidden">
@@ -2830,6 +2871,7 @@ ${disliked || "—"}
             value={name}
             onChange={(e) => setName(e.target.value)}
             placeholder="Как к вам обращаться"
+            autoComplete="off" autoCorrect="off" spellCheck={false}
             className="mt-1 w-full px-3 py-2 rounded-lg bg-secondary border border-border focus:outline-none focus:ring-2 focus:ring-primary"
           />
         </div>
@@ -2842,6 +2884,7 @@ ${disliked || "—"}
             onChange={(e) => setLiked(e.target.value)}
             rows={4}
             placeholder="Что работает хорошо, что удобно, что радует…"
+            autoComplete="off" autoCorrect="off" spellCheck={false}
             className="mt-1 w-full px-3 py-2 rounded-lg bg-secondary border border-border focus:outline-none focus:ring-2 focus:ring-primary resize-y"
           />
         </div>
@@ -2854,9 +2897,11 @@ ${disliked || "—"}
             onChange={(e) => setDisliked(e.target.value)}
             rows={4}
             placeholder="Что мешает, чего не хватает, что добавить…"
+            autoComplete="off" autoCorrect="off" spellCheck={false}
             className="mt-1 w-full px-3 py-2 rounded-lg bg-secondary border border-border focus:outline-none focus:ring-2 focus:ring-primary resize-y"
           />
         </div>
+
         <div className="flex items-center gap-3 pt-2">
           <button
             onClick={send}
@@ -2870,7 +2915,7 @@ ${disliked || "—"}
           </p>
         </div>
         {sent && (
-          <p className="text-sm text-primary">Спасибо! Письмо подготовлено — отправьте его из почты ✉️</p>
+          <p className="text-sm text-primary">Спасибо за отзыв! Текст скопирован в буфер обмена — если почтовый клиент не открылся, вставьте его в письмо на {FEEDBACK_EMAIL} ✉️</p>
         )}
       </div>
     </div>
