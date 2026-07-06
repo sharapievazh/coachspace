@@ -1335,14 +1335,6 @@ const DILTS_HOW: {
     icon: Flower2,   hex: "#EA580C", ring: "ring-orange-500/40", text: "text-orange-400" },
 ];
 
-function Nlu() {
-  const [active, setActive] = useState<number>(6);
-  const rows = DILTS.length; // 6
-  const ROW_H = 60; // px per row
-
-  return (
-    <div className="space-y-6 max-w-full overflow-hidden">
-function Nlu() {
   const [active, setActive] = useState<number | null>(null);
   const rows = DILTS.length; // 6
   const ROW_H = 64; // px per row
