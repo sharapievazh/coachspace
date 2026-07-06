@@ -493,10 +493,15 @@ ${notes || "—"}
             return (
               <button
                 key={t.id}
+                ref={(el) => {
+                  if (active && el) {
+                    el.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "center" });
+                  }
+                }}
                 onClick={() => setTab(t.id)}
-                className={`flex items-center gap-2 px-3 min-h-11 text-sm rounded-lg whitespace-nowrap transition-colors ${
+                className={`flex items-center gap-2 px-3 min-h-11 text-sm rounded-lg whitespace-nowrap transition-all duration-200 ${
                   active
-                    ? "bg-primary text-primary-foreground"
+                    ? "bg-primary text-primary-foreground scale-[1.02]"
                     : "text-muted-foreground hover:bg-secondary"
                 }`}
               >
@@ -506,6 +511,7 @@ ${notes || "—"}
             );
           })}
         </nav>
+
       </header>
 
       <div className="max-w-7xl mx-auto md:flex md:gap-6 md:px-6">
@@ -534,41 +540,54 @@ ${notes || "—"}
         </aside>
 
         <main className="flex-1 min-w-0 px-4 sm:px-6 md:px-0 py-6">
-          {tab === "session" && (
-            <SessionPanelMemo
-              duration={duration}
-              setDuration={changeDuration}
-              remaining={remaining}
-              running={running}
-              setRunning={handleSetRunning}
-              reset={resetTimer}
-              mmss={mmss}
-              clientName={clientName}
-              setClientName={setClientName}
-              topic={topic}
-              setTopic={setTopic}
-              notes={notes}
-              setNotes={setNotes}
-              exportSession={exportSession}
-              testSound={testSound}
-            />
-          )}
-          {tab === "grow" && <GrowMemo />}
-          {tab === "swot" && <SwotMemo />}
-          {tab === "nlu" && <NluMemo />}
-          {tab === "sos" && <SosMemo />}
-          {tab === "rapport" && <RapportMemo />}
-          {tab === "smart" && <SmartGoalMemo notes={notes} setNotes={setNotes} />}
-          {tab === "eisenhower" && <EisenhowerMemo notes={notes} setNotes={setNotes} />}
-          {tab === "burger" && <BurgerMemo />}
-          {tab === "erickson" && <EricksonStarMemo />}
-          {tab === "rules" && <BurgerRulesMemo />}
-          {tab === "balance" && <BalanceMemo scores={balanceScores} onChange={setBalanceScores} />}
-          {tab === "values" && <ValuesMemo />}
-          {tab === "supervision" && <SupervisionMemo />}
-          {tab === "feedback" && <FeedbackMemo />}
-          {tab === "competencies" && <CompetenciesMemo />}
+          <SwipeableTabContent
+            tabId={tab}
+            onSwipeLeft={() => {
+              const i = TABS.findIndex((t) => t.id === tab);
+              if (i < TABS.length - 1) setTab(TABS[i + 1].id);
+            }}
+            onSwipeRight={() => {
+              const i = TABS.findIndex((t) => t.id === tab);
+              if (i > 0) setTab(TABS[i - 1].id);
+            }}
+          >
+            {tab === "session" && (
+              <SessionPanelMemo
+                duration={duration}
+                setDuration={changeDuration}
+                remaining={remaining}
+                running={running}
+                setRunning={handleSetRunning}
+                reset={resetTimer}
+                mmss={mmss}
+                clientName={clientName}
+                setClientName={setClientName}
+                topic={topic}
+                setTopic={setTopic}
+                notes={notes}
+                setNotes={setNotes}
+                exportSession={exportSession}
+                testSound={testSound}
+              />
+            )}
+            {tab === "grow" && <GrowMemo />}
+            {tab === "swot" && <SwotMemo />}
+            {tab === "nlu" && <NluMemo />}
+            {tab === "sos" && <SosMemo />}
+            {tab === "rapport" && <RapportMemo />}
+            {tab === "smart" && <SmartGoalMemo notes={notes} setNotes={setNotes} />}
+            {tab === "eisenhower" && <EisenhowerMemo notes={notes} setNotes={setNotes} />}
+            {tab === "burger" && <BurgerMemo />}
+            {tab === "erickson" && <EricksonStarMemo />}
+            {tab === "rules" && <BurgerRulesMemo />}
+            {tab === "balance" && <BalanceMemo scores={balanceScores} onChange={setBalanceScores} />}
+            {tab === "values" && <ValuesMemo />}
+            {tab === "supervision" && <SupervisionMemo />}
+            {tab === "feedback" && <FeedbackMemo />}
+            {tab === "competencies" && <CompetenciesMemo />}
+          </SwipeableTabContent>
         </main>
+
       </div>
 
       {timeUp && (
@@ -603,6 +622,115 @@ ${notes || "—"}
     </div>
   );
 }
+
+/* ---------- Swipeable tab content (iOS-like horizontal swipe) ---------- */
+function SwipeableTabContent({
+  tabId,
+  onSwipeLeft,
+  onSwipeRight,
+  children,
+}: {
+  tabId: string;
+  onSwipeLeft: () => void;
+  onSwipeRight: () => void;
+  children: React.ReactNode;
+}) {
+  const startX = useRef(0);
+  const startY = useRef(0);
+  const deltaX = useRef(0);
+  const tracking = useRef(false);
+  const decidedHorizontal = useRef<null | boolean>(null);
+  const innerRef = useRef<HTMLDivElement>(null);
+  const [dragX, setDragX] = useState(0);
+  const [animKey, setAnimKey] = useState(tabId);
+  const [enterFrom, setEnterFrom] = useState<"left" | "right" | null>(null);
+
+  useEffect(() => {
+    setAnimKey(tabId);
+  }, [tabId]);
+
+  const THRESHOLD = 50;
+
+  const onTouchStart = (e: React.TouchEvent) => {
+    const t = e.touches[0];
+    startX.current = t.clientX;
+    startY.current = t.clientY;
+    deltaX.current = 0;
+    tracking.current = true;
+    decidedHorizontal.current = null;
+  };
+
+  const onTouchMove = (e: React.TouchEvent) => {
+    if (!tracking.current) return;
+    const t = e.touches[0];
+    const dx = t.clientX - startX.current;
+    const dy = t.clientY - startY.current;
+
+    if (decidedHorizontal.current === null) {
+      if (Math.abs(dx) < 8 && Math.abs(dy) < 8) return;
+      decidedHorizontal.current = Math.abs(dx) > Math.abs(dy) * 1.2;
+    }
+
+    if (!decidedHorizontal.current) return;
+
+    deltaX.current = dx;
+    // Damped follow
+    setDragX(Math.max(-120, Math.min(120, dx * 0.5)));
+  };
+
+  const onTouchEnd = () => {
+    if (!tracking.current) return;
+    tracking.current = false;
+    const dx = deltaX.current;
+    setDragX(0);
+    if (decidedHorizontal.current && Math.abs(dx) >= THRESHOLD) {
+      if (dx < 0) {
+        setEnterFrom("right");
+        onSwipeLeft();
+      } else {
+        setEnterFrom("left");
+        onSwipeRight();
+      }
+    }
+    decidedHorizontal.current = null;
+  };
+
+  return (
+    <div
+      onTouchStart={onTouchStart}
+      onTouchMove={onTouchMove}
+      onTouchEnd={onTouchEnd}
+      onTouchCancel={onTouchEnd}
+      style={{ touchAction: "pan-y" }}
+    >
+      <div
+        ref={innerRef}
+        key={animKey}
+        className="will-change-transform"
+        style={{
+          transform: `translateX(${dragX}px)`,
+          transition: dragX === 0 ? "transform 250ms cubic-bezier(0.22, 1, 0.36, 1)" : "none",
+          animation: enterFrom
+            ? `${enterFrom === "right" ? "swipe-in-right" : "swipe-in-left"} 250ms cubic-bezier(0.22, 1, 0.36, 1)`
+            : undefined,
+        }}
+      >
+        {children}
+      </div>
+      <style>{`
+        @keyframes swipe-in-right {
+          from { transform: translateX(24px); opacity: 0.6; }
+          to   { transform: translateX(0);    opacity: 1; }
+        }
+        @keyframes swipe-in-left {
+          from { transform: translateX(-24px); opacity: 0.6; }
+          to   { transform: translateX(0);     opacity: 1; }
+        }
+      `}</style>
+    </div>
+  );
+}
+
 
 /* ---------- Session ---------- */
 function SessionPanel(p: any) {
