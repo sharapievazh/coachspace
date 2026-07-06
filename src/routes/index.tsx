@@ -2595,6 +2595,7 @@ const OSVK_RULES = [
 ];
 
 function BurgerRules() {
+  const [openIdx, setOpenIdx] = useState<number | null>(null);
   return (
     <div className="space-y-5 max-w-4xl">
       <SectionHead title="8 Золотых Правил ОСВК" subtitle="Чек-лист развивающей обратной связи высокого качества" />
