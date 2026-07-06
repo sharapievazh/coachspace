@@ -840,11 +840,13 @@ function SessionPanel(p: any) {
           <Field label="Клиент">
             <input value={p.clientName} onChange={(e)=>p.setClientName(e.target.value)}
               placeholder="Имя клиента"
+              autoComplete="off" autoCorrect="off" autoCapitalize="words" spellCheck={false}
               className="w-full px-3 py-2 rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-ring"/>
           </Field>
           <Field label="Запрос сессии">
             <input value={p.topic} onChange={(e)=>p.setTopic(e.target.value)}
               placeholder="Тема / цель"
+              autoComplete="off" autoCorrect="off" spellCheck={false}
               className="w-full px-3 py-2 rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-ring"/>
           </Field>
         </div>
@@ -852,8 +854,10 @@ function SessionPanel(p: any) {
           <textarea value={p.notes} onChange={(e)=>p.setNotes(e.target.value)}
             rows={14}
             placeholder="Веди заметки прямо во время сессии..."
+            autoComplete="off" autoCorrect="off" spellCheck={false}
             className="w-full px-3 py-2 rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-ring resize-y"/>
         </Field>
+
         <div className="flex items-center justify-between gap-2 flex-wrap">
           <button
             onClick={() => p.setNotes((p.notes || "") + OSVK_TEMPLATE)}
