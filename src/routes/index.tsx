@@ -2915,7 +2915,7 @@ ${disliked || "—"}
           </p>
         </div>
         {sent && (
-          <p className="text-sm text-primary">Спасибо! Письмо подготовлено — отправьте его из почты ✉️</p>
+          <p className="text-sm text-primary">Спасибо за отзыв! Текст скопирован в буфер обмена — если почтовый клиент не открылся, вставьте его в письмо на {FEEDBACK_EMAIL} ✉️</p>
         )}
       </div>
     </div>
