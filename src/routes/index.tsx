@@ -2811,7 +2811,7 @@ function Feedback() {
 
   const canSend = liked.trim().length > 0 || disliked.trim().length > 0;
 
-  const send = () => {
+  const send = async () => {
     const subject = `Coach Space — обратная связь${name ? ` от ${name}` : ""}`;
     const body =
 `От: ${name || "Аноним"}
@@ -2824,9 +2824,39 @@ ${liked || "—"}
 ${disliked || "—"}
 `;
     const url = `mailto:${FEEDBACK_EMAIL}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-    window.location.href = url;
+
+    // Fallback plan: copy the message to clipboard so the user always has it,
+    // then attempt to open the mail client. On iOS/Capacitor without a
+    // configured mail account the mailto: navigation fails silently.
+    const clipboardText = `Кому: ${FEEDBACK_EMAIL}\nТема: ${subject}\n\n${body}`;
+    try {
+      if (navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(clipboardText);
+      }
+    } catch {
+      // ignore — clipboard may be blocked
+    }
+
+    let mailOpened = false;
+    try {
+      const before = Date.now();
+      const blurHandler = () => { mailOpened = true; };
+      window.addEventListener("blur", blurHandler, { once: true });
+      window.location.href = url;
+      // If the page didn't blur within 800ms we assume no mail client picked it up.
+      setTimeout(() => {
+        window.removeEventListener("blur", blurHandler);
+        if (!mailOpened && Date.now() - before >= 700) {
+          // silent fallback — success message already shown below
+        }
+      }, 800);
+    } catch {
+      // navigation blocked — clipboard fallback still applies
+    }
+
     setSent(true);
   };
+
 
   return (
     <div className="space-y-6 max-w-3xl max-w-full overflow-hidden">
