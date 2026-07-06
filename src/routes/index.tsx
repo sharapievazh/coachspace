@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   Play, Pause, Target, Heart, Triangle, Layers, Sandwich,
-  MessageSquare,
+  MessageSquare, Timer,
   Gem, Users, GraduationCap, Star, CheckCircle2,
   AlertTriangle, LayoutGrid, Award, Sparkles,
 } from "lucide-react";
