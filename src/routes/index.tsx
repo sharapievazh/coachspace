@@ -3275,7 +3275,7 @@ function Eisenhower() {
       </div>
 
       <Drawer open={!!openKey} onOpenChange={(v) => !v && setOpenKey(null)}>
-        <DrawerContent>
+        <DrawerContent className="z-[9999]">
           {active && (
             <>
               <DrawerHeader>
