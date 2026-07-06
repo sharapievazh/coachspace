@@ -488,18 +488,21 @@ export function DiltsPyramidSvg({
 export function KarpmanTriangleSvg({
   active,
   onSelect,
+  onSosSelect,
 }: {
   active: string | null;
   onSelect: (role: string) => void;
+  onSosSelect?: () => void;
 }) {
-  const W = 360;
-  const H = 320;
+  const W = 400;
+  const H = 380;
   const cx = W / 2;
-  // Triangle: Спасатель top, Жертва bottom-left, Преследователь bottom-right
-  const A = { x: cx, y: 26, role: "Спасатель", color: "#0ea5e9" };
-  const B = { x: 32, y: H - 24, role: "Жертва", color: "#f59e0b" };
-  const C = { x: W - 32, y: H - 24, role: "Преследователь", color: "#e11d48" };
-  const center = { x: cx, y: (A.y + B.y + C.y) / 3 + 6 };
+  const R = 52;
+  const A = { x: cx, y: R + 12, role: "Спасатель", color: "#0ea5e9" };
+  const B = { x: R + 12, y: H - R - 30, role: "Жертва", color: "#f59e0b" };
+  const C = { x: W - R - 12, y: H - R - 30, role: "Преследователь", color: "#e11d48" };
+  const center = { x: cx, y: (A.y + B.y + C.y) / 3 + 4 };
+  const SOS_R = 62;
 
   const Vertex = ({
     p,
@@ -509,26 +512,35 @@ export function KarpmanTriangleSvg({
     align: "top" | "bl" | "br";
   }) => {
     const isActive = active === p.role;
+    const maxTextWidth = R * 2 - 14;
     return (
       <g onClick={() => onSelect(p.role)} style={{ cursor: "pointer" }}>
         <circle
           cx={p.x}
           cy={p.y}
-          r={isActive ? 30 : 26}
+          r={isActive ? R + 4 : R}
           fill={p.color}
-          opacity={isActive ? 1 : 0.92}
+          opacity={isActive ? 1 : 0.95}
           stroke="#fff"
           strokeWidth="3"
         />
-        <text x={p.x} y={p.y + 4} textAnchor="middle" fontSize="11" fontWeight="800" fill="#fff">
+        <text
+          x={p.x}
+          y={p.y + 5}
+          textAnchor="middle"
+          fontSize="14"
+          fontWeight="600"
+          fill="#fff"
+          textLength={p.role.length > 8 ? maxTextWidth : undefined}
+          lengthAdjust="spacingAndGlyphs"
+        >
           {p.role}
         </text>
-        {/* descriptor label outside */}
         <text
-          x={p.x + (align === "bl" ? -32 : align === "br" ? 32 : 0)}
-          y={p.y + (align === "top" ? -34 : 44)}
-          textAnchor={align === "bl" ? "end" : align === "br" ? "start" : "middle"}
-          fontSize="10"
+          x={p.x + (align === "bl" ? -6 : align === "br" ? 6 : 0)}
+          y={p.y + (align === "top" ? -(R + 10) : R + 20)}
+          textAnchor={align === "bl" ? "start" : align === "br" ? "end" : "middle"}
+          fontSize="11"
           fontWeight="700"
           fill={p.color}
         >
@@ -540,7 +552,6 @@ export function KarpmanTriangleSvg({
 
   return (
     <svg viewBox={`0 0 ${W} ${H}`} width="100%" className="max-w-md mx-auto">
-      {/* triangle edges with directional arrows */}
       <polygon
         points={`${A.x},${A.y} ${B.x},${B.y} ${C.x},${C.y}`}
         fill="none"
@@ -548,17 +559,24 @@ export function KarpmanTriangleSvg({
         strokeWidth="2"
         strokeDasharray="6 4"
       />
-      {/* SOS center */}
-      <circle cx={center.x} cy={center.y} r="48" fill="#fff" stroke="#0f172a" strokeWidth="1.5" />
-      <text x={center.x} y={center.y - 6} textAnchor="middle" fontSize="18" fontWeight="900" fill="#0f172a">
-        SOS
-      </text>
-      <text x={center.x} y={center.y + 12} textAnchor="middle" fontSize="9" fill="#334155">
-        Растождествление
-      </text>
-      <text x={center.x} y={center.y + 24} textAnchor="middle" fontSize="8" fill="#64748b">
-        Где здесь твой выбор?
-      </text>
+      <g
+        onClick={(e) => {
+          e.stopPropagation();
+          onSosSelect?.();
+        }}
+        style={{ cursor: onSosSelect ? "pointer" : "default" }}
+      >
+        <circle cx={center.x} cy={center.y} r={SOS_R} fill="#fff" stroke="#0f172a" strokeWidth="1.8" />
+        <text x={center.x} y={center.y - 8} textAnchor="middle" fontSize="22" fontWeight="900" fill="#0f172a">
+          SOS
+        </text>
+        <text x={center.x} y={center.y + 12} textAnchor="middle" fontSize="11" fontWeight="600" fill="#334155">
+          Растождеств-
+        </text>
+        <text x={center.x} y={center.y + 26} textAnchor="middle" fontSize="11" fontWeight="600" fill="#334155">
+          ление
+        </text>
+      </g>
       <Vertex p={A} align="top" />
       <Vertex p={B} align="bl" />
       <Vertex p={C} align="br" />
