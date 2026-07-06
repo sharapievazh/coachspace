@@ -61,6 +61,35 @@
   --color-sidebar-ring: var(--sidebar-ring);
 }
 
+@theme {
+  --text-xs: 0.9375rem;
+  --text-xs--line-height: 1.25rem;
+  --text-sm: 1rem;
+  --text-sm--line-height: 1.5rem;
+  --text-base: 1.0625rem;
+  --text-base--line-height: 1.5rem;
+  --text-lg: 1.1875rem;
+  --text-lg--line-height: 1.75rem;
+  --text-xl: 1.25rem;
+  --text-xl--line-height: 1.75rem;
+  --text-2xl: 1.5rem;
+  --text-2xl--line-height: 2rem;
+  --text-3xl: 1.875rem;
+  --text-3xl--line-height: 2.25rem;
+  --text-4xl: 2.25rem;
+  --text-4xl--line-height: 2.5rem;
+  --text-5xl: 3rem;
+  --text-5xl--line-height: 1;
+  --text-6xl: 3.75rem;
+  --text-6xl--line-height: 1;
+  --text-7xl: 4.5rem;
+  --text-7xl--line-height: 1;
+  --text-8xl: 6rem;
+  --text-8xl--line-height: 1;
+  --text-9xl: 8rem;
+  --text-9xl--line-height: 1;
+}
+
 :root {
   --radius: 0.75rem;
   --background: oklch(0.985 0.005 240);
@@ -140,5 +169,25 @@
   body {
     background-color: var(--color-background);
     color: var(--color-foreground);
+    font-size: 1.0625rem;
+  }
+
+  button {
+    font-size: 1.0625rem;
+    font-weight: 500;
+  }
+
+  input,
+  textarea {
+    font-size: 1rem;
+  }
+
+  input::placeholder,
+  textarea::placeholder {
+    font-size: 1rem;
+  }
+
+  label {
+    font-size: 0.9375rem;
   }
 }
