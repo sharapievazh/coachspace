@@ -11,7 +11,7 @@ import {
   HelpCircle, AlertOctagon, Hand, Mountain, Telescope, Glasses,
   Ear, Crown, Palette, Calculator, Smile, Wind, ChevronDown, Briefcase,
   Award, Handshake, ArrowRight, Plus, Minus, BadgePlus, LayoutGrid, Trash2, CheckSquare, Square, Clock, Flame, CalendarCheck, UserPlus, X,
-  Flower2,
+  Flower2, Share2,
 } from "lucide-react";
 import burgerTop from "@/assets/burger-top.png";
 import burgerPatty from "@/assets/burger-patty.png";
@@ -22,6 +22,13 @@ import {
   KarpmanTriangleSvg,
   RadarChartIcon,
 } from "@/components/coach/CoachVisuals";
+import {
+  Drawer,
+  DrawerContent,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerDescription,
+} from "@/components/ui/drawer";
 
 export const Route = createFileRoute("/")({
   component: CoachSpace,
@@ -551,42 +558,66 @@ ${notes || "—"}
               if (i > 0) setTab(TABS[i - 1].id);
             }}
           >
-            {tab === "session" && (
-              <SessionPanelMemo
-                duration={duration}
-                setDuration={changeDuration}
-                remaining={remaining}
-                running={running}
-                setRunning={handleSetRunning}
-                reset={resetTimer}
-                mmss={mmss}
-                clientName={clientName}
-                setClientName={setClientName}
-                topic={topic}
-                setTopic={setTopic}
-                notes={notes}
-                setNotes={setNotes}
-                exportSession={exportSession}
-                testSound={testSound}
-              />
-            )}
-            {tab === "grow" && <GrowMemo />}
-            {tab === "swot" && <SwotMemo />}
-            {tab === "nlu" && <NluMemo />}
-            {tab === "sos" && <SosMemo />}
-            {tab === "rapport" && <RapportMemo />}
-            {tab === "smart" && <SmartGoalMemo notes={notes} setNotes={setNotes} />}
-            {tab === "eisenhower" && <EisenhowerMemo notes={notes} setNotes={setNotes} />}
-            {tab === "burger" && <BurgerMemo />}
-            {tab === "erickson" && <EricksonStarMemo />}
-            {tab === "rules" && <BurgerRulesMemo />}
-            {tab === "balance" && <BalanceMemo scores={balanceScores} onChange={setBalanceScores} />}
-            {tab === "values" && <ValuesMemo />}
-            {tab === "supervision" && <SupervisionMemo />}
-            {tab === "feedback" && <FeedbackMemo />}
-            {tab === "competencies" && <CompetenciesMemo />}
+            {(() => {
+              const activeIdx = TABS.findIndex((t) => t.id === tab);
+              const panels: { id: TabId; node: React.ReactNode }[] = [
+                { id: "session", node: (
+                  <SessionPanelMemo
+                    duration={duration}
+                    setDuration={changeDuration}
+                    remaining={remaining}
+                    running={running}
+                    setRunning={handleSetRunning}
+                    reset={resetTimer}
+                    mmss={mmss}
+                    clientName={clientName}
+                    setClientName={setClientName}
+                    topic={topic}
+                    setTopic={setTopic}
+                    notes={notes}
+                    setNotes={setNotes}
+                    exportSession={exportSession}
+                    testSound={testSound}
+                  />
+                )},
+                { id: "grow", node: <GrowMemo /> },
+                { id: "swot", node: <SwotMemo /> },
+                { id: "nlu", node: <NluMemo /> },
+                { id: "sos", node: <SosMemo /> },
+                { id: "rapport", node: <RapportMemo /> },
+                { id: "smart", node: <SmartGoalMemo /> },
+                { id: "eisenhower", node: <EisenhowerMemo /> },
+                { id: "burger", node: <BurgerMemo /> },
+                { id: "erickson", node: <EricksonStarMemo /> },
+                { id: "rules", node: <BurgerRulesMemo /> },
+                { id: "balance", node: <BalanceMemo scores={balanceScores} onChange={setBalanceScores} /> },
+                { id: "values", node: <ValuesMemo /> },
+                { id: "supervision", node: <SupervisionMemo /> },
+                { id: "feedback", node: <FeedbackMemo /> },
+                { id: "competencies", node: <CompetenciesMemo /> },
+              ];
+              return panels.map((p, idx) => {
+                const isActive = p.id === tab;
+                const isAdjacent = Math.abs(idx - activeIdx) === 1;
+                if (!isActive && !isAdjacent) return null;
+                return (
+                  <div
+                    key={p.id}
+                    style={{
+                      display: isActive ? "block" : "none",
+                      contentVisibility: isActive ? "visible" : ("auto" as any),
+                      transform: "translateZ(0)",
+                      willChange: "transform, opacity",
+                    }}
+                  >
+                    {p.node}
+                  </div>
+                );
+              });
+            })()}
           </SwipeableTabContent>
         </main>
+
 
       </div>
 
@@ -637,6 +668,7 @@ function SwipeableTabContent({
 }) {
   const startX = useRef(0);
   const startY = useRef(0);
+  const startTime = useRef(0);
   const deltaX = useRef(0);
   const tracking = useRef(false);
   const decidedHorizontal = useRef<null | boolean>(null);
@@ -644,46 +676,64 @@ function SwipeableTabContent({
   const [dragX, setDragX] = useState(0);
   const [animKey, setAnimKey] = useState(tabId);
   const [enterFrom, setEnterFrom] = useState<"left" | "right" | null>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     setAnimKey(tabId);
   }, [tabId]);
 
-  const THRESHOLD = 50;
+  const THRESHOLD = 20;
+  const VELOCITY_THRESHOLD = 0.3; // px/ms
 
-  const onTouchStart = (e: React.TouchEvent) => {
-    const t = e.touches[0];
-    startX.current = t.clientX;
-    startY.current = t.clientY;
+  const onPointerDown = (e: React.PointerEvent) => {
+    if (!containerRef.current) return;
+    containerRef.current.setPointerCapture(e.pointerId);
+    startX.current = e.clientX;
+    startY.current = e.clientY;
+    startTime.current = e.timeStamp;
     deltaX.current = 0;
     tracking.current = true;
     decidedHorizontal.current = null;
   };
 
-  const onTouchMove = (e: React.TouchEvent) => {
+  const rafId = useRef<number | null>(null);
+  const pendingDrag = useRef(0);
+
+  const onPointerMove = (e: React.PointerEvent) => {
     if (!tracking.current) return;
-    const t = e.touches[0];
-    const dx = t.clientX - startX.current;
-    const dy = t.clientY - startY.current;
+    const dx = e.clientX - startX.current;
+    const dy = e.clientY - startY.current;
 
     if (decidedHorizontal.current === null) {
-      if (Math.abs(dx) < 8 && Math.abs(dy) < 8) return;
+      if (Math.abs(dx) < 6 && Math.abs(dy) < 6) return;
       decidedHorizontal.current = Math.abs(dx) > Math.abs(dy) * 1.2;
     }
 
     if (!decidedHorizontal.current) return;
 
     deltaX.current = dx;
-    // Damped follow
-    setDragX(Math.max(-120, Math.min(120, dx * 0.5)));
+    pendingDrag.current = Math.max(-120, Math.min(120, dx * 0.5));
+    if (rafId.current == null) {
+      rafId.current = requestAnimationFrame(() => {
+        rafId.current = null;
+        setDragX(pendingDrag.current);
+      });
+    }
   };
 
-  const onTouchEnd = () => {
+
+  const onPointerUp = (e: React.PointerEvent) => {
     if (!tracking.current) return;
     tracking.current = false;
     const dx = deltaX.current;
+    const elapsed = e.timeStamp - startTime.current;
+    const velocity = elapsed > 0 ? Math.abs(dx) / elapsed : 0;
     setDragX(0);
-    if (decidedHorizontal.current && Math.abs(dx) >= THRESHOLD) {
+
+    const fastFlick = velocity > VELOCITY_THRESHOLD;
+    const farEnough = Math.abs(dx) >= THRESHOLD;
+
+    if (decidedHorizontal.current && (farEnough || fastFlick)) {
       if (dx < 0) {
         setEnterFrom("right");
         onSwipeLeft();
@@ -695,23 +745,33 @@ function SwipeableTabContent({
     decidedHorizontal.current = null;
   };
 
+  const onPointerCancel = () => {
+    tracking.current = false;
+    setDragX(0);
+    decidedHorizontal.current = null;
+  };
+
   return (
     <div
-      onTouchStart={onTouchStart}
-      onTouchMove={onTouchMove}
-      onTouchEnd={onTouchEnd}
-      onTouchCancel={onTouchEnd}
-      style={{ touchAction: "pan-y" }}
+      ref={containerRef}
+      onPointerDown={onPointerDown}
+      onPointerMove={onPointerMove}
+      onPointerUp={onPointerUp}
+      onPointerCancel={onPointerCancel}
+      style={{ touchAction: "pan-y", transform: "translateZ(0)", willChange: "transform" }}
     >
       <div
         ref={innerRef}
         key={animKey}
-        className="will-change-transform"
         style={{
-          transform: `translateX(${dragX}px)`,
-          transition: dragX === 0 ? "transform 250ms cubic-bezier(0.22, 1, 0.36, 1)" : "none",
+          transform: `translate3d(${dragX}px, 0, 0)`,
+          transition: dragX === 0
+            ? "transform 150ms ease-out, opacity 150ms ease-out"
+            : "none",
+          willChange: "transform, opacity",
+          backfaceVisibility: "hidden",
           animation: enterFrom
-            ? `${enterFrom === "right" ? "swipe-in-right" : "swipe-in-left"} 250ms cubic-bezier(0.22, 1, 0.36, 1)`
+            ? `${enterFrom === "right" ? "swipe-in-right" : "swipe-in-left"} 150ms ease-out`
             : undefined,
         }}
       >
@@ -719,17 +779,18 @@ function SwipeableTabContent({
       </div>
       <style>{`
         @keyframes swipe-in-right {
-          from { transform: translateX(24px); opacity: 0.6; }
-          to   { transform: translateX(0);    opacity: 1; }
+          from { transform: translate3d(24px, 0, 0); opacity: 0.6; }
+          to   { transform: translate3d(0, 0, 0);    opacity: 1; }
         }
         @keyframes swipe-in-left {
-          from { transform: translateX(-24px); opacity: 0.6; }
-          to   { transform: translateX(0);     opacity: 1; }
+          from { transform: translate3d(-24px, 0, 0); opacity: 0.6; }
+          to   { transform: translate3d(0, 0, 0);     opacity: 1; }
         }
       `}</style>
     </div>
   );
 }
+
 
 
 /* ---------- Session ---------- */
@@ -1329,152 +1390,103 @@ const DILTS_HOW: {
 ];
 
 function Nlu() {
-  const [active, setActive] = useState<number>(6);
+  const [active, setActive] = useState<number | null>(null);
   const rows = DILTS.length; // 6
-  const ROW_H = 60; // px per row
+  const ROW_H = 64; // px per row
+
+  const activeLevel = active != null ? DILTS.find((l) => l.n === active) ?? null : null;
 
   return (
     <div className="space-y-6 max-w-full overflow-hidden">
-      <SectionHead title="Пирамида Дилтса" subtitle="Неврологические уровни изменений" />
+      <SectionHead title="Пирамида Дилтса" subtitle="Неврологические уровни изменений — коснитесь уровня" />
 
-      {/* Header row */}
-      <div className="hidden md:grid grid-cols-[1fr_280px_1fr] gap-4 items-end">
-        <div className="text-right pr-2">
-          <div className="text-[11px] uppercase tracking-widest text-muted-foreground">УРОВЕНЬ</div>
-          <div className="text-[10px] text-muted-foreground/70">что изменяем?</div>
-        </div>
-        <div />
-        <div className="pl-2">
-          <div className="text-[11px] uppercase tracking-widest text-muted-foreground">ОПИСАНИЕ</div>
-          <div className="text-[10px] text-muted-foreground/70">фокус вопросов</div>
-        </div>
-      </div>
-
-      {/* Main: left labels | pyramid | right descriptions */}
-      <div className="grid md:grid-cols-[1fr_280px_1fr] gap-3 md:gap-4 items-start">
-        {/* LEFT — labels (numbers + name + question) */}
-        <div className="hidden md:flex flex-col" style={{ height: rows * ROW_H }}>
-          {DILTS.map((lv) => {
+      {/* PYRAMID — tappable trapezoids with labels */}
+      <div className="mx-auto w-full max-w-[360px]">
+        <div className="relative" style={{ height: rows * ROW_H }}>
+          {DILTS.map((lv, i) => {
+            const Icon = lv.icon;
             const isActive = active === lv.n;
+            const topHalf = (i / rows) * 50;
+            const botHalf = ((i + 1) / rows) * 50;
+            const clip = `polygon(${50 - topHalf}% 0%, ${50 + topHalf}% 0%, ${50 + botHalf}% 100%, ${50 - botHalf}% 100%)`;
+            const iconSize = i === 0 ? 14 : i === 1 ? 18 : 22;
+            const showLabel = i >= 1; // top apex too narrow for text
             return (
               <button
                 key={lv.n}
                 onClick={() => setActive(lv.n)}
-                style={{ height: ROW_H }}
-                className={`group w-full flex items-center justify-end gap-3 pr-3 text-right transition-all ${
-                  isActive ? "scale-[1.02]" : "opacity-80 hover:opacity-100"
-                }`}
+                className="absolute left-0 right-0 flex items-center justify-center gap-2 transition-all duration-200 active:scale-[0.98]"
+                style={{
+                  top: i * ROW_H,
+                  height: ROW_H,
+                  background: lv.hex,
+                  clipPath: clip,
+                  filter: isActive ? "brightness(1.15) saturate(1.2)" : "none",
+                  boxShadow: isActive
+                    ? `inset 0 0 0 2px rgba(255,255,255,0.7), 0 0 24px ${lv.hex}80`
+                    : "none",
+                }}
+                aria-label={lv.name}
               >
-                <div>
-                  <div className={`text-sm font-extrabold leading-tight tracking-wide ${lv.textColor}`}>
+                <Icon size={iconSize} className="text-white drop-shadow shrink-0" strokeWidth={2.4} />
+                {showLabel && (
+                  <span
+                    className="text-white font-extrabold tracking-wide drop-shadow truncate"
+                    style={{ fontSize: i === 1 ? 10 : i === 2 ? 11 : 12 }}
+                  >
                     {lv.name}
-                  </div>
-                  <div className="text-xs text-muted-foreground leading-tight">{lv.q}</div>
-                </div>
-                <div
-                  className="text-3xl font-black leading-none shrink-0"
-                  style={{ color: lv.hex }}
-                >
-                  {lv.n}
-                </div>
+                  </span>
+                )}
               </button>
             );
           })}
         </div>
-
-        {/* PYRAMID — clip-path trapezoids, icons only */}
-        <div className="mx-auto w-full max-w-[300px]">
-          <div className="relative" style={{ height: rows * ROW_H }}>
-            {DILTS.map((lv, i) => {
-              const Icon = lv.icon;
-              const isActive = active === lv.n;
-              const topHalf = (i / rows) * 50;
-              const botHalf = ((i + 1) / rows) * 50;
-              const clip = `polygon(${50 - topHalf}% 0%, ${50 + topHalf}% 0%, ${50 + botHalf}% 100%, ${50 - botHalf}% 100%)`;
-              // Icon area shrinks for narrow top rows
-              const iconSize = i === 0 ? 18 : i === 1 ? 26 : 32;
-              return (
-                <button
-                  key={lv.n}
-                  onClick={() => setActive(lv.n)}
-                  className="absolute left-0 right-0 grid place-items-center transition-all"
-                  style={{
-                    top: i * ROW_H,
-                    height: ROW_H,
-                    background: lv.hex,
-                    clipPath: clip,
-                    filter: isActive ? "brightness(1.15) saturate(1.15)" : "none",
-                    boxShadow: isActive ? `inset 0 0 0 2px rgba(255,255,255,0.6)` : "none",
-                  }}
-                  aria-label={lv.name}
-                >
-                  <Icon size={iconSize} className="text-white drop-shadow" strokeWidth={2.2} />
-                </button>
-              );
-            })}
-          </div>
-        </div>
-
-        {/* RIGHT — description + focus question */}
-        <div className="hidden md:flex flex-col" style={{ height: rows * ROW_H }}>
-          {DILTS.map((lv) => {
-            const isActive = active === lv.n;
-            return (
-              <div
-                key={lv.n}
-                onClick={() => setActive(lv.n)}
-                style={{ height: ROW_H }}
-                className={`pl-3 pr-2 text-left cursor-pointer transition-all flex flex-col justify-center ${
-                  isActive ? "" : "opacity-75 hover:opacity-100"
-                }`}
-              >
-                <p className="text-[12px] leading-tight text-foreground/90">{lv.desc}</p>
-                <p className={`text-[11px] mt-1 leading-tight font-semibold ${lv.textColor}`}>
-                  ▸ {lv.focus}
-                </p>
-              </div>
-            );
-          })}
-        </div>
+        <p className="text-center text-xs text-muted-foreground mt-3">
+          Коснитесь уровня, чтобы узнать больше
+        </p>
       </div>
 
-      {/* MOBILE: list under pyramid */}
-      <div className="md:hidden space-y-2">
-        {DILTS.map((lv) => {
-          const isActive = active === lv.n;
-          const Icon = lv.icon;
-          return (
-            <button
-              key={lv.n}
-              onClick={() => setActive(lv.n)}
-              className={`w-full text-left rounded-xl border p-3 transition-all flex items-start gap-3 ${
-                isActive ? "border-transparent ring-2" : "bg-card border-border"
-              }`}
-              style={isActive ? { background: lv.hex + "22", borderColor: lv.hex } : undefined}
-            >
-              <div
-                className="w-9 h-9 rounded-lg grid place-items-center shrink-0"
-                style={{ background: lv.hex }}
-              >
-                <Icon size={18} className="text-white" />
-              </div>
-              <div className="flex-1 min-w-0">
-                <div className="flex items-baseline gap-2">
-                  <span className="text-lg font-black" style={{ color: lv.hex }}>{lv.n}</span>
-                  <span className={`text-sm font-extrabold ${lv.textColor}`}>{lv.name}</span>
-                </div>
-                <div className="text-xs text-muted-foreground">{lv.q}</div>
-                {isActive && (
-                  <div className="mt-2 space-y-1">
-                    <p className="text-xs text-foreground/90 leading-snug">{lv.desc}</p>
-                    <p className={`text-xs font-semibold ${lv.textColor}`}>▸ {lv.focus}</p>
+      {/* iOS-style bottom sheet */}
+      <Drawer open={active != null} onOpenChange={(o) => { if (!o) setActive(null); }}>
+        <DrawerContent>
+          {activeLevel && (
+            <>
+              <DrawerHeader className="text-left">
+                <div className="flex items-center gap-3 mb-1">
+                  <div
+                    className="w-11 h-11 rounded-xl grid place-items-center shrink-0"
+                    style={{ background: activeLevel.hex }}
+                  >
+                    <span className="text-white font-black text-lg">{activeLevel.n}</span>
                   </div>
-                )}
+                  <div className="min-w-0">
+                    <DrawerTitle className={`text-xl font-extrabold ${activeLevel.textColor}`}>
+                      {activeLevel.name}
+                    </DrawerTitle>
+                    <DrawerDescription className="text-sm">
+                      {activeLevel.q}
+                    </DrawerDescription>
+                  </div>
+                </div>
+              </DrawerHeader>
+              <div className="px-4 pb-8 space-y-3">
+                <p className="text-[15px] leading-relaxed text-foreground/90">
+                  {activeLevel.desc}
+                </p>
+                <div
+                  className="rounded-xl p-3"
+                  style={{ background: activeLevel.hex + "1A" }}
+                >
+                  <p className={`text-sm font-semibold ${activeLevel.textColor}`}>
+                    ▸ {activeLevel.focus}
+                  </p>
+                </div>
               </div>
-            </button>
-          );
-        })}
-      </div>
+            </>
+          )}
+        </DrawerContent>
+      </Drawer>
+
 
       {/* HOW-TO — 4 colored cards as in reference */}
       <div className="rounded-2xl border border-border bg-card/80 p-4 sm:p-5">
@@ -1574,7 +1586,7 @@ const BALANCE_AREAS = [
 
 const BALANCE_COLORS = ["#10b981", "#f43f5e", "#f97316", "#3b82f6", "#d97706", "#ef4444", "#a855f7", "#0ea5e9"];
 
-function RadarWithTooltip({ scores }: { scores: Record<number, number> }) {
+function RadarWithTooltip({ scores, compareValues }: { scores: Record<number, number>; compareValues?: number[] }) {
   const [active, setActive] = useState<number | null>(null);
   const area = active != null ? BALANCE_AREAS[active] : null;
   const I = area?.icon;
@@ -1588,6 +1600,7 @@ function RadarWithTooltip({ scores }: { scores: Record<number, number> }) {
         colors={BALANCE_COLORS}
         active={active}
         onSelect={setActive}
+        compareValues={compareValues}
       />
       {area && I && (
         <div
@@ -1641,10 +1654,78 @@ function RadarWithTooltip({ scores }: { scores: Record<number, number> }) {
   );
 }
 
+const BALANCE_SNAPSHOTS_KEY = "balance_snapshots";
+type BalanceSnapshot = { date: string; scores: Record<number, number> };
+
+function loadSnapshots(): BalanceSnapshot[] {
+  if (typeof window === "undefined") return [];
+  try {
+    const raw = window.localStorage.getItem(BALANCE_SNAPSHOTS_KEY);
+    if (!raw) return [];
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+}
+
+function formatSnapshotDate(iso: string): string {
+  const d = new Date(iso);
+  if (isNaN(d.getTime())) return iso;
+  const dd = String(d.getDate()).padStart(2, "0");
+  const mm = String(d.getMonth() + 1).padStart(2, "0");
+  const yy = d.getFullYear();
+  return `${dd}.${mm}.${yy}`;
+}
+
 function Balance({ scores, onChange }: { scores: Record<number, number>; onChange: (s: Record<number, number>) => void }) {
   const average = (
     BALANCE_AREAS.reduce((s, a) => s + scores[a.n], 0) / BALANCE_AREAS.length
   ).toFixed(1);
+
+  const [snapshots, setSnapshots] = useState<BalanceSnapshot[]>(() => loadSnapshots());
+  const [showHistory, setShowHistory] = useState(false);
+  const [saveFlash, setSaveFlash] = useState(false);
+  const wheelRef = useRef<HTMLDivElement>(null);
+
+  const lastSnapshot = snapshots.length > 0 ? snapshots[snapshots.length - 1] : null;
+  const compareValues = showHistory && lastSnapshot
+    ? BALANCE_AREAS.map((a) => lastSnapshot.scores[a.n] ?? 0)
+    : undefined;
+
+  const saveSnapshot = () => {
+    const snap: BalanceSnapshot = { date: new Date().toISOString(), scores: { ...scores } };
+    const next = [...snapshots, snap].slice(-5);
+    setSnapshots(next);
+    try { window.localStorage.setItem(BALANCE_SNAPSHOTS_KEY, JSON.stringify(next)); } catch {}
+    setSaveFlash(true);
+    setTimeout(() => setSaveFlash(false), 1500);
+  };
+
+  const shareWheel = async () => {
+    if (!wheelRef.current) return;
+    try {
+      const { default: html2canvas } = await import("html2canvas");
+      const canvas = await html2canvas(wheelRef.current, { backgroundColor: "#ffffff", scale: 2 });
+      const blob: Blob | null = await new Promise((res) => canvas.toBlob(res, "image/png"));
+      if (!blob) return;
+      const file = new File([blob], `balance-wheel-${formatSnapshotDate(new Date().toISOString())}.png`, { type: "image/png" });
+      const nav = navigator as Navigator & { canShare?: (d: ShareData) => boolean };
+      if (nav.canShare && nav.canShare({ files: [file] })) {
+        await nav.share({ files: [file], title: "Колесо баланса", text: `Средний балл: ${average}/10` });
+      } else {
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = file.name;
+        a.click();
+        URL.revokeObjectURL(url);
+      }
+    } catch (err) {
+      console.error("Share failed", err);
+    }
+  };
+
   return (
     <div className="space-y-6 max-w-full overflow-hidden">
       <SectionHead
@@ -1682,15 +1763,63 @@ function Balance({ scores, onChange }: { scores: Record<number, number>; onChang
         })}
       </div>
 
-      <div className="bg-card rounded-2xl border border-border p-4 sm:p-6 flex flex-col items-center">
-        <div className="text-xs uppercase tracking-wide text-muted-foreground mb-1">Ваше колесо баланса</div>
+      <div ref={wheelRef} className="bg-card rounded-2xl border border-border p-4 sm:p-6 flex flex-col items-center">
+        <div className="w-full flex items-center justify-between mb-2 gap-2">
+          <div className="text-xs uppercase tracking-wide text-muted-foreground">Ваше колесо баланса</div>
+          {lastSnapshot && (
+            <button
+              onClick={() => setShowHistory((v) => !v)}
+              className={`text-[11px] px-2.5 py-1 rounded-full border transition-colors ${
+                showHistory
+                  ? "bg-primary text-primary-foreground border-primary"
+                  : "bg-transparent text-muted-foreground border-border hover:text-foreground"
+              }`}
+              aria-pressed={showHistory}
+            >
+              История {showHistory ? "✓" : ""}
+            </button>
+          )}
+        </div>
         <p className="text-xs text-muted-foreground mb-3 text-center max-w-md">
           Оранжевый полигон — ваши текущие оценки. Серый пунктирный круг — идеальный баланс.
           Чем «круглее» полигон — тем гармоничнее жизнь. Средний балл:{" "}
           <span className="font-bold text-foreground">{average} / 10</span>.
         </p>
-        <RadarWithTooltip scores={scores} />
+        <RadarWithTooltip scores={scores} compareValues={compareValues} />
+        {showHistory && lastSnapshot && (
+          <div className="mt-3 flex flex-wrap items-center justify-center gap-x-4 gap-y-1 text-[11px]">
+            <span className="inline-flex items-center gap-1.5">
+              <span className="inline-block w-4 h-0.5 border-t-2 border-dashed border-slate-500" />
+              <span className="text-muted-foreground">До: {formatSnapshotDate(lastSnapshot.date)}</span>
+            </span>
+            <span className="inline-flex items-center gap-1.5">
+              <span className="inline-block w-3 h-3 rounded-sm" style={{ background: "#c2410c" }} />
+              <span className="text-muted-foreground">После: сегодня</span>
+            </span>
+          </div>
+        )}
+        <div className="mt-4 flex flex-wrap items-center justify-center gap-2 w-full">
+          <button
+            onClick={saveSnapshot}
+            className="px-3 py-2 rounded-full bg-primary text-primary-foreground text-sm font-semibold active:scale-95 transition-transform"
+          >
+            📸 {saveFlash ? "Сохранено!" : "Сохранить результат"}
+          </button>
+          <button
+            onClick={shareWheel}
+            className="px-3 py-2 rounded-full border border-border text-sm font-semibold text-foreground active:scale-95 transition-transform inline-flex items-center gap-1.5"
+          >
+            <Share2 size={16} /> Поделиться
+          </button>
+        </div>
+        {snapshots.length > 0 && (
+          <div className="mt-3 text-[11px] text-muted-foreground">
+            Сохранено снимков: {snapshots.length} / 5
+          </div>
+        )}
       </div>
+
+
 
 
       <div className="bg-card rounded-2xl border border-border p-5">
@@ -2953,246 +3082,197 @@ function EricksonStar() {
 }
 
 // ============ EISENHOWER MATRIX ============
-type EisenTask = { id: string; text: string; important: boolean; urgent: boolean; done: boolean };
-const EISEN_STORAGE = "coach-space-eisenhower-tasks";
-
-const QUADRANTS = [
+const EISENHOWER_DATA = [
   {
-    key: "do", important: true, urgent: true,
-    title: "Важные и срочные", action: "Сделай немедленно",
-    en: "DO", icon: Flame,
-    bg: "from-red-100 via-orange-100 to-red-200",
-    ring: "border-red-400", chip: "bg-red-200 text-red-900 border-red-400",
-    dot: "bg-red-500",
+    key: "do",
+    title: "Важные и срочные",
+    action: "Сделай немедленно",
+    en: "DO",
+    icon: Flame,
+    color: "bg-rose-500",
+    lightBg: "bg-rose-50",
+    border: "border-rose-200",
+    text: "text-rose-900",
+    desc: "Эти задачи требуют немедленного внимания и имеют серьёзные последствия, если их не выполнить. Обычно возникают из-за срочных проблем, дедлайнов или кризисов. Работа в этом квадранте создаёт стресс, но иногда неизбежна.",
+    examples: [
+      "Срочный дедлайн по проекту сегодня",
+      "Технический сбой, требующий немедленного решения",
+      "Звонок клиента с критической проблемой",
+      "Предупреждение о возможном увольнении",
+    ],
+    questions: [
+      "Что произойдёт, если это не сделать прямо сейчас?",
+      "Это действительно кризис или созданная спешка?",
+      "Какие задачи из этого квадранта можно было запланировать заранее?",
+    ],
   },
   {
-    key: "schedule", important: true, urgent: false,
-    title: "Важные и несрочные", action: "Запланируй",
-    en: "SCHEDULE", icon: CalendarCheck,
-    bg: "from-emerald-100 via-green-100 to-emerald-200",
-    ring: "border-emerald-400", chip: "bg-emerald-200 text-emerald-900 border-emerald-400",
-    dot: "bg-emerald-500",
+    key: "schedule",
+    title: "Важные и несрочные",
+    action: "Запланируй",
+    en: "SCHEDULE",
+    icon: CalendarCheck,
+    color: "bg-emerald-500",
+    lightBg: "bg-emerald-50",
+    border: "border-emerald-200",
+    text: "text-emerald-900",
+    desc: "Здесь лежит стратегическое планирование, профессиональное развитие, отношения и здоровье. Эти задачи не горят, но определяют долгосрочный успех. Именно этот квадрант отличает эффективного профессионала от пожарного.",
+    examples: [
+      "Планирование квартальных целей",
+      "Обучение и повышение квалификации",
+      "Нетворкинг и укрепление отношений",
+      "Спорт, сон и профилактика выгорания",
+    ],
+    questions: [
+      "Какие задачи из этого квадранта дадут максимальный результат через 3 месяца?",
+      "Что мешает вам уделять им время сейчас?",
+      "Какие привычки помогут регулярно возвращаться сюда?",
+    ],
   },
   {
-    key: "delegate", important: false, urgent: true,
-    title: "Неважные и срочные", action: "Делегируй",
-    en: "DELEGATE", icon: UserPlus,
-    bg: "from-indigo-100 via-violet-100 to-indigo-200",
-    ring: "border-indigo-400", chip: "bg-indigo-200 text-indigo-900 border-indigo-400",
-    dot: "bg-indigo-500",
+    key: "delegate",
+    title: "Неважные и срочные",
+    action: "Делегируй",
+    en: "DELEGATE",
+    icon: UserPlus,
+    color: "bg-sky-500",
+    lightBg: "bg-sky-50",
+    border: "border-sky-200",
+    text: "text-sky-900",
+    desc: "Срочные, но не важные для вас лично задачи. Чужие приоритеты, которые вы чувствуете обязанным сделать. Классический источник прокрастинации и отвлечения. Лучшее решение — передать другим или автоматизировать.",
+    examples: [
+      "Ответы на непрерывные рабочие чаты",
+      "Перепроверка работы коллеги",
+      "Участие в собрании без чёткой повестки",
+      "Срочные просьбы, которые не ваши приоритеты",
+    ],
+    questions: [
+      "Это действительно моя ответственность?",
+      "Кто ещё может это сделать?",
+      "Какие границы помогут защитить ваше время?",
+    ],
   },
   {
-    key: "delete", important: false, urgent: false,
-    title: "Неважные и несрочные", action: "Удали / минимизируй",
-    en: "DELETE", icon: Trash2,
-    bg: "from-slate-100 via-slate-200 to-slate-300",
-    ring: "border-slate-400", chip: "bg-slate-200 text-slate-800 border-slate-400",
-    dot: "bg-slate-500",
+    key: "delete",
+    title: "Неважные и несрочные",
+    action: "Удали / минимизируй",
+    en: "DELETE",
+    icon: Trash2,
+    color: "bg-slate-500",
+    lightBg: "bg-slate-50",
+    border: "border-slate-200",
+    text: "text-slate-900",
+    desc: "Безделье, привычки-вампиры и бессмысленная трата времени. Бесконечный скроллинг, пересмотр сериалов, непродуктивные переживания. Это не отдых — это побег. Настоящий отдых относится к квадранту SCHEDULE.",
+    examples: [
+      "Бесконечный скроллинг соцсетей",
+      "Пересмотр сериалов без радости",
+      "Переживания о невозможном контроле",
+      "Участие в спорах без смысла",
+    ],
+    questions: [
+      "Что из этого я делаю по привычке, а не по выбору?",
+      "Какие активности здесь можно заменить настоящим отдыхом?",
+      "Что я теряю, пока трачу время на это?",
+    ],
   },
 ] as const;
 
-function Eisenhower({ notes, setNotes }: { notes: string; setNotes: (v: string) => void }) {
-  const [tasks, setTasks] = useState<EisenTask[]>([]);
-  const [text, setText] = useState("");
-  const [important, setImportant] = useState(true);
-  const [urgent, setUrgent] = useState(false);
-  const [mobileTab, setMobileTab] = useState<typeof QUADRANTS[number]["key"]>("do");
-
-  useEffect(() => {
-    try {
-      const raw = localStorage.getItem(EISEN_STORAGE);
-      if (raw) setTasks(JSON.parse(raw));
-    } catch {}
-  }, []);
-  useEffect(() => {
-    try { localStorage.setItem(EISEN_STORAGE, JSON.stringify(tasks)); } catch {}
-  }, [tasks]);
-
-  const add = () => {
-    const t = text.trim();
-    if (!t) return;
-    setTasks((arr) => [
-      { id: Math.random().toString(36).slice(2), text: t, important, urgent, done: false },
-      ...arr,
-    ]);
-    setText("");
-  };
-  const toggleDone = (id: string) =>
-    setTasks((arr) => arr.map((t) => (t.id === id ? { ...t, done: !t.done } : t)));
-  const remove = (id: string) => setTasks((arr) => arr.filter((t) => t.id !== id));
-
-  const byQuad = (q: typeof QUADRANTS[number]) =>
-    tasks.filter((t) => t.important === q.important && t.urgent === q.urgent);
-
-  const sendToNotes = () => {
-    const lines = ["", "[Матрица Эйзенхауэра]"];
-    for (const q of QUADRANTS) {
-      const items = byQuad(q);
-      if (!items.length) continue;
-      lines.push(`\n— ${q.title} · ${q.action}:`);
-      for (const t of items) lines.push(`   ${t.done ? "✓" : "•"} ${t.text}`);
-    }
-    setNotes((notes ? notes + "\n" : "") + lines.join("\n") + "\n");
-  };
+function Eisenhower() {
+  const [openKey, setOpenKey] = useState<string | null>(null);
+  const active = openKey ? EISENHOWER_DATA.find((q) => q.key === openKey) : null;
 
   return (
-    <div className="max-w-5xl mx-auto rounded-2xl border border-border bg-gradient-to-br from-sky-50 via-indigo-100 to-violet-200 text-slate-900 p-3 sm:p-5 space-y-4 max-w-full overflow-hidden">
-      <div className="flex items-start gap-3">
-        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-500 to-rose-600 grid place-items-center shadow-lg shrink-0">
-          <LayoutGrid size={22} className="text-white" />
-        </div>
-        <div className="min-w-0">
-          <h2 className="text-lg sm:text-xl font-bold leading-tight">Матрица Эйзенхауэра</h2>
-          <p className="text-xs text-muted-foreground">Таск-менеджер с автосортировкой по важности и срочности</p>
-        </div>
+    <div className="max-w-full overflow-hidden">
+      <div className="mb-4">
+        <h2 className="text-xl font-bold flex items-center gap-2">
+          <LayoutGrid className="text-accent" size={22} />
+          Матрица Эйзенхауэра
+        </h2>
+        <p className="text-sm text-secondary-foreground mt-1">
+          Тапните квадрант, чтобы увидеть описание, примеры и наводящие вопросы.
+        </p>
       </div>
 
-      {/* Add form */}
-      <div className="rounded-xl border border-border bg-card/60 p-3 space-y-2">
-        <div className="flex gap-2">
-          <input
-            value={text}
-            onChange={(e) => setText(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && add()}
-            placeholder="Новая задача…"
-            className="flex-1 bg-background border border-border rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-primary"
-          />
-          <button
-            onClick={add}
-            className="px-3 py-2 rounded-lg bg-primary text-primary-foreground text-sm font-medium flex items-center gap-1 hover:opacity-90"
-          >
-            <Plus size={16} /> <span className="hidden sm:inline">Добавить</span>
-          </button>
-        </div>
-        <div className="flex flex-wrap gap-2">
-          <button
-            onClick={() => setImportant((v) => !v)}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs border transition-colors ${
-              important
-                ? "bg-rose-200 border-rose-500 text-rose-900"
-                : "bg-card border-border text-muted-foreground"
-            }`}
-          >
-            <Flame size={13} /> Важно {important ? "✓" : ""}
-          </button>
-          <button
-            onClick={() => setUrgent((v) => !v)}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs border transition-colors ${
-              urgent
-                ? "bg-amber-200 border-amber-500 text-amber-900"
-                : "bg-card border-border text-muted-foreground"
-            }`}
-          >
-            <Clock size={13} /> Срочно {urgent ? "✓" : ""}
-          </button>
-          <button
-            onClick={sendToNotes}
-            className="ml-auto flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs border border-primary/40 bg-primary/10 text-primary hover:bg-primary/20"
-            title="Скопировать матрицу в блокнот сессии"
-          >
-            <BadgePlus size={13} /> В блокнот
-          </button>
-        </div>
-      </div>
-
-      {/* Mobile tabs */}
-      <div className="sm:hidden flex gap-1 overflow-x-auto -mx-1 px-1 pb-1">
-        {QUADRANTS.map((q) => (
-          <button
-            key={q.key}
-            onClick={() => setMobileTab(q.key)}
-            className={`shrink-0 flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[11px] border ${
-              mobileTab === q.key ? q.chip : "bg-card border-border text-muted-foreground"
-            }`}
-          >
-            <span className={`w-2 h-2 rounded-full ${q.dot}`} />
-            {q.en}
-            <span className="opacity-70">({byQuad(q).length})</span>
-          </button>
-        ))}
-      </div>
-
-      {/* Matrix with axes (desktop) */}
-      <div className="hidden sm:grid grid-cols-[auto_1fr] gap-2">
-        <div className="flex items-center justify-center">
-          <div className="rotate-180 [writing-mode:vertical-rl] text-[10px] uppercase tracking-widest text-muted-foreground flex items-center gap-2">
-            <ArrowRight size={12} className="rotate-90" /> Важность
-          </div>
-        </div>
-        <div>
-          <div className="grid grid-cols-2 grid-rows-2 gap-2">
-            {QUADRANTS.map((q) => (
-              <QuadrantCard key={q.key} q={q} items={byQuad(q)} onToggle={toggleDone} onRemove={remove} />
-            ))}
-          </div>
-          <div className="mt-2 text-center text-[10px] uppercase tracking-widest text-muted-foreground flex items-center justify-center gap-2">
-            Срочность <ArrowRight size={12} />
-          </div>
-        </div>
-      </div>
-
-      {/* Mobile: single quadrant */}
-      <div className="sm:hidden">
-        {QUADRANTS.filter((q) => q.key === mobileTab).map((q) => (
-          <QuadrantCard key={q.key} q={q} items={byQuad(q)} onToggle={toggleDone} onRemove={remove} />
-        ))}
-      </div>
-
-      <div className="text-[11px] text-muted-foreground text-center">
-        Всего задач: <b className="text-foreground">{tasks.length}</b> · сохраняется локально на устройстве
-      </div>
-    </div>
-  );
-}
-
-function QuadrantCard({
-  q, items, onToggle, onRemove,
-}: {
-  q: typeof QUADRANTS[number];
-  items: EisenTask[];
-  onToggle: (id: string) => void;
-  onRemove: (id: string) => void;
-}) {
-  const Icon = q.icon;
-  return (
-    <div className={`rounded-xl border ${q.ring} bg-gradient-to-br ${q.bg} text-slate-900 p-2.5 sm:p-3 min-h-[180px] flex flex-col`}>
-      <div className="flex items-center gap-2 mb-2">
-        <div className="w-7 h-7 rounded-lg bg-slate-900/80 grid place-items-center">
-          <Icon size={14} className="text-white" />
-        </div>
-        <div className="min-w-0 flex-1">
-          <div className="text-[10px] font-mono uppercase tracking-widest text-slate-600">{q.en}</div>
-          <div className="text-xs font-semibold leading-tight truncate text-slate-900">{q.title}</div>
-        </div>
-        <span className={`text-[10px] px-1.5 py-0.5 rounded-full border ${q.chip}`}>{items.length}</span>
-      </div>
-      <div className={`text-[11px] mb-2 px-2 py-1 rounded-md border ${q.chip} self-start`}>
-        → {q.action}
-      </div>
-      <div className="flex-1 space-y-1.5 overflow-auto">
-        {items.length === 0 && (
-          <div className="text-[11px] text-slate-500 italic py-2 text-center">пусто</div>
-        )}
-        {items.map((t) => (
-          <div
-            key={t.id}
-            className="group flex items-center gap-2 bg-white/80 border border-slate-300 rounded-lg px-2 py-1.5"
-          >
-            <button onClick={() => onToggle(t.id)} className="shrink-0 text-slate-700 hover:text-slate-900">
-              {t.done ? <CheckSquare size={14} /> : <Square size={14} />}
-            </button>
-            <span className={`text-xs flex-1 ${t.done ? "line-through text-slate-400" : "text-slate-900"}`}>
-              {t.text}
-            </span>
+      <div className="grid grid-cols-2 grid-rows-2 gap-3 h-[calc(100vh-280px)] min-h-[360px] max-h-[680px]">
+        {EISENHOWER_DATA.map((q) => {
+          const Icon = q.icon;
+          return (
             <button
-              onClick={() => onRemove(t.id)}
-              className="shrink-0 text-slate-500 hover:text-red-600 opacity-0 group-hover:opacity-100 transition-opacity"
+              key={q.key}
+              onClick={() => setOpenKey(q.key)}
+              className={`rounded-2xl border ${q.border} ${q.lightBg} p-4 sm:p-5 text-left flex flex-col gap-2 active:scale-[0.98] transition-transform shadow-sm hover:shadow-md`}
             >
-              <X size={13} />
+              <div className="flex items-center gap-2">
+                <div className={`w-8 h-8 rounded-lg ${q.color} grid place-items-center shadow-sm`}>
+                  <Icon size={16} className="text-white" />
+                </div>
+                <div className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground">
+                  {q.en}
+                </div>
+              </div>
+              <div className={`text-sm font-semibold leading-tight ${q.text}`}>
+                {q.title}
+              </div>
+              <div className="text-xs text-muted-foreground leading-relaxed">
+                {q.action}
+              </div>
             </button>
-          </div>
-        ))}
+          );
+        })}
       </div>
+
+      <Drawer open={!!openKey} onOpenChange={(v) => !v && setOpenKey(null)}>
+        <DrawerContent>
+          {active && (
+            <>
+              <DrawerHeader>
+                <div className="flex items-center gap-2 mb-1">
+                  <div className={`w-8 h-8 rounded-lg ${active.color} grid place-items-center shadow-sm`}>
+                    <active.icon size={16} className="text-white" />
+                  </div>
+                  <DrawerTitle className="text-lg">
+                    {active.en} — {active.title}
+                  </DrawerTitle>
+                </div>
+                <DrawerDescription className="text-sm font-medium text-foreground mt-0">
+                  {active.action}
+                </DrawerDescription>
+              </DrawerHeader>
+              <div className="px-4 pb-6 space-y-4">
+                <p className="text-sm text-secondary-foreground leading-relaxed">
+                  {active.desc}
+                </p>
+                <div>
+                  <div className="text-xs font-semibold text-secondary-foreground uppercase tracking-wider mb-2">
+                    Примеры задач
+                  </div>
+                  <ul className="space-y-2">
+                    {active.examples.map((ex, idx) => (
+                      <li key={idx} className="flex items-start gap-2 text-sm text-foreground">
+                        <span className={`shrink-0 mt-1.5 w-1.5 h-1.5 rounded-full ${active.color}`} />
+                        <span>{ex}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+                <div>
+                  <div className="text-xs font-semibold text-secondary-foreground uppercase tracking-wider mb-2">
+                    Наводящие вопросы для клиента
+                  </div>
+                  <ul className="space-y-2">
+                    {active.questions.map((q, idx) => (
+                      <li key={idx} className="flex items-start gap-2 text-sm text-foreground">
+                        <span className="shrink-0 mt-1 text-muted-foreground">•</span>
+                        <span>{q}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+            </>
+          )}
+        </DrawerContent>
+      </Drawer>
     </div>
   );
 }
@@ -3201,292 +3281,194 @@ function QuadrantCard({
    SMART-цель — интерактивный тренажёр
    ============================================================ */
 
-const SMART_STEPS: {
-  key: keyof Pick<SmartData, "s" | "m" | "a" | "r" | "t">;
+const SMART_CRITERIA: {
   letter: string;
   title: string;
   subtitle: string;
-  hint: string;
-  example: string;
   color: string;
   ring: string;
-  placeholder: string;
+  textColor: string;
+  questions: string[];
 }[] = [
   {
-    key: "s",
     letter: "S",
     title: "Specific",
     subtitle: "Конкретная",
-    hint: "Каких именно результатов необходимо достичь? Опиши характеристики результата.",
-    example: "«Создаю личное веб-приложение для тайм-менеджмента на 4 квадранта матрицы Эйзенхауэра».",
     color: "bg-rose-500",
     ring: "ring-rose-400/50",
-    placeholder: "Что именно делаем? Конкретный результат…",
+    textColor: "text-rose-600",
+    questions: [
+      "Каких именно результатов необходимо достичь?",
+      "Опиши характеристики результата конкретно и однозначно.",
+      "Что именно будет по-другому, когда цель достигнута?",
+      "Кто конкретно вовлечён в достижение цели?",
+      "Где и в каком контексте происходит работа над целью?",
+    ],
   },
   {
-    key: "m",
     letter: "M",
     title: "Measurable",
     subtitle: "Измеримая",
-    hint: "Что даст возможность судить о достижении цели? Критерии MVP, метрики, признаки готовности.",
-    example: "«Приложение готово, когда в браузере можно добавить задачу с параметрами важно/срочно, и она автоматически сортируется».",
     color: "bg-amber-500",
     ring: "ring-amber-400/50",
-    placeholder: "По каким признакам/метрикам поймём, что цель достигнута?",
+    textColor: "text-amber-600",
+    questions: [
+      "Что даст возможность судить о достижении цели?",
+      "Какие критерии, метрики или признаки готовности используем?",
+      "Как мы поймём, что цель достигнута на 50%, 80%, 100%?",
+      "Какое количественное или качественное подтверждение нужно?",
+      "Как будем отслеживать прогресс?",
+    ],
   },
   {
-    key: "a",
     letter: "A",
     title: "Achievable",
     subtitle: "Достижимая",
-    hint: "За счёт чего цель будет достигнута? Какие ресурсы, навыки и инструменты используем?",
-    example: "«Используя ИИ-конструктор Lovable и уделяя составлению промптов по 1 часу каждый вечер».",
     color: "bg-emerald-500",
     ring: "ring-emerald-400/50",
-    placeholder: "Какие ресурсы и шаги делают цель достижимой?",
+    textColor: "text-emerald-600",
+    questions: [
+      "За счёт чего цель будет достигнута?",
+      "Какие ресурсы, навыки и инструменты уже есть?",
+      "Что нужно дополнительно освоить или привлечь?",
+      "Есть ли у клиента контроль над этой целью?",
+      "Какие внутренние и внешние препятствия возможны?",
+    ],
   },
   {
-    key: "r",
     letter: "R",
     title: "Relevant",
     subtitle: "Актуальная",
-    hint: "Почему цель важна для успеха именно сейчас? Связь с практикой, ценностями, текущей ситуацией.",
-    example: "«Поможет структурировать дела в период обучения коучингу и снизит уровень стресса».",
     color: "bg-sky-500",
     ring: "ring-sky-400/50",
-    placeholder: "Почему это важно именно сейчас?",
+    textColor: "text-sky-600",
+    questions: [
+      "Почему цель важна для успеха именно сейчас?",
+      "Как эта цель связана с ценностями клиента?",
+      "Какие последствия будут, если цель не достигнута?",
+      "Какие выгоды принесёт достижение цели?",
+      "Эта цель соответствует текущей ситуации и приоритетам?",
+    ],
   },
   {
-    key: "t",
     letter: "T",
     title: "Time-framed",
     subtitle: "Определена во времени",
-    hint: "Когда и к какому моменту цель должна быть достигнута? Точный дедлайн или вехи.",
-    example: "«Первая рабочая версия будет готова через 14 дней, к 23 июня 2026 года».",
     color: "bg-violet-500",
     ring: "ring-violet-400/50",
-    placeholder: "К какой дате? Какие промежуточные вехи?",
+    textColor: "text-violet-600",
+    questions: [
+      "Когда и к какому моменту цель должна быть достигнута?",
+      "Какой точный дедлайн или конечная дата?",
+      "Какие промежуточные вехи и контрольные точки?",
+      "Что клиент готов делать уже сегодня/на этой неделе?",
+      "Как часто будем проверять прогресс?",
+    ],
   },
 ];
 
-function SmartGoal({ notes, setNotes }: { notes: string; setNotes: (v: string) => void }) {
-  const [data, setData] = useState<SmartData>(SMART_EMPTY);
-  const [openHint, setOpenHint] = useState<string | null>(null);
-  const [copied, setCopied] = useState(false);
-  const [sent, setSent] = useState(false);
+function SmartGoal() {
+  const [openKey, setOpenKey] = useState<string | null>(null);
 
-  useEffect(() => {
-    try {
-      const raw = localStorage.getItem(SMART_STORAGE);
-      if (raw) setData({ ...SMART_EMPTY, ...JSON.parse(raw) });
-    } catch {}
-  }, []);
-  useEffect(() => {
-    try {
-      localStorage.setItem(SMART_STORAGE, JSON.stringify(data));
-    } catch {}
-  }, [data]);
-
-  const paragraph = useMemo(() => buildSmartParagraph(data), [data]);
-  const filled = SMART_STEPS.filter((s) => data[s.key].trim().length > 0).length;
-  const progress = (filled / SMART_STEPS.length) * 100;
-
-  const update = (k: keyof SmartData, v: any) => setData((d) => ({ ...d, [k]: v }));
-
-  const copy = async () => {
-    if (!paragraph) return;
-    try {
-      await navigator.clipboard.writeText(paragraph);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 1500);
-    } catch {}
-  };
-
-  const sendToNotes = () => {
-    if (!paragraph) return;
-    const block = `\n[SMART-цель]\n${paragraph}\n${
-      data.positive ? "✓ Позитивная формулировка\n" : ""
-    }${data.balanced ? "✓ Баланс вызова и реальности\n" : ""}`;
-    setNotes((notes ? notes.trimEnd() + "\n" : "") + block);
-    setSent(true);
-    setTimeout(() => setSent(false), 1500);
+  const toggle = (key: string) => {
+    setOpenKey((prev) => (prev === key ? null : key));
   };
 
   return (
-    <div className="rounded-3xl bg-gradient-to-br from-indigo-50 via-fuchsia-50 to-amber-50 text-slate-900 border border-fuchsia-200 p-4 sm:p-6 shadow-xl max-w-full overflow-hidden">
-      <div className="flex items-start justify-between gap-3 mb-4">
-        <div>
-          <h2 className="text-xl sm:text-2xl font-bold flex items-center gap-2">
-            <CheckCircle2 className="text-fuchsia-600" size={22} />
-            Интерактивный SMART-тренажёр цели
-          </h2>
-          <p className="text-xs sm:text-sm text-slate-600 mt-1">
-            Пошагово оцифруйте цель клиента — каждый критерий превращает желание в проектный план.
-          </p>
-        </div>
-        <div className="hidden sm:flex flex-col items-end text-xs text-slate-600">
-          <span className="font-semibold text-slate-800">{filled}/5</span>
-          <span>заполнено</span>
-        </div>
+    <div className="rounded-3xl bg-surface-1 text-foreground border border-border p-4 sm:p-5 shadow-sm max-w-full overflow-hidden">
+      <div className="mb-5">
+        <h2 className="text-xl font-bold flex items-center gap-2">
+          <CheckCircle2 className="text-accent" size={22} />
+          SMART — справочник для коуча
+        </h2>
+        <p className="text-sm text-secondary-foreground mt-1">
+          Тапните по критерию, чтобы увидеть наводящие вопросы для сессии.
+        </p>
       </div>
 
-      <div className="h-1.5 rounded-full bg-white/70 overflow-hidden mb-5">
-        <div
-          className="h-full bg-gradient-to-r from-rose-500 via-amber-500 via-emerald-500 via-sky-500 to-violet-500 transition-all"
-          style={{ width: `${progress}%` }}
-        />
-      </div>
-
-      <div className="grid gap-2.5">
-        {SMART_STEPS.map((step) => {
-          const value = data[step.key];
-          const isOpen = openHint === step.key;
-          const filled = value.trim().length > 0;
+      <div className="grid gap-2">
+        {SMART_CRITERIA.map((item) => {
+          const isOpen = openKey === item.letter;
           return (
             <div
-              key={step.key}
-              className={`rounded-xl bg-white/80 backdrop-blur border ${
-                filled ? "border-fuchsia-300 shadow-sm" : "border-slate-200"
-              } p-3 transition-all`}
+              key={item.letter}
+              className={"rounded-2xl border transition-all overflow-hidden " + (isOpen ? "border-border bg-surface-0 shadow-sm" : "border-border/50 bg-surface-0/60")}
             >
-              <div className="flex items-start gap-3">
+              <button
+                onClick={() => toggle(item.letter)}
+                className="w-full flex items-center gap-3 p-3 sm:p-4 text-left active:scale-[0.98] transition-transform"
+                aria-expanded={isOpen}
+              >
                 <div
-                  className={`shrink-0 w-10 h-10 rounded-xl ${step.color} text-white font-black text-lg grid place-items-center shadow-md ${
-                    filled ? "ring-2 " + step.ring : ""
-                  }`}
+                  className={"shrink-0 w-10 h-10 rounded-xl " + item.color + " text-white font-black text-lg grid place-items-center shadow-sm " + (isOpen ? "ring-2 " + item.ring : "")}
                 >
-                  {step.letter}
+                  {item.letter}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <div className="flex items-center justify-between gap-2">
-                    <div className="text-sm font-semibold text-slate-800 leading-tight">
-                      {step.title} <span className="text-slate-500 font-normal">— {step.subtitle}</span>
-                    </div>
-                    <button
-                      onClick={() => setOpenHint(isOpen ? null : step.key)}
-                      className={`shrink-0 grid place-items-center w-7 h-7 rounded-full transition-colors ${
-                        isOpen ? "bg-fuchsia-600 text-white" : "bg-slate-100 text-slate-600 hover:bg-slate-200"
-                      }`}
-                      aria-label="Подсказка"
-                    >
-                      <HelpCircle size={14} />
-                    </button>
+                  <div className="text-sm font-semibold leading-tight">
+                    {item.title}{" "}
+                    <span className="font-normal text-secondary-foreground">
+                      — {item.subtitle}
+                    </span>
                   </div>
-                  {isOpen && (
-                    <div className="mt-2 rounded-lg bg-slate-900 text-slate-100 text-xs p-3 leading-relaxed animate-in fade-in slide-in-from-top-1">
-                      <div className="mb-1.5 opacity-90">{step.hint}</div>
-                      <div className="text-amber-200">
-                        <span className="font-semibold">Пример:</span> {step.example}
-                      </div>
-                    </div>
-                  )}
-                  <textarea
-                    value={value}
-                    onChange={(e) => update(step.key, e.target.value)}
-                    placeholder={step.placeholder}
-                    rows={2}
-                    className="mt-2 w-full text-sm rounded-lg border border-slate-200 bg-white px-3 py-2 resize-none focus:outline-none focus:ring-2 focus:ring-fuchsia-400/50 focus:border-fuchsia-400 placeholder:text-slate-400"
-                  />
                 </div>
-              </div>
+                <div
+                  className={"shrink-0 text-muted-foreground transition-transform duration-200 " + (isOpen ? "rotate-180" : "")}
+                >
+                  <ChevronDown size={18} />
+                </div>
+              </button>
+
+              {isOpen && (
+                <div className="px-4 pb-4 sm:px-5 sm:pb-5 animate-in fade-in slide-in-from-top-1">
+                  <div className="border-t border-border/40 pt-3">
+                    <div className="text-xs font-semibold text-secondary-foreground uppercase tracking-wider mb-2">
+                      Наводящие вопросы
+                    </div>
+                    <ul className="space-y-2">
+                      {item.questions.map((q, idx) => (
+                        <li
+                          key={idx}
+                          className="flex items-start gap-2 text-sm text-foreground leading-relaxed"
+                        >
+                          <span
+                            className={"shrink-0 mt-1 w-1.5 h-1.5 rounded-full " + item.color}
+                          />
+                          <span>{q}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
+              )}
             </div>
           );
         })}
       </div>
 
       {/* Whitmore rules */}
-      <div className="mt-5 rounded-xl bg-white/80 border border-emerald-200 p-3">
-        <div className="text-xs font-semibold text-emerald-800 mb-2 flex items-center gap-1.5">
-          <ShieldCheck size={14} /> Правила Джона Уитмора
+      <div className="mt-5 rounded-2xl border border-border bg-surface-0/60 p-4">
+        <div className="text-xs font-semibold text-secondary-foreground mb-3 flex items-center gap-1.5">
+          <ShieldCheck size={14} className="text-accent" /> Правила Джона Уитмора
         </div>
         <div className="grid gap-2 sm:grid-cols-2">
-          {[
-            {
-              k: "positive" as const,
-              title: "Позитивная формулировка",
-              desc: "Без частицы «НЕ». Направлена на достижение, а не на избегание.",
-            },
-            {
-              k: "balanced" as const,
-              title: "Баланс вызова и реальности",
-              desc: "Мотивирует (бросает вызов), но остаётся выполнимой.",
-            },
-          ].map((rule) => {
-            const on = data[rule.k];
-            return (
-              <button
-                key={rule.k}
-                onClick={() => update(rule.k, !on)}
-                className={`text-left rounded-lg p-2.5 border transition-all flex items-start gap-2 ${
-                  on
-                    ? "bg-emerald-500 text-white border-emerald-600 shadow"
-                    : "bg-white text-slate-700 border-slate-200 hover:border-emerald-400"
-                }`}
-              >
-                <div
-                  className={`shrink-0 mt-0.5 w-4 h-4 rounded grid place-items-center border ${
-                    on ? "bg-white border-white text-emerald-600" : "border-slate-300 bg-white"
-                  }`}
-                >
-                  {on && <CheckCircle2 size={14} />}
-                </div>
-                <div className="min-w-0">
-                  <div className="text-xs font-bold leading-tight">{rule.title}</div>
-                  <div className={`text-[11px] mt-0.5 leading-snug ${on ? "text-white/90" : "text-slate-500"}`}>
-                    {rule.desc}
-                  </div>
-                </div>
-              </button>
-            );
-          })}
-        </div>
-      </div>
-
-      {/* Final paragraph */}
-      <div className="mt-5 rounded-2xl bg-gradient-to-br from-slate-900 via-indigo-950 to-fuchsia-950 text-white p-4 sm:p-5 shadow-lg">
-        <div className="flex items-center justify-between gap-2 mb-2">
-          <div className="flex items-center gap-2">
-            <Sparkles size={16} className="text-amber-300" />
-            <h3 className="text-sm font-bold">Итоговая SMART-формулировка</h3>
+          <div className="rounded-xl p-3 border border-border bg-surface-0">
+            <div className="text-sm font-semibold">Позитивная формулировка</div>
+            <div className="text-xs text-secondary-foreground mt-1 leading-relaxed">
+              Без частицы «НЕ». Направлена на достижение, а не на избегание.
+            </div>
           </div>
-          <span className="text-[10px] uppercase tracking-wider text-white/50">
-            обновляется автоматически
-          </span>
-        </div>
-        <p className="text-sm sm:text-base leading-relaxed min-h-[3.5rem] text-white/95">
-          {paragraph || (
-            <span className="text-white/40 italic">
-              Заполните поля выше — итог соберётся в один связный абзац…
-            </span>
-          )}
-        </p>
-        <div className="mt-3 flex flex-wrap gap-2">
-          <button
-            onClick={copy}
-            disabled={!paragraph}
-            className="text-xs px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 disabled:opacity-40 disabled:cursor-not-allowed border border-white/20 flex items-center gap-1.5"
-          >
-            <ClipboardList size={13} /> {copied ? "Скопировано!" : "Скопировать"}
-          </button>
-          <button
-            onClick={sendToNotes}
-            disabled={!paragraph}
-            className="text-xs px-3 py-1.5 rounded-lg bg-fuchsia-500 hover:bg-fuchsia-400 disabled:opacity-40 disabled:cursor-not-allowed text-white flex items-center gap-1.5 font-semibold"
-          >
-            <Send size={13} /> {sent ? "Перенесено в заметки" : "Перенести в заметки сессии"}
-          </button>
-          <button
-            onClick={() => setData(SMART_EMPTY)}
-            className="text-xs px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-white/70 flex items-center gap-1.5 ml-auto"
-          >
-            <RotateCcw size={13} /> Очистить
-          </button>
+          <div className="rounded-xl p-3 border border-border bg-surface-0">
+            <div className="text-sm font-semibold">Баланс вызова и реальности</div>
+            <div className="text-xs text-secondary-foreground mt-1 leading-relaxed">
+              Мотивирует (бросает вызов), но остаётся выполнимой.
+            </div>
+          </div>
         </div>
       </div>
     </div>
   );
 }
-
 /* ---------- 16 Компетенций Коуча ---------- */
 
 type Comp = { n: number; icon: any; title: string; example: string; questions: string };

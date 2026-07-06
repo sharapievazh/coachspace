@@ -196,6 +196,7 @@ export function BalanceRadar({
   size = 360,
   active = null,
   onSelect,
+  compareValues,
 }: {
   values: number[]; // 1..10, length 8
   labels: string[];
@@ -203,6 +204,7 @@ export function BalanceRadar({
   size?: number;
   active?: number | null;
   onSelect?: (i: number | null) => void;
+  compareValues?: number[];
 }) {
   const n = values.length;
   const cx = size / 2;
@@ -225,6 +227,16 @@ export function BalanceRadar({
       return `${x.toFixed(1)},${y.toFixed(1)}`;
     })
     .join(" ");
+
+  const comparePolygon = compareValues && compareValues.length === n
+    ? compareValues
+        .map((v, i) => {
+          const cv = Math.min(10, Math.max(0, Number(v) || 0));
+          const [x, y] = point(i, (R * cv) / 10);
+          return `${x.toFixed(1)},${y.toFixed(1)}`;
+        })
+        .join(" ")
+    : null;
 
   // Wedge path for a sector (hit area + active highlight)
   const wedgePath = (i: number, r: number) => {
@@ -284,6 +296,19 @@ export function BalanceRadar({
       })}
       {/* perfect circle reference (ideal wheel) */}
       <circle cx={cx} cy={cy} r={R} fill="none" stroke="#64748b" strokeWidth="1.2" strokeDasharray="4 4" opacity="0.7" />
+      {/* compare polygon (previous snapshot) */}
+      {comparePolygon && (
+        <polygon
+          points={comparePolygon}
+          fill="#64748b"
+          fillOpacity="0.18"
+          stroke="#64748b"
+          strokeWidth="1.6"
+          strokeDasharray="4 3"
+          strokeLinejoin="round"
+          pointerEvents="none"
+        />
+      )}
       {/* user polygon */}
       <polygon points={polygon} fill="url(#radar-fill)" stroke="#c2410c" strokeWidth="2.2" strokeLinejoin="round" pointerEvents="none" />
       {/* invisible wedge hit areas for click/hover */}
