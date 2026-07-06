@@ -2595,6 +2595,7 @@ const OSVK_RULES = [
 ];
 
 function BurgerRules() {
+  const [openIdx, setOpenIdx] = useState<number | null>(null);
   return (
     <div className="space-y-5 max-w-4xl">
       <SectionHead title="8 Золотых Правил ОСВК" subtitle="Чек-лист развивающей обратной связи высокого качества" />
@@ -2609,30 +2610,38 @@ function BurgerRules() {
         </div>
       </div>
 
-      <ol className="grid sm:grid-cols-2 gap-3 list-none">
+      <div className="space-y-2">
         {OSVK_RULES.map((r, i) => {
-          const Icon = r.icon;
+          const isOpen = openIdx === i;
           return (
-            <li
+            <div
               key={i}
-              className={`relative rounded-xl border ${r.border} bg-gradient-to-br ${r.color} p-4 flex gap-3 overflow-hidden`}
+              className="rounded-xl border border-border bg-card overflow-hidden"
             >
-              <div className="absolute -right-4 -bottom-4 text-7xl opacity-10 select-none">{r.emoji}</div>
-              <div className={`w-10 h-10 rounded-lg bg-background/50 border ${r.border} grid place-items-center shrink-0 ${r.tint}`}>
-                <Icon size={18} />
-              </div>
-              <div className="relative flex-1 min-w-0">
-                <div className="flex items-center gap-2 mb-1">
-                  <span className={`text-xs font-mono font-bold ${r.tint}`}>0{i + 1}</span>
-                  <span className="text-base">{r.emoji}</span>
-                  <span className="font-semibold text-sm sm:text-base">{r.title}</span>
+              <button
+                onClick={() => setOpenIdx(prev => prev === i ? null : i)}
+                className="w-full flex items-center gap-3 px-4 py-3.5 text-left min-h-11"
+              >
+                <div className={`w-1.5 self-stretch rounded-full ${r.tint.replace("text-", "bg-").replace("-300", "-500")}`} />
+                <span className={`text-xs font-mono font-bold ${r.tint}`}>0{i + 1}</span>
+                <span className="text-base leading-none">{r.emoji}</span>
+                <span className="font-semibold text-sm sm:text-base flex-1">{r.title}</span>
+                <ChevronDown
+                  size={18}
+                  className={`text-muted-foreground transition-transform duration-200 shrink-0 ${isOpen ? "rotate-180" : ""}`}
+                />
+              </button>
+              <div
+                className={`overflow-hidden transition-[max-height] duration-200 ease-out ${isOpen ? "max-h-60" : "max-h-0"}`}
+              >
+                <div className={`px-4 pb-3.5 pt-2 text-sm text-muted-foreground leading-relaxed border-t ${r.border} bg-gradient-to-br ${r.color}`}>
+                  {r.text}
                 </div>
-                <div className="text-xs sm:text-sm text-muted-foreground leading-snug">{r.text}</div>
               </div>
-            </li>
+            </div>
           );
         })}
-      </ol>
+      </div>
 
       <div className="rounded-xl bg-secondary/60 border border-border p-4 text-sm text-muted-foreground flex gap-3">
         <ShieldCheck size={18} className="text-primary shrink-0 mt-0.5" />
