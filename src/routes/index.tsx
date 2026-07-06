@@ -716,7 +716,11 @@ function SwipeableTabContent({
     if (decidedHorizontal.current === null) {
       if (Math.abs(dx) < 6 && Math.abs(dy) < 6) return;
       decidedHorizontal.current = Math.abs(dx) > Math.abs(dy) * 1.2;
+      if (decidedHorizontal.current && containerRef.current) {
+        try { containerRef.current.setPointerCapture(e.pointerId); } catch {}
+      }
     }
+
 
     if (!decidedHorizontal.current) return;
 
