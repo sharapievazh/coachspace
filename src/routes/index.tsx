@@ -684,95 +684,120 @@ function SwipeableTabContent({
 
   const THRESHOLD = 20;
   const VELOCITY_THRESHOLD = 0.3; // px/ms
-
-  const onPointerDown = (e: React.PointerEvent) => {
-    if (!containerRef.current) return;
-    // Do not hijack pointer events for editable fields — iOS needs the native tap to focus & open keyboard.
-    const target = e.target as HTMLElement | null;
-    if (target && target.closest('input, textarea, select, [contenteditable="true"]')) {
-      tracking.current = false;
-      return;
-    }
-    // NOTE: do NOT setPointerCapture here — it would steal click events from buttons.
-    // We capture only after we've decided the gesture is a horizontal swipe (in onPointerMove).
-    startX.current = e.clientX;
-    startY.current = e.clientY;
-    startTime.current = e.timeStamp;
-    deltaX.current = 0;
-    tracking.current = true;
-    decidedHorizontal.current = null;
-  };
-
-
-
   const rafId = useRef<number | null>(null);
   const pendingDrag = useRef(0);
 
-  const onPointerMove = (e: React.PointerEvent) => {
-    if (!tracking.current) return;
-    const dx = e.clientX - startX.current;
-    const dy = e.clientY - startY.current;
 
-    if (decidedHorizontal.current === null) {
-      if (Math.abs(dx) < 6 && Math.abs(dy) < 6) return;
-      decidedHorizontal.current = Math.abs(dx) > Math.abs(dy) * 1.2;
-      if (decidedHorizontal.current && containerRef.current) {
-        try { containerRef.current.setPointerCapture(e.pointerId); } catch {}
+
+  // Native listeners with { passive: true } so iOS WebKit never has to wait
+  // for a possible preventDefault. We never call preventDefault here.
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+
+    const handleStart = (clientX: number, clientY: number, timeStamp: number, target: EventTarget | null) => {
+      const t = target as HTMLElement | null;
+      if (t && t.closest('input, textarea, select, [contenteditable="true"]')) {
+        tracking.current = false;
+        return;
       }
-    }
+      startX.current = clientX;
+      startY.current = clientY;
+      startTime.current = timeStamp;
+      deltaX.current = 0;
+      tracking.current = true;
+      decidedHorizontal.current = null;
+    };
 
+    const handleMove = (clientX: number, clientY: number, e: Event) => {
+      if (!tracking.current) return;
+      const dx = clientX - startX.current;
+      const dy = clientY - startY.current;
 
-    if (!decidedHorizontal.current) return;
-
-    deltaX.current = dx;
-    pendingDrag.current = Math.max(-120, Math.min(120, dx * 0.5));
-    if (rafId.current == null) {
-      rafId.current = requestAnimationFrame(() => {
-        rafId.current = null;
-        setDragX(pendingDrag.current);
-      });
-    }
-  };
-
-
-  const onPointerUp = (e: React.PointerEvent) => {
-    if (!tracking.current) return;
-    tracking.current = false;
-    const dx = deltaX.current;
-    const elapsed = e.timeStamp - startTime.current;
-    const velocity = elapsed > 0 ? Math.abs(dx) / elapsed : 0;
-    setDragX(0);
-
-    const fastFlick = velocity > VELOCITY_THRESHOLD;
-    const farEnough = Math.abs(dx) >= THRESHOLD;
-
-    if (decidedHorizontal.current && (farEnough || fastFlick)) {
-      if (dx < 0) {
-        setEnterFrom("right");
-        onSwipeLeft();
-      } else {
-        setEnterFrom("left");
-        onSwipeRight();
+      if (decidedHorizontal.current === null) {
+        if (Math.abs(dx) < 6 && Math.abs(dy) < 6) return;
+        decidedHorizontal.current = Math.abs(dx) > Math.abs(dy) * 1.2;
+        // Only after we've confirmed a horizontal swipe do we stop propagation
+        // to sibling handlers. We still do NOT preventDefault — the listener
+        // is passive and iOS keeps native scroll behavior.
+        if (decidedHorizontal.current) {
+          e.stopPropagation();
+        }
       }
-    }
-    decidedHorizontal.current = null;
-  };
+      if (!decidedHorizontal.current) return;
 
-  const onPointerCancel = () => {
-    tracking.current = false;
-    setDragX(0);
-    decidedHorizontal.current = null;
-  };
+      deltaX.current = dx;
+      pendingDrag.current = Math.max(-120, Math.min(120, dx * 0.5));
+      if (rafId.current == null) {
+        rafId.current = requestAnimationFrame(() => {
+          rafId.current = null;
+          setDragX(pendingDrag.current);
+        });
+      }
+    };
+
+    const handleEnd = (timeStamp: number) => {
+      if (!tracking.current) return;
+      tracking.current = false;
+      const dx = deltaX.current;
+      const elapsed = timeStamp - startTime.current;
+      const velocity = elapsed > 0 ? Math.abs(dx) / elapsed : 0;
+      setDragX(0);
+
+      const fastFlick = velocity > VELOCITY_THRESHOLD;
+      const farEnough = Math.abs(dx) >= THRESHOLD;
+
+      if (decidedHorizontal.current && (farEnough || fastFlick)) {
+        if (dx < 0) {
+          setEnterFrom("right");
+          onSwipeLeft();
+        } else {
+          setEnterFrom("left");
+          onSwipeRight();
+        }
+      }
+      decidedHorizontal.current = null;
+    };
+
+    const handleCancel = () => {
+      tracking.current = false;
+      setDragX(0);
+      decidedHorizontal.current = null;
+    };
+
+    const onTouchStart = (e: TouchEvent) => {
+      const t = e.touches[0];
+      if (!t) return;
+      handleStart(t.clientX, t.clientY, e.timeStamp, e.target);
+    };
+    const onTouchMove = (e: TouchEvent) => {
+      const t = e.touches[0];
+      if (!t) return;
+      handleMove(t.clientX, t.clientY, e);
+    };
+    const onTouchEnd = (e: TouchEvent) => handleEnd(e.timeStamp);
+
+    // Passive listeners — iOS will never block the main thread waiting for
+    // a possible preventDefault call.
+    el.addEventListener("touchstart", onTouchStart, { passive: true });
+    el.addEventListener("touchmove", onTouchMove, { passive: true });
+    el.addEventListener("touchend", onTouchEnd, { passive: true });
+    el.addEventListener("touchcancel", handleCancel, { passive: true });
+
+    return () => {
+      el.removeEventListener("touchstart", onTouchStart);
+      el.removeEventListener("touchmove", onTouchMove);
+      el.removeEventListener("touchend", onTouchEnd);
+      el.removeEventListener("touchcancel", handleCancel);
+    };
+  }, [onSwipeLeft, onSwipeRight]);
 
   return (
     <div
       ref={containerRef}
-      onPointerDown={onPointerDown}
-      onPointerMove={onPointerMove}
-      onPointerUp={onPointerUp}
-      onPointerCancel={onPointerCancel}
       style={{ touchAction: "pan-y", transform: "translateZ(0)", willChange: "transform" }}
     >
+
       <div
         ref={innerRef}
         key={animKey}
