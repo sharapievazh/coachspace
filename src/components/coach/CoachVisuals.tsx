@@ -196,6 +196,7 @@ export function BalanceRadar({
   size = 360,
   active = null,
   onSelect,
+  compareValues,
 }: {
   values: number[]; // 1..10, length 8
   labels: string[];
@@ -203,6 +204,7 @@ export function BalanceRadar({
   size?: number;
   active?: number | null;
   onSelect?: (i: number | null) => void;
+  compareValues?: number[];
 }) {
   const n = values.length;
   const cx = size / 2;
