@@ -33,6 +33,15 @@ export default defineConfig({
     outDir: "dist",
     emptyOutDir: true,
     target: "es2020",
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          "vendor-react": ["react", "react-dom"],
+          "vendor-router": ["@tanstack/react-router", "@tanstack/react-query"],
+          "vendor-ui": ["lucide-react"],
+        },
+      },
+    },
   },
   define: {
     "process.env.NODE_ENV": JSON.stringify("production"),
