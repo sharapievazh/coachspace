@@ -2274,40 +2274,93 @@ const ROLES = [
 ];
 function Sos() {
   const [active, setActive] = useState<string | null>(null);
+  const [sosOpen, setSosOpen] = useState(false);
+  const activeRole = ROLES.find((r) => r.name === active) || null;
+  const roleAccent: Record<string, string> = {
+    "Спасатель": "#0ea5e9",
+    "Жертва": "#f59e0b",
+    "Преследователь": "#e11d48",
+  };
   return (
     <div className="space-y-6 max-w-full overflow-hidden">
       <SectionHead title="SOS · Треугольник Карпмана" subtitle="Шпаргалка-предохранитель для растождествления" />
 
       <div className="bg-card rounded-2xl border border-border p-4 sm:p-6">
         <p className="text-xs text-center text-muted-foreground mb-3">
-          Нажмите на роль, чтобы увидеть признаки, антидот и SOS-вопросы. В центре — точка растождествления.
+          Нажмите на роль или на центр SOS, чтобы увидеть подробности.
         </p>
-        <KarpmanTriangleSvg active={active} onSelect={(r) => setActive(active === r ? null : r)} />
+        <KarpmanTriangleSvg
+          active={active}
+          onSelect={(r) => setActive(r)}
+          onSosSelect={() => setSosOpen(true)}
+        />
       </div>
 
-      <div className="grid md:grid-cols-3 gap-4">
-        {ROLES.map((r) => {
-          const isActive = active === r.name;
-          return (
-            <div
-              key={r.name}
-              onClick={() => setActive(isActive ? null : r.name)}
-              className={`p-5 rounded-2xl border-2 cursor-pointer transition-all ${r.color} ${isActive ? "ring-2 ring-primary scale-[1.02]" : ""}`}
-            >
-              <div className="flex items-center gap-2 mb-3">
-                <AlertTriangle size={18} />
-                <h3 className="font-semibold">{r.name}</h3>
+      <Drawer open={!!activeRole} onOpenChange={(o) => { if (!o) setActive(null); }}>
+        <DrawerContent className="z-[9999]">
+          {activeRole && (
+            <>
+              <DrawerHeader className="text-left">
+                <div className="flex items-center gap-3">
+                  <div
+                    className="w-11 h-11 rounded-xl grid place-items-center shrink-0"
+                    style={{ background: roleAccent[activeRole.name] }}
+                  >
+                    <AlertTriangle size={22} className="text-white" />
+                  </div>
+                  <div className="min-w-0">
+                    <DrawerTitle className="text-xl font-extrabold">{activeRole.name}</DrawerTitle>
+                    <DrawerDescription className="text-sm">Роль в треугольнике</DrawerDescription>
+                  </div>
+                </div>
+              </DrawerHeader>
+              <div className="px-4 pb-8 space-y-4">
+                <div>
+                  <div className="text-xs uppercase tracking-wide text-muted-foreground mb-1">Признаки</div>
+                  <ul className="text-sm space-y-1">{activeRole.signs.map((s, i) => <li key={i}>· {s}</li>)}</ul>
+                </div>
+                <div className="rounded-xl p-3" style={{ background: roleAccent[activeRole.name] + "1A" }}>
+                  <div className="text-xs uppercase tracking-wide text-muted-foreground mb-1">Антидот</div>
+                  <p className="text-sm font-semibold">{activeRole.antidote}</p>
+                </div>
+                <div>
+                  <div className="text-xs uppercase tracking-wide text-muted-foreground mb-1">SOS-вопросы</div>
+                  <ul className="text-sm space-y-1">{activeRole.q.map((s, i) => <li key={i}>→ {s}</li>)}</ul>
+                </div>
               </div>
-              <div className="text-xs uppercase tracking-wide text-muted-foreground mb-1">Признаки</div>
-              <ul className="text-sm space-y-1 mb-4">{r.signs.map((s, i) => <li key={i}>· {s}</li>)}</ul>
-              <div className="text-xs uppercase tracking-wide text-muted-foreground mb-1">Антидот</div>
-              <p className="text-sm mb-4 font-medium">{r.antidote}</p>
-              <div className="text-xs uppercase tracking-wide text-muted-foreground mb-1">SOS-вопросы</div>
-              <ul className="text-sm space-y-1">{r.q.map((s, i) => <li key={i}>→ {s}</li>)}</ul>
+            </>
+          )}
+        </DrawerContent>
+      </Drawer>
+
+      <Drawer open={sosOpen} onOpenChange={setSosOpen}>
+        <DrawerContent className="z-[9999]">
+          <DrawerHeader className="text-left">
+            <div className="flex items-center gap-3">
+              <div className="w-11 h-11 rounded-xl grid place-items-center shrink-0 bg-foreground text-background font-black">
+                SOS
+              </div>
+              <div className="min-w-0">
+                <DrawerTitle className="text-xl font-extrabold">Растождествление</DrawerTitle>
+                <DrawerDescription className="text-sm">Точка выхода из треугольника</DrawerDescription>
+              </div>
             </div>
-          );
-        })}
-      </div>
+          </DrawerHeader>
+          <div className="px-4 pb-8 space-y-4">
+            <p className="text-[15px] leading-relaxed text-foreground/90">
+              Растождествление — это способность заметить: «я сейчас в роли», сделать шаг в сторону и увидеть ситуацию со стороны. Не роль управляет тобой, а ты выбираешь ответ.
+            </p>
+            <div className="rounded-xl p-3 bg-muted">
+              <div className="text-xs uppercase tracking-wide text-muted-foreground mb-2">Коуч-вопросы</div>
+              <ul className="text-sm space-y-1.5">
+                <li>→ В какой роли я сейчас нахожусь?</li>
+                <li>→ Что я выбираю вместо этой роли?</li>
+                <li>→ Какой мой следующий взрослый шаг?</li>
+              </ul>
+            </div>
+          </div>
+        </DrawerContent>
+      </Drawer>
     </div>
   );
 }
