@@ -172,6 +172,16 @@
   * {
     border-color: var(--color-border);
     box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+  }
+
+  button,
+  a,
+  [role="button"],
+  [onclick] {
+    cursor: pointer;
+    touch-action: manipulation;
   }
 
   html, body {

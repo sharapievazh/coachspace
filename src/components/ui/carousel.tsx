@@ -72,10 +72,8 @@ const Carousel = React.forwardRef<
   const handleKeyDown = React.useCallback(
     (event: React.KeyboardEvent<HTMLDivElement>) => {
       if (event.key === "ArrowLeft") {
-        event.preventDefault();
         scrollPrev();
       } else if (event.key === "ArrowRight") {
-        event.preventDefault();
         scrollNext();
       }
     },
@@ -137,7 +135,7 @@ const CarouselContent = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HT
     const { carouselRef, orientation } = useCarousel();
 
     return (
-      <div ref={carouselRef} className="overflow-hidden">
+      <div ref={carouselRef} className="overflow-hidden touch-pan-y">
         <div
           ref={ref}
           className={cn(
