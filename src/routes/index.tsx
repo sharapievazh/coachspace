@@ -1417,11 +1417,10 @@ function Nlu() {
     <div className="space-y-6 max-w-full overflow-hidden">
       <SectionHead title="Пирамида Дилтса" subtitle="Неврологические уровни изменений — коснитесь уровня" />
 
-      {/* PYRAMID — SVG tappable trapezoids, icon-only */}
-      <div className="mx-auto w-full max-w-[360px]" style={{ height: rows * ROW_H }}>
-        <svg viewBox={`0 0 360 ${rows * ROW_H}`} width="100%" height="100%" className="block">
+      {/* PYRAMID — SVG trapezoids + HTML icon/tap overlay (reliable on iOS Safari) */}
+      <div className="relative mx-auto w-full max-w-[360px]" style={{ height: rows * ROW_H }}>
+        <svg viewBox={`0 0 360 ${rows * ROW_H}`} width="100%" height="100%" className="block absolute inset-0" preserveAspectRatio="none">
           {DILTS.map((lv, i) => {
-            const Icon = lv.icon;
             const isActive = active === lv.n;
             const topHalf = (i / rows) * 50;
             const botHalf = ((i + 1) / rows) * 50;
@@ -1430,54 +1429,48 @@ function Nlu() {
             const rightTop = (50 + topHalf) / 100 * W;
             const leftBottom = (50 - botHalf) / 100 * W;
             const rightBottom = (50 + botHalf) / 100 * W;
-            const points = `${leftTop},0 ${rightTop},0 ${rightBottom},${ROW_H} ${leftBottom},${ROW_H}`;
-            const bandLeft = Math.min(leftTop, leftBottom);
-            const bandRight = Math.max(rightTop, rightBottom);
-            const bandWidth = bandRight - bandLeft;
-            const pad = 8;
-            const foX = bandLeft + pad;
-            const foWidth = Math.max(24, bandWidth - pad * 2);
-            const foY = 4;
-            const foHeight = ROW_H - 8;
-            const iconSize = Math.max(18, Math.min(30, Math.floor(bandWidth / 4)));
+            const points = `${leftTop},${i * ROW_H} ${rightTop},${i * ROW_H} ${rightBottom},${(i + 1) * ROW_H} ${leftBottom},${(i + 1) * ROW_H}`;
             return (
-              <g key={lv.n} transform={`translate(0, ${i * ROW_H})`}>
-                <g className="transition-transform duration-100 active:scale-[0.98]" style={{ transformOrigin: "50% 50%", transformBox: "fill-box" }}>
-                  <polygon
-                    points={points}
-                    fill={lv.hex}
-                    style={{
-                      filter: isActive
-                        ? `brightness(1.15) saturate(1.2) drop-shadow(0 0 24px ${lv.hex})`
-                        : "none",
-                    }}
-                  />
-                  <foreignObject x={foX} y={foY} width={foWidth} height={foHeight} style={{ pointerEvents: "none" }}>
-                    <div className="flex items-center justify-center h-full w-full">
-                      <Icon size={iconSize} className="text-white drop-shadow shrink-0" strokeWidth={2.4} />
-                    </div>
-                  </foreignObject>
-                  <rect
-                    x={bandLeft}
-                    y={0}
-                    width={bandWidth}
-                    height={ROW_H}
-                    fill="transparent"
-                    className="cursor-pointer"
-                    style={{ pointerEvents: "all" }}
-                    onClick={() => setActive(lv.n)}
-                    role="button"
-                    aria-label={lv.name}
-                    tabIndex={0}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter" || e.key === " ") {
-                        e.preventDefault();
-                        setActive(lv.n);
-                      }
-                    }}
-                  />
-                </g>
-              </g>
+              <polygon
+                key={lv.n}
+                points={points}
+                fill={lv.hex}
+                style={{
+                  filter: isActive
+                    ? `brightness(1.15) saturate(1.2) drop-shadow(0 0 24px ${lv.hex})`
+                    : "none",
+                }}
+              />
+            );
+          })}
+        </svg>
+        {/* HTML overlay — icons + tap targets */}
+        <div className="absolute inset-0">
+          {DILTS.map((lv, i) => {
+            const Icon = lv.icon;
+            const topHalf = (i / rows) * 50;
+            const botHalf = ((i + 1) / rows) * 50;
+            const bandWidthPct = Math.max(topHalf, botHalf) * 2; // %
+            const iconSize = Math.max(18, Math.min(30, Math.floor((bandWidthPct / 100) * 360 / 4)));
+            return (
+              <button
+                key={lv.n}
+                type="button"
+                onClick={() => setActive(lv.n)}
+                aria-label={lv.name}
+                className="absolute left-0 right-0 flex items-center justify-center cursor-pointer transition-transform duration-100 active:scale-[0.97]"
+                style={{ top: i * ROW_H, height: ROW_H, background: "transparent", border: 0, padding: 0 }}
+              >
+                <Icon size={iconSize} className="text-white drop-shadow shrink-0" strokeWidth={2.4} />
+              </button>
+            );
+          })}
+        </div>
+      </div>
+      {/* hidden legacy container removed */}
+      <div className="hidden">
+        {DILTS.map((lv) => (
+          <span key={lv.n}>
             );
           })}
         </svg>
