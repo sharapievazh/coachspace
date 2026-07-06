@@ -534,41 +534,54 @@ ${notes || "—"}
         </aside>
 
         <main className="flex-1 min-w-0 px-4 sm:px-6 md:px-0 py-6">
-          {tab === "session" && (
-            <SessionPanelMemo
-              duration={duration}
-              setDuration={changeDuration}
-              remaining={remaining}
-              running={running}
-              setRunning={handleSetRunning}
-              reset={resetTimer}
-              mmss={mmss}
-              clientName={clientName}
-              setClientName={setClientName}
-              topic={topic}
-              setTopic={setTopic}
-              notes={notes}
-              setNotes={setNotes}
-              exportSession={exportSession}
-              testSound={testSound}
-            />
-          )}
-          {tab === "grow" && <GrowMemo />}
-          {tab === "swot" && <SwotMemo />}
-          {tab === "nlu" && <NluMemo />}
-          {tab === "sos" && <SosMemo />}
-          {tab === "rapport" && <RapportMemo />}
-          {tab === "smart" && <SmartGoalMemo notes={notes} setNotes={setNotes} />}
-          {tab === "eisenhower" && <EisenhowerMemo notes={notes} setNotes={setNotes} />}
-          {tab === "burger" && <BurgerMemo />}
-          {tab === "erickson" && <EricksonStarMemo />}
-          {tab === "rules" && <BurgerRulesMemo />}
-          {tab === "balance" && <BalanceMemo scores={balanceScores} onChange={setBalanceScores} />}
-          {tab === "values" && <ValuesMemo />}
-          {tab === "supervision" && <SupervisionMemo />}
-          {tab === "feedback" && <FeedbackMemo />}
-          {tab === "competencies" && <CompetenciesMemo />}
+          <SwipeableTabContent
+            tabId={tab}
+            onSwipeLeft={() => {
+              const i = TABS.findIndex((t) => t.id === tab);
+              if (i < TABS.length - 1) setTab(TABS[i + 1].id);
+            }}
+            onSwipeRight={() => {
+              const i = TABS.findIndex((t) => t.id === tab);
+              if (i > 0) setTab(TABS[i - 1].id);
+            }}
+          >
+            {tab === "session" && (
+              <SessionPanelMemo
+                duration={duration}
+                setDuration={changeDuration}
+                remaining={remaining}
+                running={running}
+                setRunning={handleSetRunning}
+                reset={resetTimer}
+                mmss={mmss}
+                clientName={clientName}
+                setClientName={setClientName}
+                topic={topic}
+                setTopic={setTopic}
+                notes={notes}
+                setNotes={setNotes}
+                exportSession={exportSession}
+                testSound={testSound}
+              />
+            )}
+            {tab === "grow" && <GrowMemo />}
+            {tab === "swot" && <SwotMemo />}
+            {tab === "nlu" && <NluMemo />}
+            {tab === "sos" && <SosMemo />}
+            {tab === "rapport" && <RapportMemo />}
+            {tab === "smart" && <SmartGoalMemo notes={notes} setNotes={setNotes} />}
+            {tab === "eisenhower" && <EisenhowerMemo notes={notes} setNotes={setNotes} />}
+            {tab === "burger" && <BurgerMemo />}
+            {tab === "erickson" && <EricksonStarMemo />}
+            {tab === "rules" && <BurgerRulesMemo />}
+            {tab === "balance" && <BalanceMemo scores={balanceScores} onChange={setBalanceScores} />}
+            {tab === "values" && <ValuesMemo />}
+            {tab === "supervision" && <SupervisionMemo />}
+            {tab === "feedback" && <FeedbackMemo />}
+            {tab === "competencies" && <CompetenciesMemo />}
+          </SwipeableTabContent>
         </main>
+
       </div>
 
       {timeUp && (
