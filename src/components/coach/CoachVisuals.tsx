@@ -538,11 +538,14 @@ export function KarpmanTriangleSvg({
         </text>
         <text
           x={p.x + (align === "bl" ? -6 : align === "br" ? 6 : 0)}
-          y={p.y + (align === "top" ? -(R + 10) : R + 20)}
+          y={p.y + (align === "top" ? -(R + 12) : R + 20)}
           textAnchor={align === "bl" ? "start" : align === "br" ? "end" : "middle"}
-          fontSize="11"
+          fontSize="12"
           fontWeight="700"
           fill={p.color}
+          stroke="hsl(var(--background, 0 0% 100%))"
+          strokeWidth="3"
+          paintOrder="stroke"
         >
           {align === "top" ? "помощь без запроса" : align === "bl" ? "бессилие" : "обвинение"}
         </text>
