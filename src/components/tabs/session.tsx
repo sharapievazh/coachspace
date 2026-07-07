@@ -5,6 +5,7 @@ import { OSVK_TEMPLATE } from "./_shared";
 type Props = {
   duration: number;
   setDuration: (v: number) => void;
+  remaining?: number;
   running: boolean;
   setRunning: (v: boolean) => void;
   reset: () => void;
