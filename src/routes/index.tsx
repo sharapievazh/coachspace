@@ -469,7 +469,7 @@ ${notesRef.current || "—"}
 
   return (
     <div className="min-h-screen bg-background text-foreground">
-      <header className="border-b border-border bg-card/60 backdrop-blur sticky top-0 z-20">
+      <header className="border-b border-border bg-card/60">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-[env(safe-area-inset-top)] pb-4 flex items-center justify-between gap-4">
           <div className="flex items-center gap-3 min-w-0">
             <div className="w-11 h-11 rounded-xl bg-primary text-primary-foreground grid place-items-center font-bold shrink-0">CS</div>
@@ -497,15 +497,10 @@ ${notesRef.current || "—"}
             return (
               <button
                 key={t.id}
-                ref={(el) => {
-                  if (active && el) {
-                    el.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "center" });
-                  }
-                }}
                 onClick={() => setTab(t.id)}
-                className={`flex items-center gap-2 px-3 min-h-11 text-xs rounded-lg transition-all duration-200 max-w-[140px] ${
+                  className={`flex items-center gap-2 px-3 min-h-11 text-xs rounded-lg transition-colors duration-100 max-w-[140px] ${
                   active
-                    ? "bg-primary text-primary-foreground scale-[1.02]"
+                      ? "bg-primary text-primary-foreground"
                     : "text-muted-foreground hover:bg-secondary"
                 }`}
               >
@@ -520,7 +515,7 @@ ${notesRef.current || "—"}
 
       <div className="max-w-7xl mx-auto md:flex md:gap-6 md:px-6">
         {/* iPad+ sidebar nav */}
-        <aside className="hidden md:block md:w-56 lg:w-64 shrink-0 py-6 sticky top-[calc(env(safe-area-inset-top)+72px)] self-start max-h-[calc(100vh-72px)] overflow-y-auto">
+        <aside className="hidden md:block md:w-56 lg:w-64 shrink-0 py-6 self-start">
           <nav className="flex flex-col gap-1">
             {TABS.map((t) => {
               const Icon = t.icon;
