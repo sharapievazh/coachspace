@@ -545,7 +545,7 @@ ${notesRef.current || "—"}
 
         <main className="flex-1 min-w-0 px-4 sm:px-6 md:px-0 py-6">
           <Suspense fallback={<div className="py-10 text-center text-sm text-muted-foreground">Загрузка…</div>}>
-            {tab === "session" && <SessionPanelLazy duration={duration} setDuration={changeDuration} remaining={remaining} running={running} setRunning={handleSetRunning} reset={resetTimer} mmss={mmss} clientName={clientName} setClientName={setClientName} topic={topic} setTopic={setTopic} notes={notes} setNotes={setNotes} exportSession={exportSession} testSound={testSound} />}
+            {tab === "session" && <SessionPanelLazy duration={duration} setDuration={changeDuration} remaining={remaining} running={running} setRunning={handleSetRunning} reset={resetTimer} mmss={mmss} clientNameRef={clientNameRef} topicRef={topicRef} notesRef={notesRef} exportSession={exportSession} testSound={testSound} />}
             {tab === "grow" && <GrowLazy />}
             {tab === "swot" && <SwotLazy />}
             {tab === "nlu" && <NluLazy />}
