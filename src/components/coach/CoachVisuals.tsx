@@ -498,7 +498,7 @@ export function KarpmanTriangleSvg({
   const H = 380;
   const cx = W / 2;
   const R = 52;
-  const A = { x: cx, y: R + 12, role: "Спасатель", color: "#0ea5e9" };
+  const A = { x: cx, y: R + 34, role: "Спасатель", color: "#0ea5e9" };
   const B = { x: R + 12, y: H - R - 30, role: "Жертва", color: "#f59e0b" };
   const C = { x: W - R - 12, y: H - R - 30, role: "Преследователь", color: "#e11d48" };
   const center = { x: cx, y: (A.y + B.y + C.y) / 3 + 4 };
@@ -538,11 +538,14 @@ export function KarpmanTriangleSvg({
         </text>
         <text
           x={p.x + (align === "bl" ? -6 : align === "br" ? 6 : 0)}
-          y={p.y + (align === "top" ? -(R + 10) : R + 20)}
+          y={p.y + (align === "top" ? -(R + 12) : R + 20)}
           textAnchor={align === "bl" ? "start" : align === "br" ? "end" : "middle"}
-          fontSize="11"
+          fontSize="12"
           fontWeight="700"
           fill={p.color}
+          stroke="hsl(var(--background, 0 0% 100%))"
+          strokeWidth="3"
+          paintOrder="stroke"
         >
           {align === "top" ? "помощь без запроса" : align === "bl" ? "бессилие" : "обвинение"}
         </text>

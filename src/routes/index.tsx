@@ -74,9 +74,12 @@ function CoachSpace() {
   const [remaining, setRemaining] = useState(20 * 60);
   const [running, setRunning] = useState(false);
   const [endsAt, setEndsAt] = useState<number | null>(null);
-  const [clientName, setClientName] = useState("");
-  const [topic, setTopic] = useState("");
-  const [notes, setNotes] = useState("");
+  // Session fields are held in refs (updated from SessionPanel) so keystrokes
+  // don't re-render this huge parent tree on every character — critical for
+  // input responsiveness inside the iOS/Xcode WebView.
+  const clientNameRef = useRef("");
+  const topicRef = useRef("");
+  const notesRef = useRef("");
   const [balanceScores, setBalanceScores] = useState<Record<number, number>>(() =>
     Object.fromEntries(Array.from({ length: 8 }, (_, i) => [i + 1, 5]))
   );
@@ -445,28 +448,28 @@ function CoachSpace() {
     } catch {}
     const txt = `Coach Space — Протокол сессии
 Дата: ${new Date().toLocaleString()}
-Клиент: ${clientName || "—"}
-Запрос: ${topic || "—"}
+Клиент: ${clientNameRef.current || "—"}
+Запрос: ${topicRef.current || "—"}
 Остаток времени: ${mmss}
 
 Колесо баланса (оценки):
 ${balanceLines}
 ${smartBlock}
 Заметки коуча:
-${notes || "—"}
+${notesRef.current || "—"}
 `;
     const blob = new Blob([txt], { type: "text/plain;charset=utf-8" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `session-${clientName || "client"}-${Date.now()}.txt`;
+    a.download = `session-${clientNameRef.current || "client"}-${Date.now()}.txt`;
     a.click();
     URL.revokeObjectURL(url);
-  }, [clientName, topic, notes, mmss, balanceScores]);
+  }, [mmss, balanceScores]);
 
   return (
     <div className="min-h-screen bg-background text-foreground">
-      <header className="border-b border-border bg-card/60 backdrop-blur sticky top-0 z-20">
+      <header className="border-b border-border bg-card/60">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-[env(safe-area-inset-top)] pb-4 flex items-center justify-between gap-4">
           <div className="flex items-center gap-3 min-w-0">
             <div className="w-11 h-11 rounded-xl bg-primary text-primary-foreground grid place-items-center font-bold shrink-0">CS</div>
@@ -494,15 +497,10 @@ ${notes || "—"}
             return (
               <button
                 key={t.id}
-                ref={(el) => {
-                  if (active && el) {
-                    el.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "center" });
-                  }
-                }}
                 onClick={() => setTab(t.id)}
-                className={`flex items-center gap-2 px-3 min-h-11 text-xs rounded-lg transition-all duration-200 max-w-[140px] ${
+                  className={`flex items-center gap-2 px-3 min-h-11 text-xs rounded-lg transition-colors duration-100 max-w-[140px] ${
                   active
-                    ? "bg-primary text-primary-foreground scale-[1.02]"
+                      ? "bg-primary text-primary-foreground"
                     : "text-muted-foreground hover:bg-secondary"
                 }`}
               >
@@ -517,7 +515,7 @@ ${notes || "—"}
 
       <div className="max-w-7xl mx-auto md:flex md:gap-6 md:px-6">
         {/* iPad+ sidebar nav */}
-        <aside className="hidden md:block md:w-56 lg:w-64 shrink-0 py-6 sticky top-[calc(env(safe-area-inset-top)+72px)] self-start max-h-[calc(100vh-72px)] overflow-y-auto">
+        <aside className="hidden md:block md:w-56 lg:w-64 shrink-0 py-6 self-start">
           <nav className="flex flex-col gap-1">
             {TABS.map((t) => {
               const Icon = t.icon;
@@ -542,7 +540,7 @@ ${notes || "—"}
 
         <main className="flex-1 min-w-0 px-4 sm:px-6 md:px-0 py-6">
           <Suspense fallback={<div className="py-10 text-center text-sm text-muted-foreground">Загрузка…</div>}>
-            {tab === "session" && <SessionPanelLazy duration={duration} setDuration={changeDuration} remaining={remaining} running={running} setRunning={handleSetRunning} reset={resetTimer} mmss={mmss} clientName={clientName} setClientName={setClientName} topic={topic} setTopic={setTopic} notes={notes} setNotes={setNotes} exportSession={exportSession} testSound={testSound} />}
+            {tab === "session" && <SessionPanelLazy duration={duration} setDuration={changeDuration} remaining={remaining} running={running} setRunning={handleSetRunning} reset={resetTimer} mmss={mmss} clientNameRef={clientNameRef} topicRef={topicRef} notesRef={notesRef} exportSession={exportSession} testSound={testSound} />}
             {tab === "grow" && <GrowLazy />}
             {tab === "swot" && <SwotLazy />}
             {tab === "nlu" && <NluLazy />}
@@ -565,26 +563,24 @@ ${notes || "—"}
       </div>
 
       {timeUp && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in">
-          <div className="relative w-full max-w-md md:max-w-[680px] rounded-2xl border border-primary/40 bg-card p-6 sm:p-8 text-center shadow-2xl">
-
-            <div className="absolute inset-0 rounded-2xl ring-2 ring-primary/60 animate-ping pointer-events-none" />
-            <div className="relative">
-              <div className="mx-auto mb-4 w-16 h-16 rounded-full bg-primary/15 text-primary grid place-items-center animate-pulse">
-                <Timer size={32} />
-              </div>
-              <h3 className="text-xl font-semibold mb-2">Время сессии истекло</h3>
-              <p className="text-muted-foreground mb-6">Пора подводить итоги!</p>
-              <div className="flex gap-2 justify-center">
+        <div className="mt-4 rounded-2xl border border-primary/40 bg-card p-4 sm:p-5 shadow-lg">
+          <div className="flex items-start gap-3">
+            <div className="w-10 h-10 rounded-full bg-primary/15 text-primary grid place-items-center shrink-0">
+              <Timer size={22} />
+            </div>
+            <div className="min-w-0 flex-1">
+              <h3 className="text-base font-semibold">Время сессии истекло</h3>
+              <p className="text-sm text-muted-foreground">Пора подводить итоги.</p>
+              <div className="flex flex-wrap gap-2 mt-3">
                 <button
                   onClick={() => { setTimeUp(false); resetTimer(); }}
-                  className="px-4 py-2 rounded-lg bg-primary text-primary-foreground hover:opacity-90"
+                  className="px-3 py-2 min-h-11 text-sm rounded-lg bg-primary text-primary-foreground hover:opacity-90"
                 >
                   Закрыть
                 </button>
                 <button
                   onClick={() => playBell(false)}
-                  className="px-4 py-2 rounded-lg bg-secondary hover:bg-muted"
+                  className="px-3 py-2 min-h-11 text-sm rounded-lg bg-secondary hover:bg-muted"
                 >
                   Повторить звук
                 </button>

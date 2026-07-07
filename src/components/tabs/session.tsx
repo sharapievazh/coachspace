@@ -1,10 +1,53 @@
-import React from "react";
+import React, { memo, useRef, MutableRefObject } from "react";
 import { Bell, Download, Pause, Play, RotateCcw, Sandwich, Sparkles } from "lucide-react";
 import { OSVK_TEMPLATE } from "./_shared";
 
-function SessionPanel(p: any) {
+type Props = {
+  duration: number;
+  setDuration: (v: number) => void;
+  remaining?: number;
+  running: boolean;
+  setRunning: (v: boolean) => void;
+  reset: () => void;
+  mmss: string;
+  clientNameRef: MutableRefObject<string>;
+  topicRef: MutableRefObject<string>;
+  notesRef: MutableRefObject<string>;
+  exportSession: () => void;
+  testSound: () => void;
+};
+
+function SessionPanel(p: Props) {
+  // Uncontrolled fields: typing updates DOM + refs only, with no React render
+  // per keystroke. This avoids WKWebView keyboard deadlocks on iOS simulator/device.
+  const notesElRef = useRef<HTMLTextAreaElement | null>(null);
+
+  const appendOsvkTemplate = () => {
+    const el = notesElRef.current;
+    if (!el) {
+      p.notesRef.current = `${p.notesRef.current || ""}${OSVK_TEMPLATE}`;
+      return;
+    }
+
+    const start = el.selectionStart ?? el.value.length;
+    const end = el.selectionEnd ?? el.value.length;
+    const next = `${el.value.slice(0, start)}${OSVK_TEMPLATE}${el.value.slice(end)}`;
+    const caret = start + OSVK_TEMPLATE.length;
+    el.value = next;
+    p.notesRef.current = next;
+
+    requestAnimationFrame(() => {
+      try {
+        el.focus({ preventScroll: true });
+        el.setSelectionRange(caret, caret);
+      } catch {
+        el.focus();
+      }
+    });
+  };
+
   return (
-    <div className="grid md:grid-cols-3 gap-6 max-w-full overflow-hidden">
+    <div className="grid md:grid-cols-3 gap-6 max-w-full">
       <section className="md:col-span-1 bg-card rounded-2xl border border-border p-5 space-y-4">
         <h2 className="font-semibold flex items-center gap-2"><Sparkles size={18} className="text-primary" /> Таймер сессии</h2>
         <div className="text-center py-6 rounded-xl bg-secondary">
@@ -39,29 +82,32 @@ function SessionPanel(p: any) {
 
         <div className="grid sm:grid-cols-2 gap-3">
           <Field label="Клиент">
-            <input value={p.clientName} onChange={(e)=>p.setClientName(e.target.value)}
+            <input defaultValue={p.clientNameRef.current} onInput={(e) => { p.clientNameRef.current = e.currentTarget.value; }}
               placeholder="Имя клиента"
+              inputMode="text"
               autoComplete="off" autoCorrect="off" autoCapitalize="words" spellCheck={false}
               className="w-full px-3 py-2 rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-ring"/>
           </Field>
           <Field label="Запрос сессии">
-            <input value={p.topic} onChange={(e)=>p.setTopic(e.target.value)}
+            <input defaultValue={p.topicRef.current} onInput={(e) => { p.topicRef.current = e.currentTarget.value; }}
               placeholder="Тема / цель"
+              inputMode="text"
               autoComplete="off" autoCorrect="off" spellCheck={false}
               className="w-full px-3 py-2 rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-ring"/>
           </Field>
         </div>
         <Field label="Потоковый блокнот · ценностные слова, инсайты, цитаты клиента">
-          <textarea value={p.notes} onChange={(e)=>p.setNotes(e.target.value)}
+          <textarea ref={notesElRef} defaultValue={p.notesRef.current} onInput={(e) => { p.notesRef.current = e.currentTarget.value; }}
             rows={14}
             placeholder="Веди заметки прямо во время сессии..."
+            inputMode="text"
             autoComplete="off" autoCorrect="off" spellCheck={false}
-            className="w-full px-3 py-2 rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-ring resize-y"/>
+            className="w-full px-3 py-2 rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-ring resize-none"/>
         </Field>
 
         <div className="flex items-center justify-between gap-2 flex-wrap">
           <button
-            onClick={() => p.setNotes((p.notes || "") + OSVK_TEMPLATE)}
+            onClick={appendOsvkTemplate}
             className="inline-flex items-center gap-2 px-4 min-h-11 rounded-lg border border-amber-500/40 bg-gradient-to-r from-amber-500/15 to-orange-500/10 hover:from-amber-500/25 hover:to-orange-500/20 text-sm text-amber-700 dark:text-amber-300"
           >
             <Sandwich size={16}/> Маркер ОСВК
@@ -85,6 +131,4 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
   );
 }
 
-/* ---------- Visual helpers for rich block cards ---------- */
-
-export default SessionPanel;
+export default memo(SessionPanel);

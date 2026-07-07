@@ -7,7 +7,12 @@ const config: CapacitorConfig = {
   ios: {
     scrollEnabled: true,
     allowsLinkPreview: false,
-  }
+  },
+  plugins: {
+    Keyboard: {
+      resize: 'none',
+    },
+  },
 };
 
 export default config;

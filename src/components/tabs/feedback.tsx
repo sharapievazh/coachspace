@@ -1,18 +1,29 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { Send, ThumbsDown, ThumbsUp } from "lucide-react";
 import { SectionHead } from "./_shared";
 
 const FEEDBACK_EMAIL = "sharapieva@gmail.com";
 
 function Feedback() {
-  const [liked, setLiked] = useState("");
-  const [disliked, setDisliked] = useState("");
-  const [name, setName] = useState("");
+  const likedRef = useRef("");
+  const dislikedRef = useRef("");
+  const nameRef = useRef("");
+  const hasContentRef = useRef(false);
+  const [hasContent, setHasContent] = useState(false);
   const [sent, setSent] = useState(false);
 
-  const canSend = liked.trim().length > 0 || disliked.trim().length > 0;
+  const updateHasContent = () => {
+    const next = likedRef.current.trim().length > 0 || dislikedRef.current.trim().length > 0;
+    if (hasContentRef.current !== next) {
+      hasContentRef.current = next;
+      setHasContent(next);
+    }
+  };
 
   const send = async () => {
+    const name = nameRef.current;
+    const liked = likedRef.current;
+    const disliked = dislikedRef.current;
     const subject = `Coach Space — обратная связь${name ? ` от ${name}` : ""}`;
     const body =
 `От: ${name || "Аноним"}
@@ -60,7 +71,7 @@ ${disliked || "—"}
 
 
   return (
-    <div className="space-y-6 max-w-3xl max-w-full overflow-hidden">
+    <div className="space-y-6 max-w-3xl max-w-full">
       <SectionHead
         title="Обратная связь по приложению"
         subtitle="Поделитесь впечатлениями — это поможет сделать Coach Space лучше."
@@ -69,9 +80,10 @@ ${disliked || "—"}
         <div>
           <label className="text-sm font-medium">Ваше имя (необязательно)</label>
           <input
-            value={name}
-            onChange={(e) => setName(e.target.value)}
+            defaultValue=""
+            onInput={(e) => { nameRef.current = e.currentTarget.value; }}
             placeholder="Как к вам обращаться"
+            inputMode="text"
             autoComplete="off" autoCorrect="off" spellCheck={false}
             className="mt-1 w-full px-3 py-2 rounded-lg bg-secondary border border-border focus:outline-none focus:ring-2 focus:ring-primary"
           />
@@ -81,12 +93,13 @@ ${disliked || "—"}
             <ThumbsUp size={16} className="text-primary" /> Что нравится
           </label>
           <textarea
-            value={liked}
-            onChange={(e) => setLiked(e.target.value)}
+            defaultValue=""
+            onInput={(e) => { likedRef.current = e.currentTarget.value; updateHasContent(); }}
             rows={4}
             placeholder="Что работает хорошо, что удобно, что радует…"
+            inputMode="text"
             autoComplete="off" autoCorrect="off" spellCheck={false}
-            className="mt-1 w-full px-3 py-2 rounded-lg bg-secondary border border-border focus:outline-none focus:ring-2 focus:ring-primary resize-y"
+            className="mt-1 w-full px-3 py-2 rounded-lg bg-secondary border border-border focus:outline-none focus:ring-2 focus:ring-primary resize-none"
           />
         </div>
         <div>
@@ -94,19 +107,20 @@ ${disliked || "—"}
             <ThumbsDown size={16} className="text-destructive" /> Что не нравится / что улучшить
           </label>
           <textarea
-            value={disliked}
-            onChange={(e) => setDisliked(e.target.value)}
+            defaultValue=""
+            onInput={(e) => { dislikedRef.current = e.currentTarget.value; updateHasContent(); }}
             rows={4}
             placeholder="Что мешает, чего не хватает, что добавить…"
+            inputMode="text"
             autoComplete="off" autoCorrect="off" spellCheck={false}
-            className="mt-1 w-full px-3 py-2 rounded-lg bg-secondary border border-border focus:outline-none focus:ring-2 focus:ring-primary resize-y"
+            className="mt-1 w-full px-3 py-2 rounded-lg bg-secondary border border-border focus:outline-none focus:ring-2 focus:ring-primary resize-none"
           />
         </div>
 
         <div className="flex items-center gap-3 pt-2">
           <button
             onClick={send}
-            disabled={!canSend}
+            disabled={!hasContent}
             className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-primary text-primary-foreground hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <Send size={16} /> Отправить
