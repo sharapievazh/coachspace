@@ -8,10 +8,12 @@ import {
 } from "@tanstack/react-router";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { routeTree } from "./routeTree.gen";
+import { startIOSKeyboardStabilizer } from "./lib/ios-keyboard";
 import { startPerfDiagnostics } from "./lib/perf-diagnostics";
 import "./styles.css";
 
 startPerfDiagnostics();
+startIOSKeyboardStabilizer();
 
 // Inside a Capacitor iOS/Android WebView the origin is `capacitor://localhost`
 // (or `http://localhost` on Android). There is no server to handle deep-link

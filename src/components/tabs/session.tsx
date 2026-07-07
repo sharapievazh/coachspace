@@ -47,7 +47,7 @@ function SessionPanel(p: Props) {
   };
 
   return (
-    <div className="grid md:grid-cols-3 gap-6 max-w-full overflow-hidden">
+    <div className="grid md:grid-cols-3 gap-6 max-w-full">
       <section className="md:col-span-1 bg-card rounded-2xl border border-border p-5 space-y-4">
         <h2 className="font-semibold flex items-center gap-2"><Sparkles size={18} className="text-primary" /> Таймер сессии</h2>
         <div className="text-center py-6 rounded-xl bg-secondary">
@@ -84,12 +84,14 @@ function SessionPanel(p: Props) {
           <Field label="Клиент">
             <input defaultValue={p.clientNameRef.current} onInput={(e) => { p.clientNameRef.current = e.currentTarget.value; }}
               placeholder="Имя клиента"
+              inputMode="text"
               autoComplete="off" autoCorrect="off" autoCapitalize="words" spellCheck={false}
               className="w-full px-3 py-2 rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-ring"/>
           </Field>
           <Field label="Запрос сессии">
             <input defaultValue={p.topicRef.current} onInput={(e) => { p.topicRef.current = e.currentTarget.value; }}
               placeholder="Тема / цель"
+              inputMode="text"
               autoComplete="off" autoCorrect="off" spellCheck={false}
               className="w-full px-3 py-2 rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-ring"/>
           </Field>
@@ -98,6 +100,7 @@ function SessionPanel(p: Props) {
           <textarea ref={notesElRef} defaultValue={p.notesRef.current} onInput={(e) => { p.notesRef.current = e.currentTarget.value; }}
             rows={14}
             placeholder="Веди заметки прямо во время сессии..."
+            inputMode="text"
             autoComplete="off" autoCorrect="off" spellCheck={false}
             className="w-full px-3 py-2 rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-ring resize-none"/>
         </Field>
