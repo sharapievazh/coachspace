@@ -59,20 +59,15 @@ function EricksonStar() {
       <SectionHead title="Звезда Принципов Эриксона" subtitle="Философский фундамент коучинга · 5 опор" />
 
       <div className="relative rounded-3xl border border-amber-500/40 bg-gradient-to-br from-indigo-950 via-violet-900 to-slate-800 p-4 sm:p-8 overflow-hidden">
-        {/* constellation dots */}
-        <div className="absolute inset-0 pointer-events-none opacity-50">
-          {Array.from({ length: 30 }).map((_, i) => {
-            const t = (i * 9301 + 49297) % 233280;
-            const x = (t % 100);
-            const y = ((t / 100) | 0) % 100;
-            return (
-              <span
-                key={i}
-                className="absolute w-[2px] h-[2px] rounded-full bg-amber-200/60 animate-pulse"
-                style={{ left: `${x}%`, top: `${y}%`, animationDelay: `${(i % 7) * 0.4}s` }}
-              />
-            );
-          })}
+        {/* static star field — no animation to avoid iOS WebView GPU overload */}
+        <div className="absolute inset-0 pointer-events-none opacity-40" aria-hidden="true">
+          {[7,14,23,38,52,61,77,83,91,5,18,44,69,88,96,31,56,73].map((v, i) => (
+            <span
+              key={i}
+              className="absolute w-[2px] h-[2px] rounded-full bg-amber-200/70"
+              style={{ left: `${v % 100}%`, top: `${(v * 7 + i * 13) % 100}%` }}
+            />
+          ))}
         </div>
 
         <div className="relative flex flex-col gap-5 items-center">
@@ -89,10 +84,6 @@ function EricksonStar() {
                   <stop offset="60%" stopColor="#f59e0b" stopOpacity="0.15" />
                   <stop offset="100%" stopColor="#000" stopOpacity="0" />
                 </radialGradient>
-                <filter id="starShadow" x="-50%" y="-50%" width="200%" height="200%">
-                  <feGaussianBlur stdDeviation="6" result="b" />
-                  <feMerge><feMergeNode in="b" /><feMergeNode in="SourceGraphic" /></feMerge>
-                </filter>
               </defs>
 
               <circle cx={cx} cy={cy} r={R + 40} fill="url(#starGlow)" />
@@ -116,7 +107,7 @@ function EricksonStar() {
                 stroke="#fef3c7"
                 strokeWidth="1.5"
                 strokeLinejoin="round"
-                filter="url(#starShadow)"
+
               />
 
               {/* clickable tip hotspots with large number badge */}

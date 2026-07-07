@@ -469,7 +469,7 @@ ${notesRef.current || "—"}
 
   return (
     <div className="min-h-screen bg-background text-foreground">
-      <header className="border-b border-border bg-card/60">
+      <header className="border-b border-border bg-card sticky top-0 z-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-[env(safe-area-inset-top)] pb-4 flex items-center justify-between gap-4">
           <div className="flex items-center gap-3 min-w-0">
             <div className="w-11 h-11 rounded-xl bg-primary text-primary-foreground grid place-items-center font-bold shrink-0">CS</div>

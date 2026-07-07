@@ -326,9 +326,9 @@ function Grow() {
           <GrowIcon step={step.id as "G" | "R" | "O" | "W"} size={320} />
         </div>
         {/* sparkles */}
-        <Sparkles className="absolute right-10 top-6 text-primary/30 animate-pulse" size={24} />
-        <Star className="absolute right-32 top-20 text-amber-400/40 animate-pulse" size={16} />
-        <Sparkles className="absolute right-20 bottom-10 text-primary/20 animate-pulse" size={18} />
+        <Sparkles className="absolute right-10 top-6 text-primary/30" size={24} />
+        <Star className="absolute right-32 top-20 text-amber-400/40" size={16} />
+        <Sparkles className="absolute right-20 bottom-10 text-primary/20" size={18} />
 
         {(() => {
           const meta = GROW_STRUCTURE.find((g) => g.code.startsWith(step.id));
