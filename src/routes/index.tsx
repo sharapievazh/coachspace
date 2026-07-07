@@ -74,9 +74,12 @@ function CoachSpace() {
   const [remaining, setRemaining] = useState(20 * 60);
   const [running, setRunning] = useState(false);
   const [endsAt, setEndsAt] = useState<number | null>(null);
-  const [clientName, setClientName] = useState("");
-  const [topic, setTopic] = useState("");
-  const [notes, setNotes] = useState("");
+  // Session fields are held in refs (updated from SessionPanel) so keystrokes
+  // don't re-render this huge parent tree on every character — critical for
+  // input responsiveness inside the iOS/Xcode WebView.
+  const clientNameRef = useRef("");
+  const topicRef = useRef("");
+  const notesRef = useRef("");
   const [balanceScores, setBalanceScores] = useState<Record<number, number>>(() =>
     Object.fromEntries(Array.from({ length: 8 }, (_, i) => [i + 1, 5]))
   );
@@ -445,24 +448,24 @@ function CoachSpace() {
     } catch {}
     const txt = `Coach Space — Протокол сессии
 Дата: ${new Date().toLocaleString()}
-Клиент: ${clientName || "—"}
-Запрос: ${topic || "—"}
+Клиент: ${clientNameRef.current || "—"}
+Запрос: ${topicRef.current || "—"}
 Остаток времени: ${mmss}
 
 Колесо баланса (оценки):
 ${balanceLines}
 ${smartBlock}
 Заметки коуча:
-${notes || "—"}
+${notesRef.current || "—"}
 `;
     const blob = new Blob([txt], { type: "text/plain;charset=utf-8" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `session-${clientName || "client"}-${Date.now()}.txt`;
+    a.download = `session-${clientNameRef.current || "client"}-${Date.now()}.txt`;
     a.click();
     URL.revokeObjectURL(url);
-  }, [clientName, topic, notes, mmss, balanceScores]);
+  }, [mmss, balanceScores]);
 
   return (
     <div className="min-h-screen bg-background text-foreground">
@@ -542,7 +545,7 @@ ${notes || "—"}
 
         <main className="flex-1 min-w-0 px-4 sm:px-6 md:px-0 py-6">
           <Suspense fallback={<div className="py-10 text-center text-sm text-muted-foreground">Загрузка…</div>}>
-            {tab === "session" && <SessionPanelLazy duration={duration} setDuration={changeDuration} remaining={remaining} running={running} setRunning={handleSetRunning} reset={resetTimer} mmss={mmss} clientName={clientName} setClientName={setClientName} topic={topic} setTopic={setTopic} notes={notes} setNotes={setNotes} exportSession={exportSession} testSound={testSound} />}
+            {tab === "session" && <SessionPanelLazy duration={duration} setDuration={changeDuration} remaining={remaining} running={running} setRunning={handleSetRunning} reset={resetTimer} mmss={mmss} clientNameRef={clientNameRef} topicRef={topicRef} notesRef={notesRef} exportSession={exportSession} testSound={testSound} />}
             {tab === "grow" && <GrowLazy />}
             {tab === "swot" && <SwotLazy />}
             {tab === "nlu" && <NluLazy />}

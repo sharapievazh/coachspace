@@ -1,8 +1,34 @@
-import React from "react";
+import React, { memo, useState, useEffect, MutableRefObject } from "react";
 import { Bell, Download, Pause, Play, RotateCcw, Sandwich, Sparkles } from "lucide-react";
 import { OSVK_TEMPLATE } from "./_shared";
 
-function SessionPanel(p: any) {
+type Props = {
+  duration: number;
+  setDuration: (v: number) => void;
+  remaining?: number;
+  running: boolean;
+  setRunning: (v: boolean) => void;
+  reset: () => void;
+  mmss: string;
+  clientNameRef: MutableRefObject<string>;
+  topicRef: MutableRefObject<string>;
+  notesRef: MutableRefObject<string>;
+  exportSession: () => void;
+  testSound: () => void;
+};
+
+function SessionPanel(p: Props) {
+  // Local state — keystrokes stay inside this component and do NOT
+  // re-render the parent CoachSpace tree. Values are mirrored into refs
+  // so the parent can read them on export.
+  const [clientName, setClientNameLocal] = useState(p.clientNameRef.current);
+  const [topic, setTopicLocal] = useState(p.topicRef.current);
+  const [notes, setNotesLocal] = useState(p.notesRef.current);
+
+  useEffect(() => { p.clientNameRef.current = clientName; }, [clientName, p.clientNameRef]);
+  useEffect(() => { p.topicRef.current = topic; }, [topic, p.topicRef]);
+  useEffect(() => { p.notesRef.current = notes; }, [notes, p.notesRef]);
+
   return (
     <div className="grid md:grid-cols-3 gap-6 max-w-full overflow-hidden">
       <section className="md:col-span-1 bg-card rounded-2xl border border-border p-5 space-y-4">
@@ -39,20 +65,20 @@ function SessionPanel(p: any) {
 
         <div className="grid sm:grid-cols-2 gap-3">
           <Field label="Клиент">
-            <input value={p.clientName} onChange={(e)=>p.setClientName(e.target.value)}
+            <input value={clientName} onChange={(e) => setClientNameLocal(e.target.value)}
               placeholder="Имя клиента"
               autoComplete="off" autoCorrect="off" autoCapitalize="words" spellCheck={false}
               className="w-full px-3 py-2 rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-ring"/>
           </Field>
           <Field label="Запрос сессии">
-            <input value={p.topic} onChange={(e)=>p.setTopic(e.target.value)}
+            <input value={topic} onChange={(e) => setTopicLocal(e.target.value)}
               placeholder="Тема / цель"
               autoComplete="off" autoCorrect="off" spellCheck={false}
               className="w-full px-3 py-2 rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-ring"/>
           </Field>
         </div>
         <Field label="Потоковый блокнот · ценностные слова, инсайты, цитаты клиента">
-          <textarea value={p.notes} onChange={(e)=>p.setNotes(e.target.value)}
+          <textarea value={notes} onChange={(e) => setNotesLocal(e.target.value)}
             rows={14}
             placeholder="Веди заметки прямо во время сессии..."
             autoComplete="off" autoCorrect="off" spellCheck={false}
@@ -61,7 +87,7 @@ function SessionPanel(p: any) {
 
         <div className="flex items-center justify-between gap-2 flex-wrap">
           <button
-            onClick={() => p.setNotes((p.notes || "") + OSVK_TEMPLATE)}
+            onClick={() => setNotesLocal((notes || "") + OSVK_TEMPLATE)}
             className="inline-flex items-center gap-2 px-4 min-h-11 rounded-lg border border-amber-500/40 bg-gradient-to-r from-amber-500/15 to-orange-500/10 hover:from-amber-500/25 hover:to-orange-500/20 text-sm text-amber-700 dark:text-amber-300"
           >
             <Sandwich size={16}/> Маркер ОСВК
@@ -85,6 +111,4 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
   );
 }
 
-/* ---------- Visual helpers for rich block cards ---------- */
-
-export default SessionPanel;
+export default memo(SessionPanel);
