@@ -173,7 +173,6 @@
     border-color: var(--color-border);
     box-sizing: border-box;
     -webkit-tap-highlight-color: transparent;
-    touch-action: manipulation;
   }
 
   button,
@@ -236,6 +235,10 @@
   select {
     font-size: 17px;
     font-family: inherit;
+    -webkit-user-select: text;
+    user-select: text;
+    -webkit-touch-callout: default;
+    touch-action: auto;
   }
 
   input::placeholder,

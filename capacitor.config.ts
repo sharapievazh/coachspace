@@ -6,6 +6,12 @@ const config = {
     scrollEnabled: true,
     allowsLinkPreview: false,
   },
+  plugins: {
+    Keyboard: {
+      resize: "body",
+      resizeOnFullScreen: true,
+    },
+  },
 };
 
 export default config;

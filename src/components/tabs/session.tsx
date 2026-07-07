@@ -1,4 +1,4 @@
-import React, { memo, useState, useEffect, MutableRefObject } from "react";
+import React, { memo, useRef, MutableRefObject } from "react";
 import { Bell, Download, Pause, Play, RotateCcw, Sandwich, Sparkles } from "lucide-react";
 import { OSVK_TEMPLATE } from "./_shared";
 
@@ -18,16 +18,33 @@ type Props = {
 };
 
 function SessionPanel(p: Props) {
-  // Local state — keystrokes stay inside this component and do NOT
-  // re-render the parent CoachSpace tree. Values are mirrored into refs
-  // so the parent can read them on export.
-  const [clientName, setClientNameLocal] = useState(p.clientNameRef.current);
-  const [topic, setTopicLocal] = useState(p.topicRef.current);
-  const [notes, setNotesLocal] = useState(p.notesRef.current);
+  // Uncontrolled fields: typing updates DOM + refs only, with no React render
+  // per keystroke. This avoids WKWebView keyboard deadlocks on iOS simulator/device.
+  const notesElRef = useRef<HTMLTextAreaElement | null>(null);
 
-  useEffect(() => { p.clientNameRef.current = clientName; }, [clientName, p.clientNameRef]);
-  useEffect(() => { p.topicRef.current = topic; }, [topic, p.topicRef]);
-  useEffect(() => { p.notesRef.current = notes; }, [notes, p.notesRef]);
+  const appendOsvkTemplate = () => {
+    const el = notesElRef.current;
+    if (!el) {
+      p.notesRef.current = `${p.notesRef.current || ""}${OSVK_TEMPLATE}`;
+      return;
+    }
+
+    const start = el.selectionStart ?? el.value.length;
+    const end = el.selectionEnd ?? el.value.length;
+    const next = `${el.value.slice(0, start)}${OSVK_TEMPLATE}${el.value.slice(end)}`;
+    const caret = start + OSVK_TEMPLATE.length;
+    el.value = next;
+    p.notesRef.current = next;
+
+    requestAnimationFrame(() => {
+      try {
+        el.focus({ preventScroll: true });
+        el.setSelectionRange(caret, caret);
+      } catch {
+        el.focus();
+      }
+    });
+  };
 
   return (
     <div className="grid md:grid-cols-3 gap-6 max-w-full overflow-hidden">
@@ -65,29 +82,29 @@ function SessionPanel(p: Props) {
 
         <div className="grid sm:grid-cols-2 gap-3">
           <Field label="Клиент">
-            <input value={clientName} onChange={(e) => setClientNameLocal(e.target.value)}
+            <input defaultValue={p.clientNameRef.current} onInput={(e) => { p.clientNameRef.current = e.currentTarget.value; }}
               placeholder="Имя клиента"
               autoComplete="off" autoCorrect="off" autoCapitalize="words" spellCheck={false}
               className="w-full px-3 py-2 rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-ring"/>
           </Field>
           <Field label="Запрос сессии">
-            <input value={topic} onChange={(e) => setTopicLocal(e.target.value)}
+            <input defaultValue={p.topicRef.current} onInput={(e) => { p.topicRef.current = e.currentTarget.value; }}
               placeholder="Тема / цель"
               autoComplete="off" autoCorrect="off" spellCheck={false}
               className="w-full px-3 py-2 rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-ring"/>
           </Field>
         </div>
         <Field label="Потоковый блокнот · ценностные слова, инсайты, цитаты клиента">
-          <textarea value={notes} onChange={(e) => setNotesLocal(e.target.value)}
+          <textarea ref={notesElRef} defaultValue={p.notesRef.current} onInput={(e) => { p.notesRef.current = e.currentTarget.value; }}
             rows={14}
             placeholder="Веди заметки прямо во время сессии..."
             autoComplete="off" autoCorrect="off" spellCheck={false}
-            className="w-full px-3 py-2 rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-ring resize-y"/>
+            className="w-full px-3 py-2 rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-ring resize-none"/>
         </Field>
 
         <div className="flex items-center justify-between gap-2 flex-wrap">
           <button
-            onClick={() => setNotesLocal((notes || "") + OSVK_TEMPLATE)}
+            onClick={appendOsvkTemplate}
             className="inline-flex items-center gap-2 px-4 min-h-11 rounded-lg border border-amber-500/40 bg-gradient-to-r from-amber-500/15 to-orange-500/10 hover:from-amber-500/25 hover:to-orange-500/20 text-sm text-amber-700 dark:text-amber-300"
           >
             <Sandwich size={16}/> Маркер ОСВК
