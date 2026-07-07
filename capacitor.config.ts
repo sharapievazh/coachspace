@@ -8,8 +8,9 @@ const config = {
   },
   plugins: {
     Keyboard: {
-      resize: "body",
+      resize: "native",
       resizeOnFullScreen: true,
+      autoBackdropColor: "auto",
     },
   },
 };

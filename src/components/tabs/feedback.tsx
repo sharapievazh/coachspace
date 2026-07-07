@@ -71,7 +71,7 @@ ${disliked || "—"}
 
 
   return (
-    <div className="space-y-6 max-w-3xl max-w-full overflow-hidden">
+    <div className="space-y-6 max-w-3xl max-w-full">
       <SectionHead
         title="Обратная связь по приложению"
         subtitle="Поделитесь впечатлениями — это поможет сделать Coach Space лучше."
@@ -83,6 +83,7 @@ ${disliked || "—"}
             defaultValue=""
             onInput={(e) => { nameRef.current = e.currentTarget.value; }}
             placeholder="Как к вам обращаться"
+            inputMode="text"
             autoComplete="off" autoCorrect="off" spellCheck={false}
             className="mt-1 w-full px-3 py-2 rounded-lg bg-secondary border border-border focus:outline-none focus:ring-2 focus:ring-primary"
           />
@@ -96,6 +97,7 @@ ${disliked || "—"}
             onInput={(e) => { likedRef.current = e.currentTarget.value; updateHasContent(); }}
             rows={4}
             placeholder="Что работает хорошо, что удобно, что радует…"
+            inputMode="text"
             autoComplete="off" autoCorrect="off" spellCheck={false}
             className="mt-1 w-full px-3 py-2 rounded-lg bg-secondary border border-border focus:outline-none focus:ring-2 focus:ring-primary resize-none"
           />
@@ -109,6 +111,7 @@ ${disliked || "—"}
             onInput={(e) => { dislikedRef.current = e.currentTarget.value; updateHasContent(); }}
             rows={4}
             placeholder="Что мешает, чего не хватает, что добавить…"
+            inputMode="text"
             autoComplete="off" autoCorrect="off" spellCheck={false}
             className="mt-1 w-full px-3 py-2 rounded-lg bg-secondary border border-border focus:outline-none focus:ring-2 focus:ring-primary resize-none"
           />

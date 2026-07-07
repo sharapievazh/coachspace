@@ -124,6 +124,20 @@ function Balance({ scores, onChange }: { scores: Record<number, number>; onChang
   const shareWheel = async () => {
     if (!wheelRef.current) return;
     try {
+      const isNativeIOS =
+        window.location.protocol === "capacitor:" && window.Capacitor?.getPlatform?.() === "ios";
+      const keyboardActive = Boolean(window.__coachSpaceKeyboardActive);
+
+      if (isNativeIOS || keyboardActive) {
+        const shareText = `Колесо баланса · средний балл: ${average}/10\n${BALANCE_AREAS.map((a) => `${a.name}: ${scores[a.n]}/10`).join("\n")}`;
+        if (navigator.share) {
+          await navigator.share({ title: "Колесо баланса", text: shareText });
+        } else if (navigator.clipboard?.writeText) {
+          await navigator.clipboard.writeText(shareText);
+        }
+        return;
+      }
+
       const { default: html2canvas } = await import("html2canvas");
       const canvas = await html2canvas(wheelRef.current, { backgroundColor: "#ffffff", scale: 2 });
       const blob: Blob | null = await new Promise((res) => canvas.toBlob(res, "image/png"));
