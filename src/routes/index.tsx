@@ -565,26 +565,24 @@ ${notes || "—"}
       </div>
 
       {timeUp && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in">
-          <div className="relative w-full max-w-md md:max-w-[680px] rounded-2xl border border-primary/40 bg-card p-6 sm:p-8 text-center shadow-2xl">
-
-            <div className="absolute inset-0 rounded-2xl ring-2 ring-primary/60 animate-ping pointer-events-none" />
-            <div className="relative">
-              <div className="mx-auto mb-4 w-16 h-16 rounded-full bg-primary/15 text-primary grid place-items-center animate-pulse">
-                <Timer size={32} />
-              </div>
-              <h3 className="text-xl font-semibold mb-2">Время сессии истекло</h3>
-              <p className="text-muted-foreground mb-6">Пора подводить итоги!</p>
-              <div className="flex gap-2 justify-center">
+        <div className="mt-4 rounded-2xl border border-primary/40 bg-card p-4 sm:p-5 shadow-lg">
+          <div className="flex items-start gap-3">
+            <div className="w-10 h-10 rounded-full bg-primary/15 text-primary grid place-items-center shrink-0">
+              <Timer size={22} />
+            </div>
+            <div className="min-w-0 flex-1">
+              <h3 className="text-base font-semibold">Время сессии истекло</h3>
+              <p className="text-sm text-muted-foreground">Пора подводить итоги.</p>
+              <div className="flex flex-wrap gap-2 mt-3">
                 <button
                   onClick={() => { setTimeUp(false); resetTimer(); }}
-                  className="px-4 py-2 rounded-lg bg-primary text-primary-foreground hover:opacity-90"
+                  className="px-3 py-2 min-h-11 text-sm rounded-lg bg-primary text-primary-foreground hover:opacity-90"
                 >
                   Закрыть
                 </button>
                 <button
                   onClick={() => playBell(false)}
-                  className="px-4 py-2 rounded-lg bg-secondary hover:bg-muted"
+                  className="px-3 py-2 min-h-11 text-sm rounded-lg bg-secondary hover:bg-muted"
                 >
                   Повторить звук
                 </button>
