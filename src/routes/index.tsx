@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import Onboarding, { isOnboardingDone } from "@/components/onboarding";
 import {
   Play, Pause, Target, Heart, Triangle, Layers,
   Timer,
@@ -65,6 +66,7 @@ const NAV: NavEntry[] = [
 const TIMER_STORAGE_KEY = "coach-space-session-timer";
 
 function CoachSpace() {
+  const [onboarded, setOnboarded] = useState(() => isOnboardingDone());
   const [tab, setTab] = useState<TabId>("session");
 
   // Preload all lazy tab chunks after first render so tapping a tab never
@@ -509,6 +511,10 @@ ${notesRef.current || "—"}
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
   }, [mmss, balanceScores]);
+
+  if (!onboarded) {
+    return <Onboarding onFinish={() => setOnboarded(true)} />;
+  }
 
   return (
     <div className="min-h-screen bg-background text-foreground">
