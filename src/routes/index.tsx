@@ -552,9 +552,12 @@ function CoachSpace() {
   }, [remaining]);
 
   const exportSession = useCallback(() => {
-    const balanceLines = BALANCE_AREAS.map(
-      (a) => `  ${a.n}. ${a.name}: ${balanceScores[a.n] ?? 5}/10`
-    ).join("\n");
+    // Колесо баланса — включаем только если хоть одна оценка изменена с дефолтных 5
+    const balanceUsed = BALANCE_AREAS.some((a) => (balanceScores[a.n] ?? 5) !== 5);
+    const balanceBlock = balanceUsed
+      ? `\nКолесо баланса (оценки):\n${BALANCE_AREAS.map((a) => `  ${a.n}. ${a.name}: ${balanceScores[a.n] ?? 5}/10`).join("\n")}\n`
+      : "";
+
     let smartBlock = "";
     try {
       const raw = typeof window !== "undefined" ? localStorage.getItem(SMART_STORAGE) : null;
@@ -580,11 +583,7 @@ function CoachSpace() {
 Коуч: ${coachNameRef.current || "—"}
 Клиент: ${clientNameRef.current || "—"}
 Запрос: ${topicRef.current || "—"}
-Остаток времени: ${mmss}
-
-Колесо баланса (оценки):
-${balanceLines}
-${smartBlock}
+${balanceBlock}${smartBlock}
 Заметки коуча:
 ${notesRef.current || "—"}
 `;
