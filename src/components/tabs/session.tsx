@@ -914,15 +914,18 @@ function SupervisionMarker({ onClose, onExport }: { onClose: () => void; onExpor
   const doExport = () => {
     const lines: string[] = [];
     const renderSection = (title: string, its: string[], ch: boolean[], ns: string[]) => {
+      const checkedItems = its.filter((_, i) => ch[i]);
+      if (checkedItems.length === 0) return;
       lines.push(`\n── ${title} ──`);
       its.forEach((item, i) => {
-        const mark = ch[i] ? "✓" : "☐";
+        if (!ch[i]) return;
         const note = ns[i].trim();
-        lines.push(`${mark} ${item}${note ? ": " + note : ""}`);
+        lines.push(`✓ ${item}${note ? ": " + note : ""}`);
       });
     };
     renderSection("Маркер Супервизии — Индивидуальный коучинг", IND_ITEMS, indChecked, indNotes);
     renderSection("Маркер Супервизии — Командный коучинг", TEAM_ITEMS, teamChecked, teamNotes);
+    if (lines.length === 0) return;
     lines.push("");
     onExport(lines.join("\n"));
     onClose();
