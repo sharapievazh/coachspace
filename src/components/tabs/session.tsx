@@ -445,6 +445,10 @@ function MindMapTool({ onExport }: { onExport: (text: string) => void }) {
     const connections: React.ReactNode[] = [];
     const nodeEls: React.ReactNode[] = [];
 
+    // Approximate half-sizes per depth to start/end lines at node edges
+    const halfW = [56, 44, 36];
+    const halfH = [18, 14, 12];
+
     nodes.forEach((node) => {
       const from = radialPos.get(node.id);
       if (!from) return;
@@ -455,16 +459,38 @@ function MindMapTool({ onExport }: { onExport: (text: string) => void }) {
         const dx = to.x - from.x;
         const dy = to.y - from.y;
         const dist = Math.sqrt(dx * dx + dy * dy);
+        if (dist < 1) return;
         const ux = dx / dist;
         const uy = dy / dist;
-        const t = dist * 0.42;
+
+        // Shrink line endpoints to node edges (ellipse approximation)
+        const pd = node.depth;
+        const cd = child.depth;
+        const pW = halfW[Math.min(pd, halfW.length - 1)];
+        const pH = halfH[Math.min(pd, halfH.length - 1)];
+        const cW = halfW[Math.min(cd, halfW.length - 1)];
+        const cH = halfH[Math.min(cd, halfH.length - 1)];
+        // Distance from center to ellipse edge in the direction of the line
+        const pEdge = Math.min(pW, pH) + (Math.abs(ux) * (pW - Math.min(pW, pH)) + Math.abs(uy) * (pH - Math.min(pW, pH)));
+        const cEdge = Math.min(cW, cH) + (Math.abs(ux) * (cW - Math.min(cW, cH)) + Math.abs(uy) * (cH - Math.min(cW, cH)));
+
+        const x1 = from.x + ux * (pEdge + 4);
+        const y1 = from.y + uy * (pEdge + 4);
+        const x2 = to.x - ux * (cEdge + 4);
+        const y2 = to.y - uy * (cEdge + 4);
+
+        const seg = Math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2);
+        const t = seg * 0.38;
+        const vx = (x2 - x1) / Math.max(seg, 1);
+        const vy = (y2 - y1) / Math.max(seg, 1);
+
         connections.push(
           <path
             key={`conn-${node.id}-${childId}`}
-            d={`M ${from.x.toFixed(1)} ${from.y.toFixed(1)} C ${(from.x + ux * t).toFixed(1)} ${(from.y + uy * t).toFixed(1)} ${(to.x - ux * t).toFixed(1)} ${(to.y - uy * t).toFixed(1)} ${to.x.toFixed(1)} ${to.y.toFixed(1)}`}
+            d={`M ${x1.toFixed(1)} ${y1.toFixed(1)} C ${(x1 + vx * t).toFixed(1)} ${(y1 + vy * t).toFixed(1)} ${(x2 - vx * t).toFixed(1)} ${(y2 - vy * t).toFixed(1)} ${x2.toFixed(1)} ${y2.toFixed(1)}`}
             stroke={child.color}
             strokeWidth={child.depth === 1 ? 2.2 : 1.6}
-            strokeOpacity="0.5"
+            strokeOpacity="0.6"
             fill="none"
             strokeLinecap="round"
           />
