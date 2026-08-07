@@ -211,6 +211,7 @@ function CoachSpace() {
   const [balanceScores, setBalanceScores] = useState<Record<number, number>>(() =>
     Object.fromEntries(Array.from({ length: 8 }, (_, i) => [i + 1, 5]))
   );
+  const [menuOpen, setMenuOpen] = useState(false);
   const audioCtxRef = useRef<any>(null);
   const wakeLockRef = useRef<any>(null);
   const alertPlayedRef = useRef(false);
@@ -625,27 +626,69 @@ ${notesRef.current || "—"}
             </button>
           </div>
         </div>
-        {/* Mobile top-tabs (hidden on iPad+) */}
-        <nav className="md:hidden max-w-7xl mx-auto px-2 sm:px-4 flex gap-1 overflow-x-auto pb-2">
-          {NAV.filter((e): e is Extract<NavEntry, { type: "tab" }> => e.type === "tab").map((t) => {
-            const Icon = t.icon;
-            const active = tab === t.id;
+        {/* Mobile header bottom row: active tab name + hamburger */}
+        <div className="md:hidden max-w-7xl mx-auto px-4 pb-3 flex items-center justify-between gap-3">
+          {/* Active tab label */}
+          {(() => {
+            const active = NAV.find((e) => e.type === "tab" && e.id === tab) as Extract<NavEntry, { type: "tab" }> | undefined;
+            if (!active) return null;
+            const Icon = active.icon;
             return (
-              <button
-                key={t.id}
-                onClick={() => setTab(t.id)}
-                className={`flex items-center gap-2 px-3 min-h-11 text-xs rounded-lg transition-colors duration-100 max-w-[140px] ${
-                  active ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-secondary"
-                }`}
-              >
-                <Icon size={16} />
-                <span className="truncate min-w-0">{t.label}</span>
-              </button>
+              <div className="flex items-center gap-2 min-w-0">
+                <Icon size={16} className="text-primary shrink-0" />
+                <span className="text-sm font-semibold text-foreground truncate">{active.label}</span>
+              </div>
             );
-          })}
-        </nav>
+          })()}
+          {/* Hamburger button */}
+          <button
+            onClick={() => setMenuOpen((v) => !v)}
+            className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-secondary hover:bg-muted transition-colors text-foreground shrink-0"
+            aria-label="Меню"
+          >
+            <span className="flex flex-col gap-[4px]">
+              <span className="block w-4 h-[2px] bg-current rounded" />
+              <span className="block w-4 h-[2px] bg-current rounded" />
+              <span className="block w-4 h-[2px] bg-current rounded" />
+            </span>
+            <span className="text-xs font-medium">Меню</span>
+          </button>
+        </div>
 
       </header>
+
+      {/* Mobile dropdown menu overlay */}
+      {menuOpen && (
+        <div className="md:hidden fixed inset-0 z-40" onClick={() => setMenuOpen(false)}>
+          <div className="absolute top-0 left-0 right-0 bg-card border-b border-border shadow-xl pt-[env(safe-area-inset-top)]" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between px-4 py-3 border-b border-border">
+              <span className="font-semibold text-foreground">Разделы</span>
+              <button onClick={() => setMenuOpen(false)} className="w-9 h-9 rounded-full bg-secondary flex items-center justify-center text-muted-foreground">✕</button>
+            </div>
+            <nav className="flex flex-col py-2 max-h-[70vh] overflow-y-auto">
+              {NAV.map((entry, i) =>
+                entry.type === "section" ? (
+                  <div key={i} className="px-4 pt-3 pb-1 text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60">
+                    {entry.label}
+                  </div>
+                ) : (
+                  <button
+                    key={entry.id}
+                    onClick={() => { setTab(entry.id); setMenuOpen(false); }}
+                    className={`flex items-center gap-3 px-4 py-3 text-sm text-left transition-colors ${
+                      tab === entry.id ? "bg-primary/10 text-primary font-semibold" : "text-foreground hover:bg-secondary"
+                    }`}
+                  >
+                    <entry.icon size={18} className="shrink-0" />
+                    <span>{entry.label}</span>
+                    {tab === entry.id && <span className="ml-auto w-1.5 h-1.5 rounded-full bg-primary" />}
+                  </button>
+                )
+              )}
+            </nav>
+          </div>
+        </div>
+      )}
 
       <div className="max-w-7xl mx-auto md:flex md:gap-6 md:px-6">
         {/* iPad+ sidebar nav */}

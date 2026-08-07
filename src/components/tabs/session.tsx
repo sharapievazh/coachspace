@@ -135,24 +135,24 @@ function BalanceTool({ onExport }: { onExport: (text: string) => void }) {
   return (
     <div className="space-y-4">
       <p className="text-xs text-muted-foreground">Нажми на название категории чтобы переименовать</p>
-      <div className="grid grid-cols-2 gap-2">
+      <div className="flex flex-col gap-2">
         {areas.map((name, i) => (
           <div key={i} className="flex items-center gap-2">
             {editingIdx === i ? (
               <input autoFocus defaultValue={name}
                 onBlur={(e) => commitEdit(i, e.target.value)}
                 onKeyDown={(e) => { if (e.key === "Enter" || e.key === "Escape") commitEdit(i, e.currentTarget.value); }}
-                className="w-24 shrink-0 px-1.5 py-0.5 rounded border border-primary bg-background text-xs focus:outline-none" />
+                className="w-28 shrink-0 px-1.5 py-0.5 rounded border border-primary bg-background text-xs focus:outline-none" />
             ) : (
               <button onClick={() => setEditingIdx(i)}
-                className="w-24 shrink-0 text-xs text-foreground text-left truncate hover:text-primary transition-colors cursor-text"
+                className="w-28 shrink-0 text-xs text-foreground text-left truncate hover:text-primary transition-colors cursor-text"
                 title="Нажми чтобы переименовать">
                 {name}
               </button>
             )}
             <input type="range" min={1} max={10} value={scores[i]}
               onChange={(e) => { const n = [...scores]; n[i] = Number(e.target.value); setScores(n); }}
-              className="flex-1 accent-primary" />
+              className="flex-1 min-w-0 accent-primary" />
             <span className="text-xs font-mono w-5 text-right shrink-0" style={{ color: BALANCE_COLORS[i] }}>{scores[i]}</span>
           </div>
         ))}
@@ -1087,7 +1087,7 @@ function SessionPanel(p: Props) {
       {/* ── Рабочее пространство ── */}
       <section className="bg-card rounded-2xl border border-border overflow-hidden">
         {/* Вкладки (скролл на малых экранах) */}
-        <div className="flex border-b border-border overflow-x-auto scrollbar-none">
+        <div className="flex border-b border-border overflow-x-auto scrollbar-none" style={{ touchAction: "pan-x" }}>
           {TABS.map((t) => (
             <button key={t.id} onClick={() => setActiveTab(t.id)}
               className={`flex items-center gap-1.5 px-3 py-3 text-xs font-medium whitespace-nowrap transition-colors border-b-2 -mb-px shrink-0 ${
