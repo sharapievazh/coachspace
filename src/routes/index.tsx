@@ -26,35 +26,107 @@ export const Route = createFileRoute("/")({
   component: CoachSpace,
 });
 
+const SHARE_CHANNELS = [
+  {
+    id: "whatsapp",
+    label: "WhatsApp",
+    color: "#25d366",
+    icon: "💬",
+    href: (t: string) => `https://wa.me/?text=${encodeURIComponent(t)}`,
+  },
+  {
+    id: "telegram",
+    label: "Telegram",
+    color: "#229ED9",
+    icon: "✈️",
+    href: (t: string) => `https://t.me/share/url?url=&text=${encodeURIComponent(t)}`,
+  },
+  {
+    id: "email",
+    label: "E-mail",
+    color: "#6b7280",
+    icon: "📧",
+    href: (t: string) => `mailto:?subject=${encodeURIComponent("Протокол сессии Coach Space")}&body=${encodeURIComponent(t)}`,
+  },
+];
+
 function ExportModal({ text, onClose }: { text: string; onClose: () => void }) {
   const [copied, setCopied] = useState(false);
+
   const copy = () => {
     navigator.clipboard?.writeText(text).then(() => {
       setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
+      setTimeout(() => setCopied(false), 5000);
     });
   };
+
+  const openShare = (href: string) => {
+    window.open(href, "_blank", "noopener,noreferrer");
+  };
+
   return (
-    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4" style={{ background: "rgba(0,0,0,0.55)" }} onClick={onClose}>
-      <div className="w-full max-w-lg rounded-2xl bg-card border border-border shadow-xl overflow-hidden" onClick={(e) => e.stopPropagation()}>
+    <div
+      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4"
+      style={{ background: "rgba(0,0,0,0.55)" }}
+      onClick={onClose}
+    >
+      <div
+        className="w-full max-w-lg rounded-2xl bg-card border border-border shadow-xl overflow-hidden"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* Header */}
         <div className="flex items-center justify-between px-5 py-4 border-b border-border">
           <span className="font-semibold text-foreground">Протокол сессии</span>
-          <button onClick={onClose} className="w-8 h-8 rounded-full bg-secondary flex items-center justify-center text-muted-foreground hover:text-foreground">✕</button>
+          <button
+            onClick={onClose}
+            className="w-8 h-8 rounded-full bg-secondary flex items-center justify-center text-muted-foreground hover:text-foreground"
+          >✕</button>
         </div>
-        <textarea readOnly value={text} rows={14}
-          className="w-full px-5 py-4 bg-background text-xs font-mono text-foreground resize-none focus:outline-none" />
-        <div className="flex gap-2 px-5 py-4 border-t border-border">
-          <button onClick={copy}
-            className={`flex-1 px-4 py-2.5 rounded-xl text-sm font-medium transition-colors ${copied ? "bg-emerald-500 text-white" : "bg-secondary hover:bg-muted"}`}>
-            {copied ? "✓ Скопировано!" : "Скопировать"}
+
+        {/* Text preview */}
+        <textarea
+          readOnly
+          value={text}
+          rows={10}
+          className="w-full px-5 py-4 bg-background text-xs font-mono text-foreground resize-none focus:outline-none"
+        />
+
+        {/* Copy button */}
+        <div className="px-5 pt-3 pb-2">
+          <button
+            onClick={copy}
+            className={`w-full py-3 rounded-xl text-sm font-semibold transition-colors ${
+              copied ? "bg-emerald-500 text-white" : "bg-secondary hover:bg-muted text-foreground"
+            }`}
+          >
+            {copied ? "✓ Скопировано в буфер — можно вставить в любое место!" : "Скопировать текст"}
           </button>
-          {typeof navigator !== "undefined" && navigator.share && (
-            <button
-              onClick={() => navigator.share({ title: "Протокол сессии", text }).catch(() => {})}
-              className="flex-1 px-4 py-2.5 rounded-xl bg-primary text-primary-foreground hover:opacity-90 text-sm font-medium">
-              Поделиться
-            </button>
-          )}
+        </div>
+
+        {/* Share row */}
+        <div className="px-5 pb-5 pt-2">
+          <p className="text-xs text-muted-foreground mb-2 text-center">Поделиться через:</p>
+          <div className="flex gap-2">
+            {SHARE_CHANNELS.map((ch) => (
+              <button
+                key={ch.id}
+                onClick={() => openShare(ch.href(text))}
+                className="flex-1 flex flex-col items-center gap-1 py-2.5 rounded-xl border border-border hover:bg-secondary transition-colors"
+              >
+                <span className="text-xl leading-none">{ch.icon}</span>
+                <span className="text-xs font-medium" style={{ color: ch.color }}>{ch.label}</span>
+              </button>
+            ))}
+            {typeof navigator !== "undefined" && navigator.share && (
+              <button
+                onClick={() => navigator.share({ title: "Протокол сессии", text }).catch(() => {})}
+                className="flex-1 flex flex-col items-center gap-1 py-2.5 rounded-xl border border-border hover:bg-secondary transition-colors"
+              >
+                <span className="text-xl leading-none">📤</span>
+                <span className="text-xs font-medium text-muted-foreground">Ещё...</span>
+              </button>
+            )}
+          </div>
         </div>
       </div>
     </div>
