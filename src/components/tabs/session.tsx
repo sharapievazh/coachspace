@@ -1,4 +1,4 @@
-import React, { memo, useRef, MutableRefObject } from "react";
+import React, { memo, useRef, useState, MutableRefObject } from "react";
 import { Bell, Download, Pause, Play, RotateCcw, Sandwich, Sparkles } from "lucide-react";
 import { OSVK_TEMPLATE } from "./_shared";
 
@@ -21,6 +21,7 @@ function SessionPanel(p: Props) {
   // Uncontrolled fields: typing updates DOM + refs only, with no React render
   // per keystroke. This avoids WKWebView keyboard deadlocks on iOS simulator/device.
   const notesElRef = useRef<HTMLTextAreaElement | null>(null);
+  const [minutesInput, setMinutesInput] = useState(() => String(Math.floor(p.duration / 60)));
 
   const appendOsvkTemplate = () => {
     const el = notesElRef.current;
@@ -50,15 +51,34 @@ function SessionPanel(p: Props) {
     <div className="grid md:grid-cols-3 gap-6 max-w-full">
       <section className="md:col-span-1 bg-card rounded-2xl border border-border p-5 space-y-4">
         <h2 className="font-semibold flex items-center gap-2"><Sparkles size={18} className="text-primary" /> Таймер сессии</h2>
-        <div className="text-center py-6 rounded-xl bg-secondary">
-          <div className="font-mono text-7xl tabular-nums text-foreground">{p.mmss}</div>
-          <div className="text-xs text-muted-foreground mt-1">из {Math.floor(p.duration/60)} мин</div>
+        <div className="text-center py-4 rounded-xl bg-secondary">
+          <div className="font-mono text-5xl tabular-nums text-foreground">{p.mmss}</div>
         </div>
+
+        {/* Duration input */}
+        <div className="flex items-center gap-2">
+          <label className="text-xs text-muted-foreground whitespace-nowrap">Длительность</label>
+          <input
+            type="number"
+            min="1"
+            max="480"
+            disabled={p.running}
+            value={minutesInput}
+            onChange={(e) => {
+              setMinutesInput(e.target.value);
+              const mins = parseInt(e.target.value, 10);
+              if (!isNaN(mins) && mins > 0) p.setDuration(mins * 60);
+            }}
+            className="w-20 px-2 py-1.5 rounded-lg border border-border bg-background text-center focus:outline-none focus:ring-2 focus:ring-ring disabled:opacity-50 text-sm"
+          />
+          <span className="text-xs text-muted-foreground">мин</span>
+        </div>
+
         <div className="flex gap-2">
           <button onClick={() => p.setRunning(!p.running)} className="flex-1 inline-flex items-center justify-center gap-2 px-4 min-h-11 rounded-lg bg-primary text-primary-foreground hover:opacity-90">
             {p.running ? <Pause size={16}/> : <Play size={16}/>} {p.running ? "Пауза" : "Старт"}
           </button>
-          <button onClick={p.reset} className="inline-flex items-center justify-center gap-2 px-4 min-h-11 min-w-11 rounded-lg bg-secondary hover:bg-muted">
+          <button onClick={() => { p.reset(); setMinutesInput(String(Math.floor(p.duration / 60))); }} className="inline-flex items-center justify-center gap-2 px-4 min-h-11 min-w-11 rounded-lg bg-secondary hover:bg-muted">
             <RotateCcw size={16}/> Сброс
           </button>
         </div>
@@ -68,14 +88,6 @@ function SessionPanel(p: Props) {
         >
           <Bell size={16} className="text-primary" /> Тест звука
         </button>
-        <div className="flex gap-2 flex-wrap">
-          {[20, 30, 45, 60, 90].map((m) => (
-            <button key={m} onClick={() => p.setDuration(m*60)}
-              className={`px-3 min-h-11 min-w-11 text-xs rounded-md border ${p.duration===m*60 ? "bg-primary text-primary-foreground border-primary" : "border-border hover:bg-secondary"}`}>
-              {m} мин
-            </button>
-          ))}
-        </div>
       </section>
 
       <section className="md:col-span-2 bg-card rounded-2xl border border-border p-5 space-y-4">
