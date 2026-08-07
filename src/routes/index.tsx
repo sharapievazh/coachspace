@@ -69,6 +69,30 @@ const TIMER_STORAGE_KEY = "coach-space-session-timer";
 function CoachSpace() {
   const [tab, setTab] = useState<TabId>("session");
 
+  // Preload all lazy tab chunks after first render so tapping a tab never
+  // blocks the JS thread with a cold dynamic import parse.
+  useEffect(() => {
+    const t = setTimeout(() => {
+      import("@/components/tabs/session");
+      import("@/components/tabs/grow");
+      import("@/components/tabs/swot");
+      import("@/components/tabs/nlu");
+      import("@/components/tabs/sos");
+      import("@/components/tabs/rapport");
+      import("@/components/tabs/smart");
+      import("@/components/tabs/eisenhower");
+      import("@/components/tabs/burger");
+      import("@/components/tabs/erickson");
+      import("@/components/tabs/rules");
+      import("@/components/tabs/balance");
+      import("@/components/tabs/values");
+      import("@/components/tabs/supervision");
+      import("@/components/tabs/feedback");
+      import("@/components/tabs/competencies");
+    }, 800);
+    return () => clearTimeout(t);
+  }, []);
+
   // Session timer state (lives in parent so it persists between tabs)
   const [duration, setDuration] = useState(20 * 60);
   const [remaining, setRemaining] = useState(20 * 60);
@@ -78,6 +102,7 @@ function CoachSpace() {
   // don't re-render this huge parent tree on every character — critical for
   // input responsiveness inside the iOS/Xcode WebView.
   const clientNameRef = useRef("");
+  const coachNameRef = useRef("");
   const topicRef = useRef("");
   const notesRef = useRef("");
   const [balanceScores, setBalanceScores] = useState<Record<number, number>>(() =>
@@ -448,6 +473,7 @@ function CoachSpace() {
     } catch {}
     const txt = `Coach Space — Протокол сессии
 Дата: ${new Date().toLocaleString()}
+Коуч: ${coachNameRef.current || "—"}
 Клиент: ${clientNameRef.current || "—"}
 Запрос: ${topicRef.current || "—"}
 Остаток времени: ${mmss}
@@ -469,7 +495,7 @@ ${notesRef.current || "—"}
 
   return (
     <div className="min-h-screen bg-background text-foreground">
-      <header className="border-b border-border bg-card sticky top-0 z-20">
+      <header className="border-b border-border bg-card">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-[env(safe-area-inset-top)] pb-4 flex items-center justify-between gap-4">
           <div className="flex items-center gap-3 min-w-0">
             <div className="w-11 h-11 rounded-xl bg-primary text-primary-foreground grid place-items-center font-bold shrink-0">CS</div>
@@ -540,7 +566,7 @@ ${notesRef.current || "—"}
 
         <main className="flex-1 min-w-0 px-4 sm:px-6 md:px-0 py-6">
           <Suspense fallback={<div className="py-10 text-center text-sm text-muted-foreground">Загрузка…</div>}>
-            {tab === "session" && <SessionPanelLazy duration={duration} setDuration={changeDuration} remaining={remaining} running={running} setRunning={handleSetRunning} reset={resetTimer} mmss={mmss} clientNameRef={clientNameRef} topicRef={topicRef} notesRef={notesRef} exportSession={exportSession} testSound={testSound} />}
+            {tab === "session" && <SessionPanelLazy duration={duration} setDuration={changeDuration} remaining={remaining} running={running} setRunning={handleSetRunning} reset={resetTimer} mmss={mmss} clientNameRef={clientNameRef} coachNameRef={coachNameRef} topicRef={topicRef} notesRef={notesRef} exportSession={exportSession} testSound={testSound} />}
             {tab === "grow" && <GrowLazy />}
             {tab === "swot" && <SwotLazy />}
             {tab === "nlu" && <NluLazy />}

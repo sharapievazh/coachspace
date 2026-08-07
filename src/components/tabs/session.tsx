@@ -16,6 +16,7 @@ type Props = {
   reset: () => void;
   mmss: string;
   clientNameRef: MutableRefObject<string>;
+  coachNameRef?: MutableRefObject<string>;
   topicRef: MutableRefObject<string>;
   notesRef: MutableRefObject<string>;
   exportSession: () => void;
@@ -571,6 +572,10 @@ function SessionPanel(p: Props) {
           <input defaultValue={p.clientNameRef.current}
             onInput={(e) => { p.clientNameRef.current = e.currentTarget.value; }}
             placeholder="Клиент" autoComplete="off" autoCorrect="off" autoCapitalize="words" spellCheck={false}
+            className="w-28 px-2 py-1 rounded-md border border-border bg-background text-xs focus:outline-none focus:ring-1 focus:ring-ring" />
+          <input defaultValue={p.coachNameRef?.current ?? ""}
+            onInput={(e) => { if (p.coachNameRef) p.coachNameRef.current = e.currentTarget.value; }}
+            placeholder="Коуч" autoComplete="off" autoCorrect="off" autoCapitalize="words" spellCheck={false}
             className="w-28 px-2 py-1 rounded-md border border-border bg-background text-xs focus:outline-none focus:ring-1 focus:ring-ring" />
           <input defaultValue={p.topicRef.current}
             onInput={(e) => { p.topicRef.current = e.currentTarget.value; }}
