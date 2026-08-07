@@ -25,12 +25,13 @@ const ValuesLazy = lazy(() => import("@/components/tabs/values"));
 const SupervisionLazy = lazy(() => import("@/components/tabs/supervision"));
 const FeedbackLazy = lazy(() => import("@/components/tabs/feedback"));
 const CompetenciesLazy = lazy(() => import("@/components/tabs/competencies"));
+const TeamCoachingLazy = lazy(() => import("@/components/tabs/team-coaching"));
 
 export const Route = createFileRoute("/")({
   component: CoachSpace,
 });
 
-type TabId = "session" | "erickson" | "grow" | "swot" | "rapport" | "smart" | "eisenhower" | "burger" | "rules" | "nlu" | "sos" | "balance" | "supervision" | "values" | "feedback" | "competencies";
+type TabId = "session" | "erickson" | "grow" | "swot" | "rapport" | "smart" | "eisenhower" | "burger" | "rules" | "nlu" | "sos" | "balance" | "supervision" | "values" | "feedback" | "competencies" | "team-coaching";
 
 const SMART_STORAGE = "coach-space-smart-goal";
 type SmartData = { s: string; m: string; a: string; r: string; t: string; positive: boolean; balanced: boolean };
@@ -48,6 +49,7 @@ const buildSmartParagraph = (d: SmartData) => {
 const TABS: { id: TabId; label: string; icon: any }[] = [
   { id: "competencies", label: "16 Компетенций", icon: GraduationCap },
   { id: "session", label: "Вести Сессию", icon: Sparkles },
+  { id: "team-coaching", label: "Командный коучинг", icon: Users },
   { id: "erickson", label: "Звезда Эриксона", icon: Star },
   { id: "rapport", label: "Раппорт", icon: Heart },
   { id: "grow", label: "GROW", icon: Target },
@@ -605,6 +607,7 @@ ${notesRef.current || "—"}
             {tab === "supervision" && <SupervisionLazy />}
             {tab === "feedback" && <FeedbackLazy />}
             {tab === "competencies" && <CompetenciesLazy />}
+            {tab === "team-coaching" && <TeamCoachingLazy />}
           </Suspense>
         </main>
 

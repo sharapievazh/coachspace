@@ -504,8 +504,73 @@ function GrowTool({ onExport }: { onExport: (text: string) => void }) {
   );
 }
 
+// ─── 6 шляп Де Боно ─────────────────────────────────────────────────────────
+const SIX_HATS = [
+  { color: "Белая",   emoji: "⬜", hex: "#94a3b8", focus: "Факты и информация",   desc: "Только объективные данные. Что мы знаем? Какие факты есть? Чего не хватает?",      example: "Какие данные у нас есть по этой теме?" },
+  { color: "Красная", emoji: "🟥", hex: "#ef4444", focus: "Эмоции и интуиция",    desc: "Чувства без объяснений. Какова ваша реакция? Что чувствуете прямо сейчас?",       example: "Какое у вас ощущение от этой идеи?" },
+  { color: "Чёрная",  emoji: "⬛", hex: "#374151", focus: "Риски и критика",       desc: "Осторожность. Что может пойти не так? Какие риски и слабые стороны?",             example: "Какие препятствия мы видим?" },
+  { color: "Жёлтая",  emoji: "🟨", hex: "#eab308", focus: "Плюсы и возможности",  desc: "Оптимизм. Что хорошего в этой идее? Какие выгоды и преимущества?",               example: "Почему это может сработать?" },
+  { color: "Зелёная", emoji: "🟩", hex: "#10b981", focus: "Творчество и идеи",    desc: "Генерация. Новые идеи, альтернативы, нестандартные решения. Без оценки!",        example: "Какие ещё варианты существуют?" },
+  { color: "Синяя",   emoji: "🟦", hex: "#3b82f6", focus: "Процесс и управление", desc: "Организация мышления. Что мы делаем сейчас? Какой следующий шаг? Итоги.",        example: "Как мы организуем дальнейшую работу?" },
+];
+
+function SixHatsTool({ onExport }: { onExport: (text: string) => void }) {
+  const [answers, setAnswers] = useState<Record<string, string>>(() =>
+    Object.fromEntries(SIX_HATS.map((h) => [h.color, ""]))
+  );
+  const [active, setActive] = useState<string | null>(null);
+
+  const exportText = () => {
+    const filled = SIX_HATS.filter((h) => answers[h.color].trim());
+    if (!filled.length) return;
+    const lines = ["\n── 6 шляп Де Боно ──", ...filled.map((h) => `\n${h.emoji} ${h.color} (${h.focus}):\n${answers[h.color].trim()}`), ""];
+    onExport(lines.join("\n"));
+  };
+
+  return (
+    <div className="space-y-3">
+      <p className="text-xs text-muted-foreground">Нажми на шляпу — раскроется фокус и поле для ответов команды</p>
+      <div className="grid sm:grid-cols-2 gap-3">
+        {SIX_HATS.map((hat) => {
+          const isOpen = active === hat.color;
+          return (
+            <div key={hat.color} className="rounded-xl border border-border overflow-hidden">
+              <button onClick={() => setActive(isOpen ? null : hat.color)}
+                className="w-full flex items-center gap-3 px-4 py-3 text-left transition-colors hover:bg-secondary/40">
+                <span className="text-xl shrink-0">{hat.emoji}</span>
+                <div className="flex-1 min-w-0">
+                  <div className="text-sm font-bold" style={{ color: hat.hex }}>{hat.color} шляпа</div>
+                  <div className="text-xs text-muted-foreground truncate">{hat.focus}</div>
+                </div>
+                {isOpen ? <ChevronUp size={14} className="text-muted-foreground shrink-0"/> : <ChevronDown size={14} className="text-muted-foreground shrink-0"/>}
+              </button>
+              {isOpen && (
+                <div className="px-4 pb-4 space-y-2 border-t border-border">
+                  <p className="text-xs text-muted-foreground pt-3 leading-relaxed">{hat.desc}</p>
+                  <p className="text-xs italic" style={{ color: hat.hex }}>💬 {hat.example}</p>
+                  <textarea
+                    value={answers[hat.color]}
+                    onChange={(e) => setAnswers((p) => ({ ...p, [hat.color]: e.target.value }))}
+                    rows={3} placeholder="Ответы и идеи команды…"
+                    autoComplete="off" autoCorrect="off" spellCheck={false}
+                    className="w-full px-3 py-2 rounded-lg border border-border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-ring resize-none" />
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
+      <div className="flex justify-end">
+        <button onClick={exportText} className="inline-flex items-center gap-1 text-xs px-3 py-1.5 rounded-lg border border-border hover:bg-secondary">
+          <ArrowRight size={12}/> В заметки
+        </button>
+      </div>
+    </div>
+  );
+}
+
 // ─── Главный компонент ────────────────────────────────────────────────────────
-type Tab = "notes" | "scale" | "balance" | "dilts" | "matrix" | "mindmap" | "grow";
+type Tab = "notes" | "scale" | "balance" | "dilts" | "matrix" | "mindmap" | "grow" | "hats";
 
 const TABS: { id: Tab; label: string; icon: React.ReactNode }[] = [
   { id: "notes",   label: "Заметки",    icon: <FileText size={13}/> },
@@ -515,6 +580,7 @@ const TABS: { id: Tab; label: string; icon: React.ReactNode }[] = [
   { id: "matrix",  label: "Матрица",    icon: <LayoutGrid size={13}/> },
   { id: "mindmap", label: "Майнд-мап",  icon: <GitBranch size={13}/> },
   { id: "grow",    label: "GROW",       icon: <Target size={13}/> },
+  { id: "hats",    label: "6 шляп",     icon: <span className="text-[11px]">🎩</span> },
 ];
 
 function SessionPanel(p: Props) {
@@ -631,6 +697,7 @@ function SessionPanel(p: Props) {
           <div className={activeTab === "matrix"  ? "" : "hidden"}><EisenhowerTool onExport={appendToNotes} /></div>
           <div className={activeTab === "mindmap" ? "" : "hidden"}><MindMapTool    onExport={appendToNotes} /></div>
           <div className={activeTab === "grow"    ? "" : "hidden"}><GrowTool       onExport={appendToNotes} /></div>
+          <div className={activeTab === "hats"    ? "" : "hidden"}><SixHatsTool    onExport={appendToNotes} /></div>
         </div>
       </section>
     </div>
