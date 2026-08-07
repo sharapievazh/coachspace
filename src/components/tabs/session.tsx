@@ -293,42 +293,44 @@ function EisenhowerTool({ onExport }: { onExport: (text: string) => void }) {
 type MindNode = { id: number; text: string; children: number[]; depth: number; color: string };
 type MindView = "list" | "radial";
 
-const RADIAL_CX = 270;
-const RADIAL_CY = 195;
-const RADIAL_R = [0, 145, 238, 310];
+const MAP_W = 580;
+const MAP_H = 420;
+const CX = 290;
+const CY = 210;
+const RING_R = [0, 160, 265] as const;
 
-function computeRadialLayout(nodes: MindNode[]) {
-  const pos = new Map<number, { x: number; y: number; angle: number }>();
-  pos.set(0, { x: RADIAL_CX, y: RADIAL_CY, angle: 0 });
-  const layout = (parentId: number, centerAngle: number, spread: number) => {
+function buildRadialLayout(nodes: MindNode[]): Map<number, { x: number; y: number }> {
+  const pos = new Map<number, { x: number; y: number }>();
+  pos.set(0, { x: CX, y: CY });
+
+  const placeChildren = (parentId: number, parentAngle: number, spread: number) => {
     const parent = nodes.find((n) => n.id === parentId);
-    if (!parent || parent.children.length === 0) return;
+    if (!parent?.children.length) return;
     const n = parent.children.length;
-    const step = spread / Math.max(n, 1);
-    const start = centerAngle - spread / 2 + step / 2;
     parent.children.forEach((childId, i) => {
-      const child = nodes.find((n) => n.id === childId);
+      const child = nodes.find((nd) => nd.id === childId);
       if (!child) return;
-      const angle = start + i * step;
-      const r = RADIAL_R[Math.min(child.depth, RADIAL_R.length - 1)];
-      const x = RADIAL_CX + r * Math.cos((angle * Math.PI) / 180);
-      const y = RADIAL_CY + r * Math.sin((angle * Math.PI) / 180);
-      pos.set(childId, { x, y, angle });
-      layout(childId, angle, Math.min(step * 0.75, 90));
+      // Root children: evenly around full circle from top; sub-children: fan in parent direction
+      const angleDeg =
+        parent.depth === 0
+          ? -90 + (360 / n) * i
+          : parentAngle - spread / 2 + (n === 1 ? spread / 2 : (spread / (n - 1)) * i);
+      const r = RING_R[Math.min(child.depth, RING_R.length - 1)];
+      const rad = (angleDeg * Math.PI) / 180;
+      pos.set(childId, { x: CX + r * Math.cos(rad), y: CY + r * Math.sin(rad) });
+      placeChildren(childId, angleDeg, Math.min(80, 35 + n * 15));
     });
   };
-  layout(0, 0, 360);
+
+  placeChildren(0, 0, 360);
   return pos;
 }
-
-const truncLabel = (text: string, max = 13) =>
-  text.length > max ? text.slice(0, max - 1) + "…" : text;
 
 function MindMapTool({ onExport }: { onExport: (text: string) => void }) {
   const [nodes, setNodes] = useState<MindNode[]>([
     { id: 0, text: "Главная тема", children: [], depth: 0, color: depthColor(0) },
   ]);
-  const [editing, setEditing] = useState<number | null>(null);
+  const [editingId, setEditingId] = useState<number | null>(null);
   const [editText, setEditText] = useState("");
   const [viewMode, setViewMode] = useState<MindView>("list");
   const [selectedId, setSelectedId] = useState<number | null>(null);
@@ -341,17 +343,20 @@ function MindMapTool({ onExport }: { onExport: (text: string) => void }) {
       const updated = prev.map((n) =>
         n.id === parentId ? { ...n, children: [...n.children, id] } : n
       );
-      return [...updated, { id, text: "Новая ветка", children: [], depth: childDepth, color: depthColor(childDepth) }];
+      return [
+        ...updated,
+        { id, text: "Новая ветка", children: [], depth: childDepth, color: depthColor(childDepth) },
+      ];
     });
-    setEditing(id);
-    setEditText("Новая ветка");
+    setSelectedId(null);
+    setTimeout(() => { setEditingId(id); setEditText("Новая ветка"); }, 0);
   };
 
   const commitEdit = () => {
-    if (editing === null) return;
+    if (editingId === null) return;
     const t = editText.trim() || "…";
-    setNodes((prev) => prev.map((n) => (n.id === editing ? { ...n, text: t } : n)));
-    setEditing(null);
+    setNodes((prev) => prev.map((n) => (n.id === editingId ? { ...n, text: t } : n)));
+    setEditingId(null);
   };
 
   const removeNode = (id: number) => {
@@ -363,23 +368,22 @@ function MindMapTool({ onExport }: { onExport: (text: string) => void }) {
     };
     collect(id);
     setNodes((prev) =>
-      prev.filter((n) => !toRemove.has(n.id)).map((n) => ({
-        ...n,
-        children: n.children.filter((c) => !toRemove.has(c)),
-      }))
+      prev
+        .filter((n) => !toRemove.has(n.id))
+        .map((n) => ({ ...n, children: n.children.filter((c) => !toRemove.has(c)) }))
     );
     setSelectedId(null);
   };
 
   const exportText = () => {
-    const lines: string[] = ["\n── Майнд-мап ──"];
-    const renderLines = (id: number, depth: number) => {
+    const lines: string[] = ["\n── Mind Map ──"];
+    const walk = (id: number, depth: number) => {
       const node = nodes.find((n) => n.id === id);
       if (!node) return;
       lines.push("  ".repeat(depth) + (depth === 0 ? node.text : `• ${node.text}`));
-      node.children.forEach((c) => renderLines(c, depth + 1));
+      node.children.forEach((c) => walk(c, depth + 1));
     };
-    renderLines(0, 0);
+    walk(0, 0);
     lines.push("");
     onExport(lines.join("\n"));
   };
@@ -393,26 +397,38 @@ function MindMapTool({ onExport }: { onExport: (text: string) => void }) {
     return (
       <div key={id} className={node.depth > 0 ? "ml-5 pl-3 border-l-2" : ""} style={node.depth > 0 ? { borderColor: c + "66" } : {}}>
         <div className="group flex items-center gap-1.5 py-0.5">
-          {editing === id ? (
-            <input autoFocus value={editText} onChange={(e) => setEditText(e.target.value)}
-              onBlur={commitEdit} onKeyDown={(e) => e.key === "Enter" && commitEdit()}
+          {editingId === id ? (
+            <input
+              autoFocus
+              value={editText}
+              onChange={(e) => setEditText(e.target.value)}
+              onBlur={commitEdit}
+              onKeyDown={(e) => e.key === "Enter" && commitEdit()}
               className="px-2 py-0.5 rounded border text-sm focus:outline-none w-full max-w-xs bg-background"
-              style={{ borderColor: c }} />
+              style={{ borderColor: c }}
+            />
           ) : (
-            <span onDoubleClick={() => { setEditing(id); setEditText(node.text); }}
+            <span
+              onDoubleClick={() => { setEditingId(id); setEditText(node.text); }}
               className="px-2.5 py-1 rounded-lg text-sm cursor-pointer select-none transition-colors font-medium"
-              style={{ backgroundColor: c + (isRoot ? "33" : "22"), color: c, border: `1px solid ${c}55` }}>
+              style={{ backgroundColor: c + (isRoot ? "33" : "22"), color: c, border: `1px solid ${c}55` }}
+            >
               {node.text}
             </span>
           )}
-          <button onClick={() => addChild(id, node.depth)} title="Добавить ветку"
+          <button
+            onClick={() => addChild(id, node.depth)}
+            title="Добавить ветку"
             className="opacity-0 group-hover:opacity-100 transition-opacity w-5 h-5 rounded flex items-center justify-center text-white text-xs"
-            style={{ backgroundColor: c }}>
+            style={{ backgroundColor: c }}
+          >
             <Plus size={11} />
           </button>
           {!isRoot && (
-            <button onClick={() => removeNode(id)}
-              className="opacity-0 group-hover:opacity-100 transition-opacity w-5 h-5 rounded flex items-center justify-center hover:bg-destructive/20 text-muted-foreground hover:text-destructive">
+            <button
+              onClick={() => removeNode(id)}
+              className="opacity-0 group-hover:opacity-100 transition-opacity w-5 h-5 rounded flex items-center justify-center hover:bg-destructive/20 text-muted-foreground hover:text-destructive"
+            >
               <X size={11} />
             </button>
           )}
@@ -422,146 +438,215 @@ function MindMapTool({ onExport }: { onExport: (text: string) => void }) {
     );
   };
 
-  // ── Radial view ──────────────────────────────────────────
-  const radialPos = useMemo(() => computeRadialLayout(nodes), [nodes]);
+  // ── MindMap (radial) view — div-based so text is fully editable ──────────
+  const radialPos = useMemo(() => buildRadialLayout(nodes), [nodes]);
 
-  const renderRadial = () => {
-    const VW = 540;
-    const VH = 390;
-    const conns: React.ReactNode[] = [];
+  const renderMindMap = () => {
+    const connections: React.ReactNode[] = [];
     const nodeEls: React.ReactNode[] = [];
 
-    // Connections
     nodes.forEach((node) => {
+      const from = radialPos.get(node.id);
+      if (!from) return;
       node.children.forEach((childId) => {
-        const from = radialPos.get(node.id);
         const to = radialPos.get(childId);
         const child = nodes.find((n) => n.id === childId);
-        if (!from || !to || !child) return;
+        if (!to || !child) return;
         const dx = to.x - from.x;
         const dy = to.y - from.y;
         const dist = Math.sqrt(dx * dx + dy * dy);
         const ux = dx / dist;
         const uy = dy / dist;
-        const t = dist * 0.38;
-        const d = `M ${from.x} ${from.y} C ${from.x + ux * t} ${from.y + uy * t} ${to.x - ux * t} ${to.y - uy * t} ${to.x} ${to.y}`;
-        conns.push(
-          <path key={`c-${node.id}-${childId}`} d={d} stroke={child.color}
-            strokeWidth={child.depth === 1 ? 2.5 : 1.8} strokeOpacity="0.65" fill="none" />
+        const t = dist * 0.42;
+        connections.push(
+          <path
+            key={`conn-${node.id}-${childId}`}
+            d={`M ${from.x.toFixed(1)} ${from.y.toFixed(1)} C ${(from.x + ux * t).toFixed(1)} ${(from.y + uy * t).toFixed(1)} ${(to.x - ux * t).toFixed(1)} ${(to.y - uy * t).toFixed(1)} ${to.x.toFixed(1)} ${to.y.toFixed(1)}`}
+            stroke={child.color}
+            strokeWidth={child.depth === 1 ? 2.2 : 1.6}
+            strokeOpacity="0.5"
+            fill="none"
+            strokeLinecap="round"
+          />
         );
       });
     });
 
-    // Nodes
     nodes.forEach((node) => {
       const p = radialPos.get(node.id);
       if (!p) return;
       const isRoot = node.id === 0;
       const isSel = selectedId === node.id;
-      const w = isRoot ? 128 : node.depth === 1 ? 106 : 90;
-      const h = isRoot ? 40 : node.depth === 1 ? 30 : 26;
-      const fs = isRoot ? 12.5 : node.depth === 1 ? 11 : 10;
-      const fw = isRoot ? "bold" : "600";
-      const label = truncLabel(node.text, isRoot ? 15 : 13);
+      const isEdit = editingId === node.id;
       const c = node.color;
 
       nodeEls.push(
-        <g key={node.id}
-          onClick={() => setSelectedId(node.id === selectedId ? null : node.id)}
-          onDoubleClick={() => { setSelectedId(null); setEditing(node.id); setEditText(node.text); }}
-          style={{ cursor: "pointer" }}>
-          <rect x={p.x - w / 2} y={p.y - h / 2} width={w} height={h} rx="9"
-            fill={c + (isRoot ? "28" : "1e")}
-            stroke={isSel ? c : c + "88"}
-            strokeWidth={isSel ? 2.5 : 1.5} />
-          <text x={p.x} y={p.y + 0.5} textAnchor="middle" dominantBaseline="middle"
-            fontSize={fs} fontWeight={fw} fill={c} style={{ userSelect: "none", pointerEvents: "none" }}>
-            {label}
-          </text>
-        </g>
+        <div
+          key={node.id}
+          style={{
+            position: "absolute",
+            left: p.x,
+            top: p.y,
+            transform: "translate(-50%, -50%)",
+            zIndex: isEdit || isSel ? 10 : 1,
+          }}
+          onClick={(e) => {
+            e.stopPropagation();
+            if (editingId !== null && editingId !== node.id) { commitEdit(); return; }
+            if (editingId === node.id) return;
+            setSelectedId(node.id === selectedId ? null : node.id);
+          }}
+          onDoubleClick={(e) => {
+            e.stopPropagation();
+            setSelectedId(null);
+            setEditingId(node.id);
+            setEditText(node.text);
+          }}
+        >
+          <div
+            style={{
+              border: `${isSel ? 2 : 1.5}px solid ${c}${isSel ? "cc" : "77"}`,
+              borderRadius: isRoot ? 14 : 9,
+              background: c + (isRoot ? "26" : "18"),
+              padding: isRoot ? "8px 18px" : "6px 12px",
+              minWidth: isRoot ? 110 : 70,
+              maxWidth: isRoot ? 175 : 145,
+              cursor: "pointer",
+            }}
+          >
+            {isEdit ? (
+              <input
+                autoFocus
+                value={editText}
+                onChange={(e) => setEditText(e.target.value)}
+                onBlur={commitEdit}
+                onKeyDown={(e) => { if (e.key === "Enter") commitEdit(); }}
+                onClick={(e) => e.stopPropagation()}
+                style={{
+                  border: "none",
+                  outline: "none",
+                  background: "transparent",
+                  color: c,
+                  fontWeight: isRoot ? "bold" : "600",
+                  fontSize: isRoot ? 13 : 11,
+                  width: "100%",
+                  fontFamily: "inherit",
+                  textAlign: "center",
+                  minWidth: 60,
+                }}
+              />
+            ) : (
+              <span
+                style={{
+                  color: c,
+                  fontWeight: isRoot ? "bold" : "600",
+                  fontSize: isRoot ? 13 : 11,
+                  display: "block",
+                  textAlign: "center",
+                  wordBreak: "break-word",
+                  lineHeight: 1.3,
+                }}
+              >
+                {node.text}
+              </span>
+            )}
+          </div>
+
+          {isSel && !isEdit && (
+            <>
+              <button
+                title="Добавить ветку"
+                onClick={(e) => { e.stopPropagation(); addChild(node.id, node.depth); }}
+                style={{
+                  position: "absolute", top: -10, right: -10,
+                  width: 22, height: 22, borderRadius: 11,
+                  background: c, border: "2px solid white",
+                  color: "white", cursor: "pointer",
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                  fontSize: 16, fontWeight: "bold",
+                  boxShadow: "0 1px 5px rgba(0,0,0,0.35)", zIndex: 20,
+                }}
+              >+</button>
+              {!isRoot && (
+                <button
+                  title="Удалить"
+                  onClick={(e) => { e.stopPropagation(); removeNode(node.id); }}
+                  style={{
+                    position: "absolute", top: -10, left: -10,
+                    width: 22, height: 22, borderRadius: 11,
+                    background: "#ef4444", border: "2px solid white",
+                    color: "white", cursor: "pointer",
+                    display: "flex", alignItems: "center", justifyContent: "center",
+                    fontSize: 16, fontWeight: "bold",
+                    boxShadow: "0 1px 5px rgba(0,0,0,0.35)", zIndex: 20,
+                  }}
+                >×</button>
+              )}
+            </>
+          )}
+        </div>
       );
     });
 
     return (
-      <svg viewBox={`0 0 ${VW} ${VH}`} className="w-full" style={{ maxHeight: 380 }}>
-        {conns}
+      <div
+        style={{ position: "relative", width: MAP_W, height: MAP_H }}
+        onClick={() => { if (selectedId !== null) setSelectedId(null); if (editingId !== null) commitEdit(); }}
+      >
+        <svg
+          style={{ position: "absolute", inset: 0, width: "100%", height: "100%", pointerEvents: "none" }}
+          viewBox={`0 0 ${MAP_W} ${MAP_H}`}
+        >
+          {connections}
+        </svg>
         {nodeEls}
-      </svg>
+      </div>
     );
   };
 
-  const selectedNode = selectedId !== null ? nodes.find((n) => n.id === selectedId) : null;
-
   return (
     <div className="space-y-3">
-      {/* View toggle */}
       <div className="flex items-center justify-between gap-2">
         <p className="text-xs text-muted-foreground">
           {viewMode === "list"
-            ? "Двойной клик — редактировать · «+» — добавить ветку"
-            : "Тап — выбрать · двойной — редактировать"}
+            ? "2× клик — изменить · «+» при наведении — добавить"
+            : "Клик — выбрать · 2× — изменить текст · «+» — ветка"}
         </p>
         <div className="flex gap-0.5 p-0.5 rounded-lg bg-secondary/70 shrink-0">
-          <button onClick={() => setViewMode("list")}
-            className={`px-2.5 py-1 rounded-md text-xs transition-colors ${viewMode === "list" ? "bg-card shadow text-foreground" : "text-muted-foreground"}`}>
+          <button
+            onClick={() => setViewMode("list")}
+            className={`px-2.5 py-1 rounded-md text-xs transition-colors ${viewMode === "list" ? "bg-card shadow text-foreground" : "text-muted-foreground"}`}
+          >
             Список
           </button>
-          <button onClick={() => setViewMode("radial")}
-            className={`px-2.5 py-1 rounded-md text-xs transition-colors ${viewMode === "radial" ? "bg-card shadow text-foreground" : "text-muted-foreground"}`}>
-            🌸 Ромашка
+          <button
+            onClick={() => setViewMode("radial")}
+            className={`px-2.5 py-1 rounded-md text-xs transition-colors ${viewMode === "radial" ? "bg-card shadow text-foreground" : "text-muted-foreground"}`}
+          >
+            🌸 MindMap
           </button>
         </div>
       </div>
 
-      {/* List view */}
       {viewMode === "list" && (
         <div className="rounded-xl border border-border bg-secondary/30 p-4 min-h-[200px] overflow-auto">
           {renderListNode(0)}
         </div>
       )}
 
-      {/* Radial view */}
       {viewMode === "radial" && (
-        <>
-          {editing !== null && (
-            <div className="flex gap-2 items-center px-1">
-              <input autoFocus value={editText} onChange={(e) => setEditText(e.target.value)}
-                onBlur={commitEdit} onKeyDown={(e) => e.key === "Enter" && commitEdit()}
-                className="flex-1 px-3 py-1.5 rounded-lg border border-border bg-background text-sm focus:outline-none focus:ring-1 focus:ring-ring" />
-              <button onClick={commitEdit}
-                className="px-3 py-1.5 rounded-lg bg-primary text-primary-foreground text-xs font-medium">ОК</button>
-            </div>
-          )}
-          <div className="rounded-xl border border-border bg-secondary/20 overflow-auto">
-            {renderRadial()}
+        <div className="rounded-xl border border-border bg-secondary/20 overflow-auto">
+          <div style={{ minWidth: MAP_W }}>
+            {renderMindMap()}
           </div>
-          {/* Action bar */}
-          {selectedNode && (
-            <div className="flex gap-2 items-center p-2.5 rounded-xl border border-border bg-card">
-              <span className="text-xs font-semibold flex-1 truncate min-w-0" style={{ color: selectedNode.color }}>
-                {selectedNode.text}
-              </span>
-              <button onClick={() => { setEditing(selectedNode.id); setEditText(selectedNode.text); setSelectedId(null); }}
-                className="text-xs px-2.5 py-1.5 rounded-lg border border-border hover:bg-secondary whitespace-nowrap">
-                Изменить
-              </button>
-              <button onClick={() => { addChild(selectedNode.id, selectedNode.depth); setSelectedId(null); }}
-                className="inline-flex items-center gap-1 text-xs px-2.5 py-1.5 rounded-lg border border-border hover:bg-secondary whitespace-nowrap">
-                <Plus size={11} /> Ветка
-              </button>
-              {selectedNode.id !== 0 && (
-                <button onClick={() => removeNode(selectedNode.id)}
-                  className="inline-flex items-center gap-1 text-xs px-2.5 py-1.5 rounded-lg border border-destructive/40 text-destructive hover:bg-destructive/10 whitespace-nowrap">
-                  <X size={11} /> Удалить
-                </button>
-              )}
-            </div>
-          )}
-        </>
+        </div>
       )}
 
       <div className="flex justify-end">
-        <button onClick={exportText} className="inline-flex items-center gap-1 text-xs px-3 py-1.5 rounded-lg border border-border hover:bg-secondary">
+        <button
+          onClick={exportText}
+          className="inline-flex items-center gap-1 text-xs px-3 py-1.5 rounded-lg border border-border hover:bg-secondary"
+        >
           <ArrowRight size={12} /> В заметки
         </button>
       </div>
