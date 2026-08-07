@@ -88,11 +88,11 @@ export default function Onboarding({ onFinish }: { onFinish: () => void }) {
             {[
               { icon: "🎯", text: "Инструменты GROW, SMART, SWOT, 6 шляп и другие" },
               { icon: "⏱", text: "Умный таймер и блокнот прямо во время сессии" },
-              { icon: "🌸", text: "Майнд-мэп, Колесо баланса, Пирамида Дилтса" },
+              { icon: "🌸", text: "Mind Map, Колесо баланса, Пирамида Дилтса" },
               { icon: "📋", text: "Маркер Супервизии для анализа своей работы" },
             ].map((f) => (
-              <div key={f.icon} className="flex items-start gap-3">
-                <span className="text-xl shrink-0 mt-0.5">{f.icon}</span>
+              <div key={f.icon} className="flex items-center gap-3">
+                <span className="text-xl shrink-0 w-7 text-center">{f.icon}</span>
                 <span className="text-sm text-foreground/85 leading-snug">{f.text}</span>
               </div>
             ))}

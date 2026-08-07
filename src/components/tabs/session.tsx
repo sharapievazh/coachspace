@@ -866,7 +866,7 @@ const TABS: { id: Tab; label: string; icon: React.ReactNode }[] = [
   { id: "balance", label: "Колесо",     icon: <CircleDot size={13}/> },
   { id: "dilts",   label: "Пирамида",   icon: <Triangle size={13}/> },
   { id: "matrix",  label: "Матрица",    icon: <LayoutGrid size={13}/> },
-  { id: "mindmap", label: "Майнд-мап",  icon: <GitBranch size={13}/> },
+  { id: "mindmap", label: "Mind Map",   icon: <GitBranch size={13}/> },
   { id: "grow",    label: "GROW",       icon: <Target size={13}/> },
   { id: "hats",    label: "6 шляп",     icon: <span className="text-[11px]">🎩</span> },
 ];
