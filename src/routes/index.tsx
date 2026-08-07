@@ -117,6 +117,7 @@ function CoachSpace() {
   const stopSilentKeepAliveRef = useRef<(() => void) | null>(null);
   const silentStopTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [timeUp, setTimeUp] = useState(false);
+  const [exportText, setExportText] = useState<string | null>(null);
 
   const getWorker = () => {
     if (typeof window === "undefined") return null;
@@ -484,12 +485,34 @@ ${smartBlock}
 Заметки коуча:
 ${notesRef.current || "—"}
 `;
+    // iOS/Capacitor: show modal so user can copy or share
+    const isIOS = /iP(hone|ad|od)/.test(navigator.userAgent) ||
+      (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1) ||
+      window.location.protocol === "capacitor:";
+
+    if (isIOS) {
+      // Try native share first
+      if (navigator.share) {
+        const file = new File([txt], `session-${clientNameRef.current || "client"}.txt`, { type: "text/plain" });
+        const nav = navigator as Navigator & { canShare?: (d: ShareData) => boolean };
+        if (nav.canShare?.({ files: [file] })) {
+          navigator.share({ files: [file], title: "Протокол сессии" }).catch(() => setExportText(txt));
+          return;
+        }
+      }
+      setExportText(txt);
+      return;
+    }
+
+    // Desktop: trigger file download
     const blob = new Blob([txt], { type: "text/plain;charset=utf-8" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
     a.download = `session-${clientNameRef.current || "client"}-${Date.now()}.txt`;
+    document.body.appendChild(a);
     a.click();
+    document.body.removeChild(a);
     URL.revokeObjectURL(url);
   }, [mmss, balanceScores]);
 
@@ -587,6 +610,34 @@ ${notesRef.current || "—"}
 
 
       </div>
+
+      {/* Export modal for iOS */}
+      {exportText && (
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4" style={{ background: "rgba(0,0,0,0.5)" }} onClick={() => setExportText(null)}>
+          <div className="w-full max-w-lg rounded-2xl bg-card border border-border shadow-xl overflow-hidden" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between px-5 py-4 border-b border-border">
+              <span className="font-semibold text-foreground">Протокол сессии</span>
+              <button onClick={() => setExportText(null)} className="w-8 h-8 rounded-full bg-secondary flex items-center justify-center text-muted-foreground hover:text-foreground">✕</button>
+            </div>
+            <textarea readOnly value={exportText} rows={16}
+              className="w-full px-5 py-4 bg-background text-xs font-mono text-foreground resize-none focus:outline-none" />
+            <div className="flex gap-2 px-5 py-4 border-t border-border">
+              <button
+                onClick={() => { navigator.clipboard?.writeText(exportText); }}
+                className="flex-1 px-4 py-2.5 rounded-xl bg-secondary hover:bg-muted text-sm font-medium">
+                Скопировать
+              </button>
+              {navigator.share && (
+                <button
+                  onClick={() => navigator.share({ title: "Протокол сессии", text: exportText }).catch(() => {})}
+                  className="flex-1 px-4 py-2.5 rounded-xl bg-primary text-primary-foreground hover:opacity-90 text-sm font-medium">
+                  Поделиться
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
 
       {timeUp && (
         <div className="mt-4 rounded-2xl border border-primary/40 bg-card p-4 sm:p-5 shadow-lg">
