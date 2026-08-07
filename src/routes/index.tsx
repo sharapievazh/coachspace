@@ -1,29 +1,23 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
-  Play, Pause, Target, Heart, Triangle, Layers, Sandwich,
-  MessageSquare, Timer,
+  Play, Pause, Target, Heart, Triangle, Layers,
+  Timer,
   Gem, Users, GraduationCap, Star, CheckCircle2,
-  AlertTriangle, LayoutGrid, Award, Sparkles,
+  AlertTriangle, Award, Sparkles,
 } from "lucide-react";
-import { RadarChartIcon } from "@/components/coach/CoachVisuals";
 import { BALANCE_AREAS } from "@/components/tabs/_shared";
 
 const SessionPanelLazy = lazy(() => import("@/components/tabs/session"));
 const GrowLazy = lazy(() => import("@/components/tabs/grow"));
 const SwotLazy = lazy(() => import("@/components/tabs/swot"));
-const NluLazy = lazy(() => import("@/components/tabs/nlu"));
 const SosLazy = lazy(() => import("@/components/tabs/sos"));
 const RapportLazy = lazy(() => import("@/components/tabs/rapport"));
 const SmartGoalLazy = lazy(() => import("@/components/tabs/smart"));
-const EisenhowerLazy = lazy(() => import("@/components/tabs/eisenhower"));
-const BurgerLazy = lazy(() => import("@/components/tabs/burger"));
 const EricksonStarLazy = lazy(() => import("@/components/tabs/erickson"));
-const BurgerRulesLazy = lazy(() => import("@/components/tabs/rules"));
-const BalanceLazy = lazy(() => import("@/components/tabs/balance"));
 const ValuesLazy = lazy(() => import("@/components/tabs/values"));
 const SupervisionLazy = lazy(() => import("@/components/tabs/supervision"));
-const FeedbackLazy = lazy(() => import("@/components/tabs/feedback"));
+const OsvkLazy = lazy(() => import("@/components/tabs/osvk"));
 const CompetenciesLazy = lazy(() => import("@/components/tabs/competencies"));
 const TeamCoachingLazy = lazy(() => import("@/components/tabs/team-coaching"));
 
@@ -31,7 +25,11 @@ export const Route = createFileRoute("/")({
   component: CoachSpace,
 });
 
-type TabId = "session" | "erickson" | "grow" | "swot" | "rapport" | "smart" | "eisenhower" | "burger" | "rules" | "nlu" | "sos" | "balance" | "supervision" | "values" | "feedback" | "competencies" | "team-coaching";
+type TabId = "session" | "team-coaching" | "competencies" | "erickson" | "rapport" | "values" | "sos" | "grow" | "swot" | "smart" | "supervision" | "osvk";
+
+type NavEntry =
+  | { type: "tab"; id: TabId; label: string; icon: any }
+  | { type: "section"; label: string };
 
 const SMART_STORAGE = "coach-space-smart-goal";
 type SmartData = { s: string; m: string; a: string; r: string; t: string; positive: boolean; balanced: boolean };
@@ -46,24 +44,22 @@ const buildSmartParagraph = (d: SmartData) => {
   return parts.join(" ");
 };
 
-const TABS: { id: TabId; label: string; icon: any }[] = [
-  { id: "competencies", label: "16 Компетенций", icon: GraduationCap },
-  { id: "session", label: "Вести Сессию", icon: Sparkles },
-  { id: "team-coaching", label: "Командный коучинг", icon: Users },
-  { id: "erickson", label: "Звезда Эриксона", icon: Star },
-  { id: "rapport", label: "Раппорт", icon: Heart },
-  { id: "grow", label: "GROW", icon: Target },
-  { id: "swot", label: "SWOT", icon: Layers },
-  { id: "smart", label: "SMART-цель", icon: CheckCircle2 },
-  { id: "nlu", label: "Пирамида Дилтса", icon: Triangle },
-  { id: "balance", label: "Колесо баланса", icon: RadarChartIcon },
-  { id: "values", label: "Ценности", icon: Gem },
-  { id: "supervision", label: "Супервизия", icon: Users },
-  { id: "eisenhower", label: "Матрица Эйзенхауэра", icon: LayoutGrid },
-  { id: "burger", label: "Гамбургер ОСВК", icon: Sandwich },
-  { id: "rules", label: "8 Правил ОСВК", icon: Award },
-  { id: "sos", label: "SOS Карпман", icon: AlertTriangle },
-  { id: "feedback", label: "Обратная связь", icon: MessageSquare },
+const NAV: NavEntry[] = [
+  { type: "tab",     id: "session",       label: "Вести Сессию",       icon: Sparkles },
+  { type: "tab",     id: "team-coaching", label: "Командный коучинг",   icon: Users },
+  { type: "section", label: "ТЕОРИЯ" },
+  { type: "tab",     id: "competencies",  label: "16 Компетенций",      icon: GraduationCap },
+  { type: "tab",     id: "erickson",      label: "Звезда Эриксона",     icon: Star },
+  { type: "tab",     id: "rapport",       label: "Раппорт",             icon: Heart },
+  { type: "tab",     id: "values",        label: "Ценности",            icon: Gem },
+  { type: "tab",     id: "sos",           label: "SOS Карпман",         icon: AlertTriangle },
+  { type: "section", label: "ИНСТРУМЕНТЫ" },
+  { type: "tab",     id: "grow",          label: "GROW",                icon: Target },
+  { type: "tab",     id: "smart",         label: "SMART-цель",          icon: CheckCircle2 },
+  { type: "tab",     id: "swot",          label: "SWOT",                icon: Layers },
+  { type: "section", label: "СУПЕРВИЗИЯ И ОСВК" },
+  { type: "tab",     id: "supervision",   label: "Супервизия",          icon: Users },
+  { type: "tab",     id: "osvk",          label: "ОСВК",                icon: Award },
 ];
 
 const TIMER_STORAGE_KEY = "coach-space-session-timer";
@@ -78,19 +74,15 @@ function CoachSpace() {
       import("@/components/tabs/session");
       import("@/components/tabs/grow");
       import("@/components/tabs/swot");
-      import("@/components/tabs/nlu");
       import("@/components/tabs/sos");
       import("@/components/tabs/rapport");
       import("@/components/tabs/smart");
-      import("@/components/tabs/eisenhower");
-      import("@/components/tabs/burger");
       import("@/components/tabs/erickson");
-      import("@/components/tabs/rules");
-      import("@/components/tabs/balance");
       import("@/components/tabs/values");
       import("@/components/tabs/supervision");
-      import("@/components/tabs/feedback");
+      import("@/components/tabs/osvk");
       import("@/components/tabs/competencies");
+      import("@/components/tabs/team-coaching");
     }, 800);
     return () => clearTimeout(t);
   }, []);
@@ -542,17 +534,15 @@ ${notesRef.current || "—"}
         </div>
         {/* Mobile top-tabs (hidden on iPad+) */}
         <nav className="md:hidden max-w-7xl mx-auto px-2 sm:px-4 flex gap-1 overflow-x-auto pb-2">
-          {TABS.map((t) => {
+          {NAV.filter((e): e is Extract<NavEntry, { type: "tab" }> => e.type === "tab").map((t) => {
             const Icon = t.icon;
             const active = tab === t.id;
             return (
               <button
                 key={t.id}
                 onClick={() => setTab(t.id)}
-                  className={`flex items-center gap-2 px-3 min-h-11 text-xs rounded-lg transition-colors duration-100 max-w-[140px] ${
-                  active
-                      ? "bg-primary text-primary-foreground"
-                    : "text-muted-foreground hover:bg-secondary"
+                className={`flex items-center gap-2 px-3 min-h-11 text-xs rounded-lg transition-colors duration-100 max-w-[140px] ${
+                  active ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-secondary"
                 }`}
               >
                 <Icon size={16} />
@@ -566,26 +556,28 @@ ${notesRef.current || "—"}
 
       <div className="max-w-7xl mx-auto md:flex md:gap-6 md:px-6">
         {/* iPad+ sidebar nav */}
-        <aside className="hidden md:block md:w-56 lg:w-64 shrink-0 py-6 self-start">
-          <nav className="flex flex-col gap-1">
-            {TABS.map((t) => {
-              const Icon = t.icon;
-              const active = tab === t.id;
-              return (
+        <aside className="hidden md:block md:w-56 lg:w-64 shrink-0 py-6 self-start sticky top-6">
+          <nav className="flex flex-col gap-0.5">
+            {NAV.map((entry, i) =>
+              entry.type === "section" ? (
+                <div key={i} className="px-3 pt-4 pb-1 text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60">
+                  {entry.label}
+                </div>
+              ) : (
                 <button
-                  key={t.id}
-                  onClick={() => setTab(t.id)}
-                  className={`flex items-center gap-3 px-3 min-h-11 text-sm rounded-lg text-left transition-colors ${
-                    active
+                  key={entry.id}
+                  onClick={() => setTab(entry.id)}
+                  className={`flex items-center gap-3 px-3 min-h-10 text-sm rounded-lg text-left transition-colors ${
+                    tab === entry.id
                       ? "bg-primary text-primary-foreground"
                       : "text-muted-foreground hover:bg-secondary"
                   }`}
                 >
-                  <Icon size={18} className="shrink-0" />
-                  <span className="truncate">{t.label}</span>
+                  <entry.icon size={17} className="shrink-0" />
+                  <span className="truncate">{entry.label}</span>
                 </button>
-              );
-            })}
+              )
+            )}
           </nav>
         </aside>
 
@@ -594,18 +586,13 @@ ${notesRef.current || "—"}
             {tab === "session" && <SessionPanelLazy duration={duration} setDuration={changeDuration} remaining={remaining} running={running} setRunning={handleSetRunning} reset={resetTimer} mmss={mmss} clientNameRef={clientNameRef} coachNameRef={coachNameRef} topicRef={topicRef} notesRef={notesRef} exportSession={exportSession} testSound={testSound} />}
             {tab === "grow" && <GrowLazy />}
             {tab === "swot" && <SwotLazy />}
-            {tab === "nlu" && <NluLazy />}
             {tab === "sos" && <SosLazy />}
             {tab === "rapport" && <RapportLazy />}
             {tab === "smart" && <SmartGoalLazy />}
-            {tab === "eisenhower" && <EisenhowerLazy />}
-            {tab === "burger" && <BurgerLazy />}
             {tab === "erickson" && <EricksonStarLazy />}
-            {tab === "rules" && <BurgerRulesLazy />}
-            {tab === "balance" && <BalanceLazy scores={balanceScores} onChange={setBalanceScores} />}
             {tab === "values" && <ValuesLazy />}
             {tab === "supervision" && <SupervisionLazy />}
-            {tab === "feedback" && <FeedbackLazy />}
+            {tab === "osvk" && <OsvkLazy />}
             {tab === "competencies" && <CompetenciesLazy />}
             {tab === "team-coaching" && <TeamCoachingLazy />}
           </Suspense>

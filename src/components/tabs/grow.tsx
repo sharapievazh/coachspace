@@ -295,6 +295,73 @@ const GROW_CLOSE = [
   { t: "ДОМАШНЕЕ ЗАДАНИЕ", d: "Конкретное действие до следующей встречи.", icon: ClipboardList },
 ];
 
+const QUESTION_TYPES = [
+  {
+    title: "Модельные (основные)",
+    desc: "Открытые вопросы, исследующие тему без оценки. Создают пространство для размышления клиента.",
+    tone: "from-emerald-500 to-teal-600",
+    ring: "border-emerald-500/30 bg-emerald-500/5",
+    text: "text-emerald-700",
+    examples: [
+      "Что для вас важно в этой ситуации?",
+      "Расскажите подробнее — что происходит?",
+      "Как вы видите идеальный результат?",
+      "Что означает для вас успех в этом?",
+    ],
+  },
+  {
+    title: "Проверяющие предположения клиента",
+    desc: "Помогают клиенту осознать фильтры и убеждения, через которые он смотрит на ситуацию.",
+    tone: "from-sky-500 to-blue-600",
+    ring: "border-sky-500/30 bg-sky-500/5",
+    text: "text-sky-700",
+    examples: [
+      "Почему вы так думаете?",
+      "На чём основано это убеждение?",
+      "Откуда вы знаете, что это правда?",
+      "Что заставляет вас в это верить?",
+    ],
+  },
+  {
+    title: "Проверяющие предположения коуча",
+    desc: "Коуч проверяет своё понимание, не навязывая интерпретацию. Сохраняет раппорт и точность.",
+    tone: "from-violet-500 to-indigo-600",
+    ring: "border-violet-500/30 bg-violet-500/5",
+    text: "text-violet-700",
+    examples: [
+      "Правильно ли я понимаю, что вы имеете в виду…?",
+      "Я слышу, что для вас важно… Это так?",
+      "Когда вы говорите «не могу» — что конкретно вы имеете в виду?",
+    ],
+  },
+  {
+    title: "Ставящие под сомнение убеждения",
+    desc: "Помогают расшатать ограничивающие убеждения и ценности, открывая новые перспективы.",
+    tone: "from-amber-500 to-orange-600",
+    ring: "border-amber-500/30 bg-amber-500/5",
+    text: "text-amber-700",
+    examples: [
+      "Всегда ли это правда — в любой ситуации?",
+      "Что было бы, если бы это убеждение оказалось неверным?",
+      "Есть ли исключения из этого правила?",
+      "Как это убеждение помогает вам? Как мешает?",
+    ],
+  },
+  {
+    title: "Вопросы разрешения",
+    desc: "Задаются в момент сопротивления или острой эмоции — для сохранения контакта и снятия напряжения.",
+    tone: "from-rose-500 to-pink-600",
+    ring: "border-rose-500/30 bg-rose-500/5",
+    text: "text-rose-700",
+    examples: [
+      "Как вы себя чувствуете прямо сейчас?",
+      "Что вам нужно, чтобы двигаться дальше?",
+      "Что сейчас важнее всего обсудить?",
+      "Хотите сделать паузу или продолжим?",
+    ],
+  },
+];
+
 function Grow() {
   const [active, setActive] = useState("G");
   const step = GROW_STEPS.find((s) => s.id === active)!;
@@ -388,6 +455,38 @@ function Grow() {
         <div>
           <div className="text-xs uppercase tracking-wide text-primary font-bold mb-1">Финальный вопрос коуча</div>
           <div className="font-medium">Если бы вы начали действовать уже сегодня, что стало бы первым шагом?</div>
+        </div>
+      </div>
+
+      {/* 5 типов вопросов */}
+      <div className="bg-card rounded-2xl border border-border p-5 space-y-4">
+        <div className="flex items-center gap-2">
+          <HelpCircle size={20} className="text-primary shrink-0" />
+          <div>
+            <h3 className="font-semibold">5 типов коучинговых вопросов</h3>
+            <p className="text-xs text-muted-foreground mt-0.5">Арсенал профессионального коуча — ICU Модуль 1</p>
+          </div>
+        </div>
+        <div className="space-y-3">
+          {QUESTION_TYPES.map((qt, i) => (
+            <div key={i} className={`rounded-xl border p-4 ${qt.ring}`}>
+              <div className="flex items-center gap-2 mb-2">
+                <div className={`w-7 h-7 rounded-lg bg-gradient-to-br ${qt.tone} text-white grid place-items-center shrink-0`}>
+                  <span className="text-xs font-bold">{i + 1}</span>
+                </div>
+                <div className={`font-semibold text-sm ${qt.text}`}>{qt.title}</div>
+              </div>
+              <p className="text-xs text-muted-foreground mb-2 leading-relaxed">{qt.desc}</p>
+              <ul className="space-y-1">
+                {qt.examples.map((ex, j) => (
+                  <li key={j} className="flex items-start gap-2 text-sm">
+                    <ChevronRight size={13} className={`mt-0.5 shrink-0 ${qt.text}`} />
+                    <span className="text-foreground/85">«{ex}»</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
         </div>
       </div>
     </div>
