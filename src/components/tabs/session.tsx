@@ -4,7 +4,7 @@ import {
   FileText, BarChart2, CircleDot, Triangle, LayoutGrid, Plus, X,
   GitBranch, Target, ChevronDown, ChevronUp, ArrowRight,
 } from "lucide-react";
-import { OSVK_TEMPLATE } from "./_shared";
+// OSVK_TEMPLATE kept for potential future use but supervision now uses interactive checklist
 import { BalanceRadar } from "@/components/coach/CoachVisuals";
 
 type Props = {
@@ -760,10 +760,160 @@ const TABS: { id: Tab; label: string; icon: React.ReactNode }[] = [
   { id: "hats",    label: "6 шляп",     icon: <span className="text-[11px]">🎩</span> },
 ];
 
+// ─── Маркер Супервизии (интерактивный) ───────────────────────────────────────
+const IND_ITEMS = [
+  "Раппорт (был или нет)",
+  "Прояснение ситуации",
+  "Речевые инструменты",
+  "Ответственность на Клиенте",
+  "Баланс поддержки и фрустрации",
+  "Постановка цели коучинга и сессии (контракт на сессию)",
+  "Прояснение реальности",
+  "Найдены новые возможности",
+  "Составлен план действий. Мотивация. Есть «протяжка» на следующую сессию",
+];
+
+const TEAM_ITEMS = [
+  "Базовые навыки классического коуча",
+  "Установление контакта (улыбка, самопрезентация, комплимент группе, поддержка, ритм, эмоции, ценности, согласие)",
+  "Навыки вербального и невербального управления группой",
+  "Владение риторическими приёмами",
+  "Владение приёмами управления фазами динамики группы",
+  "Навыки организации поиска креативных решений",
+];
+
+type MarkerSection = "ind" | "team";
+
+function SupervisionMarker({ onClose, onExport }: { onClose: () => void; onExport: (text: string) => void }) {
+  const [section, setSection] = useState<MarkerSection>("ind");
+  const [indChecked, setIndChecked] = useState<boolean[]>(() => new Array(IND_ITEMS.length).fill(false));
+  const [teamChecked, setTeamChecked] = useState<boolean[]>(() => new Array(TEAM_ITEMS.length).fill(false));
+  const [indNotes, setIndNotes] = useState<string[]>(() => new Array(IND_ITEMS.length).fill(""));
+  const [teamNotes, setTeamNotes] = useState<string[]>(() => new Array(TEAM_ITEMS.length).fill(""));
+
+  const items = section === "ind" ? IND_ITEMS : TEAM_ITEMS;
+  const checked = section === "ind" ? indChecked : teamChecked;
+  const notes = section === "ind" ? indNotes : teamNotes;
+  const setChecked = section === "ind" ? setIndChecked : setTeamChecked;
+  const setNotes = section === "ind" ? setIndNotes : setTeamNotes;
+
+  const toggle = (i: number) => setChecked((p) => p.map((v, idx) => (idx === i ? !v : v)));
+  const setNote = (i: number, val: string) => setNotes((p) => p.map((v, idx) => (idx === i ? val : v)));
+
+  const doExport = () => {
+    const lines: string[] = [];
+    const renderSection = (title: string, its: string[], ch: boolean[], ns: string[]) => {
+      lines.push(`\n── ${title} ──`);
+      its.forEach((item, i) => {
+        const mark = ch[i] ? "✓" : "☐";
+        const note = ns[i].trim();
+        lines.push(`${mark} ${item}${note ? ": " + note : ""}`);
+      });
+    };
+    renderSection("Маркер Супервизии — Индивидуальный коучинг", IND_ITEMS, indChecked, indNotes);
+    renderSection("Маркер Супервизии — Командный коучинг", TEAM_ITEMS, teamChecked, teamNotes);
+    lines.push("");
+    onExport(lines.join("\n"));
+    onClose();
+  };
+
+  const doneCount = checked.filter(Boolean).length;
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4"
+      style={{ background: "rgba(0,0,0,0.55)" }} onClick={onClose}>
+      <div className="w-full sm:max-w-lg rounded-t-2xl sm:rounded-2xl bg-card border border-border shadow-2xl flex flex-col"
+        style={{ maxHeight: "88vh" }} onClick={(e) => e.stopPropagation()}>
+
+        {/* Header */}
+        <div className="flex items-center gap-3 px-5 py-4 border-b border-border shrink-0">
+          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-amber-400 to-orange-500 grid place-items-center shadow shrink-0">
+            <span className="text-white text-base">✦</span>
+          </div>
+          <div className="flex-1 min-w-0">
+            <div className="font-semibold text-foreground text-sm">Маркер Супервизии</div>
+            <div className="text-xs text-muted-foreground">{doneCount} / {items.length} выполнено</div>
+          </div>
+          <button onClick={onClose} className="w-8 h-8 rounded-full bg-secondary flex items-center justify-center text-muted-foreground hover:text-foreground">
+            <X size={16} />
+          </button>
+        </div>
+
+        {/* Section toggle */}
+        <div className="flex gap-1.5 px-5 pt-4 pb-3 shrink-0">
+          {(["ind", "team"] as MarkerSection[]).map((s) => (
+            <button key={s} onClick={() => setSection(s)}
+              className={`flex-1 py-2 rounded-xl text-xs font-semibold transition-colors ${
+                section === s
+                  ? "bg-primary text-primary-foreground shadow-sm"
+                  : "bg-secondary text-muted-foreground hover:text-foreground"
+              }`}>
+              {s === "ind" ? "Индивидуальный" : "Командный"}
+            </button>
+          ))}
+        </div>
+
+        {/* Progress bar */}
+        <div className="px-5 pb-3 shrink-0">
+          <div className="h-1.5 rounded-full bg-secondary overflow-hidden">
+            <div className="h-full rounded-full bg-gradient-to-r from-amber-400 to-orange-500 transition-all duration-300"
+              style={{ width: `${(doneCount / items.length) * 100}%` }} />
+          </div>
+        </div>
+
+        {/* Checklist */}
+        <div className="flex-1 overflow-y-auto px-5 pb-4 space-y-2">
+          {items.map((item, i) => (
+            <div key={`${section}-${i}`}
+              className={`rounded-xl border transition-colors ${
+                checked[i]
+                  ? "border-emerald-500/40 bg-emerald-500/8"
+                  : "border-border bg-background"
+              }`}>
+              <button onClick={() => toggle(i)}
+                className="w-full flex items-start gap-3 px-4 py-3 text-left">
+                <div className={`mt-0.5 w-5 h-5 rounded-md border-2 flex items-center justify-center shrink-0 transition-colors ${
+                  checked[i] ? "bg-emerald-500 border-emerald-500" : "border-border"
+                }`}>
+                  {checked[i] && <span className="text-white text-xs font-bold">✓</span>}
+                </div>
+                <span className={`text-sm leading-snug ${checked[i] ? "line-through text-muted-foreground" : "text-foreground"}`}>
+                  {section === "team" && <span className="font-semibold text-muted-foreground mr-1">{i + 1}.</span>}
+                  {item}
+                </span>
+              </button>
+              {checked[i] && (
+                <div className="px-4 pb-3">
+                  <input value={notes[i]} onChange={(e) => setNote(i, e.target.value)}
+                    placeholder="Заметка…"
+                    className="w-full px-3 py-1.5 rounded-lg border border-border bg-card text-xs focus:outline-none focus:ring-1 focus:ring-ring" />
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+
+        {/* Footer */}
+        <div className="flex gap-2 px-5 py-4 border-t border-border shrink-0">
+          <button onClick={onClose}
+            className="flex-1 py-2.5 rounded-xl border border-border text-sm font-medium text-muted-foreground hover:bg-secondary">
+            Закрыть
+          </button>
+          <button onClick={doExport}
+            className="flex-1 py-2.5 rounded-xl bg-primary text-primary-foreground text-sm font-semibold hover:opacity-90 flex items-center justify-center gap-1.5">
+            <ArrowRight size={14} /> В заметки
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function SessionPanel(p: Props) {
   const notesElRef = useRef<HTMLTextAreaElement | null>(null);
   const [minutesInput, setMinutesInput] = useState(() => String(Math.floor(p.duration / 60)));
   const [activeTab, setActiveTab] = useState<Tab>("notes");
+  const [markerOpen, setMarkerOpen] = useState(false);
 
   const appendToNotes = useCallback((text: string) => {
     const el = notesElRef.current;
@@ -777,19 +927,6 @@ function SessionPanel(p: Props) {
     });
   }, [p.notesRef]);
 
-  const appendOsvkTemplate = useCallback(() => {
-    const el = notesElRef.current;
-    if (!el) { p.notesRef.current = `${p.notesRef.current || ""}${OSVK_TEMPLATE}`; return; }
-    const start = el.selectionStart ?? el.value.length;
-    const end = el.selectionEnd ?? el.value.length;
-    const next = `${el.value.slice(0, start)}${OSVK_TEMPLATE}${el.value.slice(end)}`;
-    el.value = next;
-    p.notesRef.current = next;
-    requestAnimationFrame(() => {
-      try { el.focus({ preventScroll: true }); el.setSelectionRange(start + OSVK_TEMPLATE.length, start + OSVK_TEMPLATE.length); }
-      catch { el.focus(); }
-    });
-  }, [p.notesRef]);
 
   return (
     <div className="flex flex-col gap-4 max-w-full">
@@ -857,9 +994,9 @@ function SessionPanel(p: Props) {
                 inputMode="text" autoComplete="off" autoCorrect="off" spellCheck={false}
                 className="w-full px-3 py-2 rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-ring resize-none text-sm" />
               <div className="flex items-center justify-between gap-2 flex-wrap">
-                <button onClick={appendOsvkTemplate}
-                  className="inline-flex items-center gap-2 px-4 min-h-10 rounded-lg border border-amber-500/40 bg-gradient-to-r from-amber-500/15 to-orange-500/10 hover:from-amber-500/25 hover:to-orange-500/20 text-sm text-amber-700 dark:text-amber-300">
-                  Маркер Супервизии
+                <button onClick={() => setMarkerOpen(true)}
+                  className="inline-flex items-center gap-2 px-4 min-h-10 rounded-lg border border-amber-500/40 bg-gradient-to-r from-amber-500/15 to-orange-500/10 hover:from-amber-500/25 hover:to-orange-500/20 text-sm text-amber-700 dark:text-amber-300 font-medium">
+                  ✦ Маркер Супервизии
                 </button>
                 <button onClick={p.exportSession}
                   className="inline-flex items-center gap-2 px-4 min-h-10 rounded-lg bg-primary text-primary-foreground hover:opacity-90 text-sm">
@@ -877,6 +1014,13 @@ function SessionPanel(p: Props) {
           <div className={activeTab === "hats"    ? "" : "hidden"}><SixHatsTool    onExport={appendToNotes} /></div>
         </div>
       </section>
+
+      {markerOpen && (
+        <SupervisionMarker
+          onClose={() => setMarkerOpen(false)}
+          onExport={appendToNotes}
+        />
+      )}
     </div>
   );
 }
