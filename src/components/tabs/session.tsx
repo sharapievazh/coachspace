@@ -48,49 +48,42 @@ function SessionPanel(p: Props) {
   };
 
   return (
-    <div className="grid md:grid-cols-3 gap-6 max-w-full">
-      <section className="md:col-span-1 bg-card rounded-2xl border border-border p-5 space-y-4">
-        <h2 className="font-semibold flex items-center gap-2"><Sparkles size={18} className="text-primary" /> Таймер сессии</h2>
-        <div className="text-center py-4 rounded-xl bg-secondary">
-          <div className="font-mono text-5xl tabular-nums text-foreground">{p.mmss}</div>
+    <div className="flex flex-col gap-4 max-w-full">
+      {/* Compact timer bar */}
+      <div className="bg-card rounded-xl border border-border px-4 py-2.5 flex items-center gap-3 flex-wrap">
+        <Sparkles size={14} className="text-primary shrink-0" />
+        <span className="font-mono text-lg tabular-nums text-foreground font-medium">{p.mmss}</span>
+        <div className="flex items-center gap-1.5">
+          <button onClick={() => p.setRunning(!p.running)}
+            className="inline-flex items-center gap-1 px-3 py-1 rounded-md bg-primary text-primary-foreground hover:opacity-90 text-xs font-medium">
+            {p.running ? <Pause size={12}/> : <Play size={12}/>} {p.running ? "Пауза" : "Старт"}
+          </button>
+          <button onClick={() => { p.reset(); setMinutesInput(String(Math.floor(p.duration / 60))); }}
+            className="inline-flex items-center justify-center w-7 h-7 rounded-md bg-secondary hover:bg-muted">
+            <RotateCcw size={12}/>
+          </button>
+          <button onClick={p.testSound}
+            className="inline-flex items-center justify-center w-7 h-7 rounded-md border border-border bg-background hover:bg-secondary">
+            <Bell size={12} className="text-primary"/>
+          </button>
         </div>
-
-        {/* Duration input */}
-        <div className="flex items-center gap-2">
-          <label className="text-xs text-muted-foreground whitespace-nowrap">Длительность</label>
+        <div className="flex items-center gap-1 ml-auto">
           <input
-            type="number"
-            min="1"
-            max="480"
-            disabled={p.running}
+            type="number" min="1" max="480" disabled={p.running}
             value={minutesInput}
             onChange={(e) => {
               setMinutesInput(e.target.value);
               const mins = parseInt(e.target.value, 10);
               if (!isNaN(mins) && mins > 0) p.setDuration(mins * 60);
             }}
-            className="w-20 px-2 py-1.5 rounded-lg border border-border bg-background text-center focus:outline-none focus:ring-2 focus:ring-ring disabled:opacity-50 text-sm"
+            className="w-14 px-2 py-1 rounded-md border border-border bg-background text-center focus:outline-none focus:ring-1 focus:ring-ring disabled:opacity-40 text-xs"
           />
           <span className="text-xs text-muted-foreground">мин</span>
         </div>
+      </div>
 
-        <div className="flex gap-2">
-          <button onClick={() => p.setRunning(!p.running)} className="flex-1 inline-flex items-center justify-center gap-2 px-4 min-h-11 rounded-lg bg-primary text-primary-foreground hover:opacity-90">
-            {p.running ? <Pause size={16}/> : <Play size={16}/>} {p.running ? "Пауза" : "Старт"}
-          </button>
-          <button onClick={() => { p.reset(); setMinutesInput(String(Math.floor(p.duration / 60))); }} className="inline-flex items-center justify-center gap-2 px-4 min-h-11 min-w-11 rounded-lg bg-secondary hover:bg-muted">
-            <RotateCcw size={16}/> Сброс
-          </button>
-        </div>
-        <button
-          onClick={p.testSound}
-          className="w-full inline-flex items-center justify-center gap-2 px-4 min-h-11 rounded-lg border border-border bg-background hover:bg-secondary text-sm"
-        >
-          <Bell size={16} className="text-primary" /> Тест звука
-        </button>
-      </section>
-
-      <section className="md:col-span-2 bg-card rounded-2xl border border-border p-5 space-y-4">
+      {/* Main workspace */}
+      <section className="bg-card rounded-2xl border border-border p-5 space-y-4">
 
         <div className="grid sm:grid-cols-2 gap-3">
           <Field label="Клиент">
@@ -110,7 +103,7 @@ function SessionPanel(p: Props) {
         </div>
         <Field label="Потоковый блокнот · ценностные слова, инсайты, цитаты клиента">
           <textarea ref={notesElRef} defaultValue={p.notesRef.current} onInput={(e) => { p.notesRef.current = e.currentTarget.value; }}
-            rows={14}
+            rows={20}
             placeholder="Веди заметки прямо во время сессии..."
             inputMode="text"
             autoComplete="off" autoCorrect="off" spellCheck={false}
@@ -132,6 +125,7 @@ function SessionPanel(p: Props) {
       </section>
     </div>
   );
+
 }
 
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
