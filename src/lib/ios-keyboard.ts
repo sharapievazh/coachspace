@@ -57,7 +57,6 @@ export function startIOSKeyboardStabilizer() {
       window.__coachSpaceKeyboardActive = true;
       document.documentElement.classList.add("ios-keyboard-active");
       scrollFocusedField(event.target);
-      console.info("[keyboard] focus", { tag: event.target.tagName, type: event.target.type });
     },
     { passive: true },
   );
@@ -70,21 +69,18 @@ export function startIOSKeyboardStabilizer() {
         if (isInputElement(document.activeElement)) return;
         window.__coachSpaceKeyboardActive = false;
         document.documentElement.classList.remove("ios-keyboard-active");
-        console.info("[keyboard] blur");
       }, 250);
     },
     { passive: true },
   );
 
-  window.addEventListener("keyboardWillShow", (event) => {
+  window.addEventListener("keyboardWillShow", () => {
     window.__coachSpaceKeyboardActive = true;
     document.documentElement.classList.add("ios-keyboard-active");
-    console.info("[keyboard] will show", (event as CustomEvent).detail ?? {});
   });
 
   window.addEventListener("keyboardWillHide", () => {
     window.__coachSpaceKeyboardActive = false;
     document.documentElement.classList.remove("ios-keyboard-active");
-    console.info("[keyboard] will hide");
   });
 }

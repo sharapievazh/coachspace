@@ -7,7 +7,6 @@ import {
   Gem, Users, GraduationCap, Star, CheckCircle2,
   AlertTriangle, Award, Sparkles,
 } from "lucide-react";
-import { BALANCE_AREAS } from "@/components/tabs/_shared";
 
 const SessionPanelLazy = lazy(() => import("@/components/tabs/session"));
 const GrowLazy = lazy(() => import("@/components/tabs/grow"));
@@ -208,9 +207,6 @@ function CoachSpace() {
   const coachNameRef = useRef("");
   const topicRef = useRef("");
   const notesRef = useRef("");
-  const [balanceScores, setBalanceScores] = useState<Record<number, number>>(() =>
-    Object.fromEntries(Array.from({ length: 8 }, (_, i) => [i + 1, 5]))
-  );
   const [menuOpen, setMenuOpen] = useState(false);
   const audioCtxRef = useRef<any>(null);
   const wakeLockRef = useRef<any>(null);
@@ -553,12 +549,6 @@ function CoachSpace() {
   }, [remaining]);
 
   const exportSession = useCallback(() => {
-    // Колесо баланса — включаем только если хоть одна оценка изменена с дефолтных 5
-    const balanceUsed = BALANCE_AREAS.some((a) => (balanceScores[a.n] ?? 5) !== 5);
-    const balanceBlock = balanceUsed
-      ? `\nКолесо баланса (оценки):\n${BALANCE_AREAS.map((a) => `  ${a.n}. ${a.name}: ${balanceScores[a.n] ?? 5}/10`).join("\n")}\n`
-      : "";
-
     let smartBlock = "";
     try {
       const raw = typeof window !== "undefined" ? localStorage.getItem(SMART_STORAGE) : null;
@@ -584,7 +574,7 @@ function CoachSpace() {
 Коуч: ${coachNameRef.current || "—"}
 Клиент: ${clientNameRef.current || "—"}
 Запрос: ${topicRef.current || "—"}
-${balanceBlock}${smartBlock}
+${smartBlock}
 Заметки коуча:
 ${notesRef.current || "—"}
 `;
@@ -598,7 +588,8 @@ ${notesRef.current || "—"}
       }
     }
     setExportText(txt);
-  }, [mmss, balanceScores]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   if (!onboarded) {
     return <Onboarding onFinish={() => setOnboarded(true)} />;
@@ -743,27 +734,29 @@ ${notesRef.current || "—"}
       )}
 
       {timeUp && (
-        <div className="mt-4 rounded-2xl border border-primary/40 bg-card p-4 sm:p-5 shadow-lg">
-          <div className="flex items-start gap-3">
-            <div className="w-10 h-10 rounded-full bg-primary/15 text-primary grid place-items-center shrink-0">
-              <Timer size={22} />
-            </div>
-            <div className="min-w-0 flex-1">
-              <h3 className="text-base font-semibold">Время сессии истекло</h3>
-              <p className="text-sm text-muted-foreground">Пора подводить итоги.</p>
-              <div className="flex flex-wrap gap-2 mt-3">
-                <button
-                  onClick={() => { setTimeUp(false); resetTimer(); }}
-                  className="px-3 py-2 min-h-11 text-sm rounded-lg bg-primary text-primary-foreground hover:opacity-90"
-                >
-                  Закрыть
-                </button>
-                <button
-                  onClick={() => playBell(false)}
-                  className="px-3 py-2 min-h-11 text-sm rounded-lg bg-secondary hover:bg-muted"
-                >
-                  Повторить звук
-                </button>
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4" style={{ background: "rgba(0,0,0,0.45)" }} onClick={() => { setTimeUp(false); resetTimer(); }}>
+          <div className="w-full max-w-sm rounded-2xl border border-primary/40 bg-card p-5 shadow-2xl" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-start gap-3">
+              <div className="w-10 h-10 rounded-full bg-primary/15 text-primary grid place-items-center shrink-0">
+                <Timer size={22} />
+              </div>
+              <div className="min-w-0 flex-1">
+                <h3 className="text-base font-semibold">Время сессии истекло</h3>
+                <p className="text-sm text-muted-foreground mt-1">Пора подводить итоги.</p>
+                <div className="flex flex-wrap gap-2 mt-4">
+                  <button
+                    onClick={() => { setTimeUp(false); resetTimer(); }}
+                    className="px-4 py-2.5 min-h-11 text-sm rounded-xl bg-primary text-primary-foreground hover:opacity-90 font-medium"
+                  >
+                    Закрыть
+                  </button>
+                  <button
+                    onClick={() => playBell(false)}
+                    className="px-4 py-2.5 min-h-11 text-sm rounded-xl bg-secondary hover:bg-muted font-medium"
+                  >
+                    Повторить звук
+                  </button>
+                </div>
               </div>
             </div>
           </div>

@@ -139,7 +139,8 @@ function BalanceTool({ onExport }: { onExport: (text: string) => void }) {
         {areas.map((name, i) => (
           <div key={i} className="flex items-center gap-2">
             {editingIdx === i ? (
-              <input autoFocus defaultValue={name}
+              <input defaultValue={name}
+                ref={(el) => { if (el) el.focus(); }}
                 onBlur={(e) => commitEdit(i, e.target.value)}
                 onKeyDown={(e) => { if (e.key === "Enter" || e.key === "Escape") commitEdit(i, e.currentTarget.value); }}
                 className="w-28 shrink-0 px-1.5 py-0.5 rounded border border-primary bg-background text-xs focus:outline-none" />
@@ -1172,7 +1173,7 @@ function SessionPanel(p: Props) {
                 </button>
                 <button onClick={p.exportSession}
                   className="inline-flex items-center gap-2 px-4 min-h-10 rounded-lg bg-primary text-primary-foreground hover:opacity-90 text-sm">
-                  <Download size={15}/> Экспорт .txt
+                  <Download size={15}/> Экспорт
                 </button>
               </div>
             </div>
