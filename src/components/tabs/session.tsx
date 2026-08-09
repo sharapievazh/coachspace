@@ -1,4 +1,4 @@
-import React, { memo, useRef, useState, useCallback, useMemo, MutableRefObject } from "react";
+import React, { memo, useRef, useState, useCallback, useMemo, useEffect, MutableRefObject } from "react";
 import {
   Bell, Download, Pause, Play, RotateCcw, Sparkles,
   FileText, BarChart2, CircleDot, Triangle, LayoutGrid, Plus, X,
@@ -330,14 +330,48 @@ function MindMapTool({ onExport }: { onExport: (text: string) => void }) {
   const [nodes, setNodes] = useState<MindNode[]>([
     { id: 0, text: "Главная тема", children: [], depth: 0, color: depthColor(0) },
   ]);
-  const [editingId, setEditingId] = useState<number | null>(null);
-  const [editText, setEditText] = useState("");
+  const [editingId, setEditingIdState] = useState<number | null>(null);
+  const [editText, setEditTextState] = useState("");
   const [viewMode, setViewMode] = useState<MindView>("list");
   const [selectedId, setSelectedId] = useState<number | null>(null);
   const nextId = useRef(1);
+  const pendingEditId = useRef<number | null>(null);
+  const editingIdRef = useRef<number | null>(null);
+  const editTextRef = useRef("");
+  const editInputRef = useRef<HTMLInputElement>(null);
+  const listEditInputRef = useRef<HTMLInputElement>(null);
+
+  const setEditingId = (id: number | null) => {
+    editingIdRef.current = id;
+    setEditingIdState(id);
+  };
+  const setEditText = (t: string) => {
+    editTextRef.current = t;
+    setEditTextState(t);
+  };
+
+  // Focus input when editing starts (avoids autoFocus issues on iOS WebView)
+  useEffect(() => {
+    if (editingId !== null) {
+      const ref = viewMode === "radial" ? editInputRef : listEditInputRef;
+      ref.current?.focus();
+    }
+  }, [editingId, viewMode]);
+
+  // Trigger edit after node is added (replaces unsafe setTimeout)
+  useEffect(() => {
+    if (pendingEditId.current !== null) {
+      const id = pendingEditId.current;
+      pendingEditId.current = null;
+      setEditingId(id);
+      setEditText("Новая ветка");
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [nodes]);
 
   const addChild = (parentId: number, parentDepth: number) => {
     const id = nextId.current++;
+    pendingEditId.current = id;
     const childDepth = parentDepth + 1;
     setNodes((prev) => {
       const updated = prev.map((n) =>
@@ -349,14 +383,15 @@ function MindMapTool({ onExport }: { onExport: (text: string) => void }) {
       ];
     });
     setSelectedId(null);
-    setTimeout(() => { setEditingId(id); setEditText("Новая ветка"); }, 0);
   };
 
   const commitEdit = () => {
-    if (editingId === null) return;
-    const t = editText.trim() || "…";
-    setNodes((prev) => prev.map((n) => (n.id === editingId ? { ...n, text: t } : n)));
-    setEditingId(null);
+    const id = editingIdRef.current;
+    if (id === null) return;
+    editingIdRef.current = null; // prevent double-call
+    const t = editTextRef.current.trim() || "…";
+    setNodes((prev) => prev.map((n) => (n.id === id ? { ...n, text: t } : n)));
+    setEditingIdState(null);
   };
 
   const removeNode = (id: number) => {
@@ -399,7 +434,7 @@ function MindMapTool({ onExport }: { onExport: (text: string) => void }) {
         <div className="group flex items-center gap-1.5 py-0.5">
           {editingId === id ? (
             <input
-              autoFocus
+              ref={listEditInputRef}
               value={editText}
               onChange={(e) => setEditText(e.target.value)}
               onBlur={commitEdit}
@@ -542,7 +577,7 @@ function MindMapTool({ onExport }: { onExport: (text: string) => void }) {
           >
             {isEdit ? (
               <input
-                autoFocus
+                ref={editInputRef}
                 value={editText}
                 onChange={(e) => setEditText(e.target.value)}
                 onBlur={commitEdit}
@@ -1023,6 +1058,29 @@ function SupervisionMarker({ onClose, onExport }: { onClose: () => void; onExpor
   );
 }
 
+class ToolErrorBoundary extends React.Component<
+  { children: React.ReactNode },
+  { error: string | null }
+> {
+  state = { error: null };
+  static getDerivedStateFromError(e: Error) { return { error: e.message }; }
+  render() {
+    if (this.state.error) {
+      return (
+        <div className="rounded-xl border border-destructive/30 bg-destructive/10 p-4 text-sm text-destructive space-y-2">
+          <p className="font-semibold">Что-то пошло не так</p>
+          <p className="text-xs opacity-70">{this.state.error}</p>
+          <button
+            onClick={() => this.setState({ error: null })}
+            className="px-3 py-1 rounded-md bg-destructive text-destructive-foreground text-xs"
+          >Восстановить</button>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
+
 function SessionPanel(p: Props) {
   const notesElRef = useRef<HTMLTextAreaElement | null>(null);
   const [minutesInput, setMinutesInput] = useState(() => String(Math.floor(p.duration / 60)));
@@ -1123,7 +1181,7 @@ function SessionPanel(p: Props) {
           <div className={activeTab === "balance" ? "" : "hidden"}><BalanceTool    onExport={appendToNotes} /></div>
           <div className={activeTab === "dilts"   ? "" : "hidden"}><DiltsTool      onExport={appendToNotes} /></div>
           <div className={activeTab === "matrix"  ? "" : "hidden"}><EisenhowerTool onExport={appendToNotes} /></div>
-          <div className={activeTab === "mindmap" ? "" : "hidden"}><MindMapTool    onExport={appendToNotes} /></div>
+          <div className={activeTab === "mindmap" ? "" : "hidden"}><ToolErrorBoundary><MindMapTool onExport={appendToNotes} /></ToolErrorBoundary></div>
           <div className={activeTab === "grow"    ? "" : "hidden"}><GrowTool       onExport={appendToNotes} /></div>
           <div className={activeTab === "hats"    ? "" : "hidden"}><SixHatsTool    onExport={appendToNotes} /></div>
         </div>
