@@ -33,12 +33,11 @@ export function startIOSKeyboardStabilizer() {
 
   const keyboard = window.Capacitor?.Plugins?.Keyboard;
 
-  keyboard?.setResizeMode?.({ mode: "native" }).catch((error) => {
-    console.warn("[keyboard] resize mode failed", error);
-  });
-  keyboard?.setScroll?.({ isDisabled: false }).catch((error) => {
-    console.warn("[keyboard] scroll mode failed", error);
-  });
+  // Keep resize:none to match capacitor.config.ts — "native" resizes the
+  // WebView when the keyboard opens and triggers a full React re-render that
+  // crashes the WKWebView on inputs inside complex components.
+  keyboard?.setResizeMode?.({ mode: "none" }).catch(() => {});
+  keyboard?.setScroll?.({ isDisabled: false }).catch(() => {});
   keyboard?.setAccessoryBarVisible?.({ isVisible: true }).catch(() => {});
 
   const scrollFocusedField = (el: HTMLInputElement | HTMLTextAreaElement) => {

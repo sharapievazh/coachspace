@@ -1084,9 +1084,15 @@ class ToolErrorBoundary extends React.Component<
 
 function SessionPanel(p: Props) {
   const notesElRef = useRef<HTMLTextAreaElement | null>(null);
+  const mmssElRef = useRef<HTMLSpanElement | null>(null);
   const [minutesInput, setMinutesInput] = useState(() => String(Math.floor(p.duration / 60)));
   const [activeTab, setActiveTab] = useState<Tab>("notes");
   const [markerOpen, setMarkerOpen] = useState(false);
+
+  // Update timer display directly in DOM — no React re-render on every tick
+  useEffect(() => {
+    if (mmssElRef.current) mmssElRef.current.textContent = p.mmss;
+  }, [p.mmss]);
 
   const appendToNotes = useCallback((text: string) => {
     const el = notesElRef.current;
@@ -1106,7 +1112,7 @@ function SessionPanel(p: Props) {
       {/* ── Компактная шапка-таймер ── */}
       <div className="bg-card rounded-xl border border-border px-4 py-2.5 flex items-center gap-3 flex-wrap">
         <Sparkles size={14} className="text-primary shrink-0" />
-        <span className="font-mono text-lg tabular-nums text-foreground font-medium">{p.mmss}</span>
+        <span ref={mmssElRef} className="font-mono text-lg tabular-nums text-foreground font-medium">{p.mmss}</span>
         <div className="flex items-center gap-1.5">
           <button onClick={() => p.setRunning(!p.running)}
             className="inline-flex items-center gap-1 px-3 py-1 rounded-md bg-primary text-primary-foreground hover:opacity-90 text-xs font-medium">
@@ -1198,4 +1204,21 @@ function SessionPanel(p: Props) {
   );
 }
 
-export default memo(SessionPanel);
+// Custom comparator: skip re-render when only mmss/remaining change (timer ticks).
+// The timer display is updated directly via mmssElRef, no React render needed.
+export default memo(SessionPanel, (prev, next) => {
+  return (
+    prev.duration === next.duration &&
+    prev.running === next.running &&
+    prev.setDuration === next.setDuration &&
+    prev.setRunning === next.setRunning &&
+    prev.reset === next.reset &&
+    prev.exportSession === next.exportSession &&
+    prev.testSound === next.testSound &&
+    prev.clientNameRef === next.clientNameRef &&
+    prev.coachNameRef === next.coachNameRef &&
+    prev.topicRef === next.topicRef &&
+    prev.notesRef === next.notesRef
+    // mmss and remaining intentionally excluded — updated via DOM ref
+  );
+});
