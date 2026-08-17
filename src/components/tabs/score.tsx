@@ -16,14 +16,14 @@ type Step = {
 
 const SCORE_STEPS: Step[] = [
   {
-    id: "S", label: "SYMPTOMS", title: "СИМПТОМЫ", time: "2 мин",
+    id: "S", label: "СИМПТОМЫ", title: "СИМПТОМЫ", time: "2 мин",
     icon: Activity,
     accent: "from-rose-500/15 to-rose-500/5 border-rose-500/30",
     tone: "from-rose-500 to-red-600",
     questions: ["Что у вас сейчас?", "Что вы хотите изменить?", "Что вас беспокоит?"],
   },
   {
-    id: "C", label: "CAUSES → РЕЗУЛЬТАТЫ", title: "РЕЗУЛЬТАТЫ", time: "3 мин",
+    id: "C", label: "РЕЗУЛЬТАТЫ", title: "РЕЗУЛЬТАТЫ", time: "3 мин",
     icon: Target,
     accent: "from-emerald-500/15 to-emerald-500/5 border-emerald-500/30",
     tone: "from-emerald-500 to-teal-600",
@@ -40,7 +40,7 @@ const SCORE_STEPS: Step[] = [
     ],
   },
   {
-    id: "O", label: "OUTCOMES", title: "ЭФФЕКТЫ", time: "2 мин",
+    id: "O", label: "ЭФФЕКТЫ", title: "ЭФФЕКТЫ", time: "2 мин",
     icon: Waves,
     accent: "from-sky-500/15 to-sky-500/5 border-sky-500/30",
     tone: "from-sky-500 to-blue-600",
@@ -52,7 +52,7 @@ const SCORE_STEPS: Step[] = [
     ],
   },
   {
-    id: "R", label: "REASONS", title: "ПРИЧИНЫ", time: "2 мин",
+    id: "R", label: "ПРИЧИНЫ", title: "ПРИЧИНЫ", time: "2 мин",
     icon: History,
     accent: "from-amber-500/15 to-amber-500/5 border-amber-500/30",
     tone: "from-amber-500 to-orange-600",
@@ -64,7 +64,7 @@ const SCORE_STEPS: Step[] = [
     ],
   },
   {
-    id: "E", label: "EFFECTS → РЕСУРСЫ", title: "РЕСУРСЫ", time: "3 мин",
+    id: "E", label: "РЕСУРСЫ", title: "РЕСУРСЫ", time: "3 мин",
     icon: Coins,
     accent: "from-violet-500/15 to-violet-500/5 border-violet-500/30",
     tone: "from-violet-500 to-indigo-600",
