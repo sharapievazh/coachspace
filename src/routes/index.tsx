@@ -142,7 +142,7 @@ function ExportModal({ text, onClose }: { text: string; onClose: () => void }) {
   );
 }
 
-type TabId = "session" | "team-coaching" | "competencies" | "erickson" | "rapport" | "values" | "sos" | "grow" | "soar" | "score" | "decart" | "kotter" | "senge" | "conflicts" | "swot" | "smart" | "supervision" | "osvk";
+type TabId = "session" | "team-coaching" | "competencies" | "erickson" | "rapport" | "values" | "sos" | "grow" | "soar" | "score" | "decart" | "kotter" | "senge" | "conflicts" | "mediation" | "swot" | "smart" | "supervision" | "osvk";
 
 type NavEntry =
   | { type: "tab"; id: TabId; label: string; icon: any }
@@ -178,6 +178,7 @@ const NAV: NavEntry[] = [
   { type: "tab",     id: "kotter",        label: "Модель Коттера",     icon: TrendingUp },
   { type: "tab",     id: "senge",         label: "Модель Сенге",       icon: BookOpen },
   { type: "tab",     id: "conflicts",     label: "Конфликты",          icon: AlertOctagon },
+  { type: "tab",     id: "mediation",     label: "Медиация",           icon: Scale },
   { type: "tab",     id: "smart",         label: "SMART-цель",          icon: CheckCircle2 },
   { type: "tab",     id: "swot",          label: "SWOT",                icon: Layers },
 
