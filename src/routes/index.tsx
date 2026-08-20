@@ -6,7 +6,7 @@ import {
   Timer,
   Gem, Users, GraduationCap, Star, CheckCircle2,
   AlertTriangle, Award, Sparkles, Workflow, Compass, Grid2x2,
-  TrendingUp, BookOpen, AlertOctagon,
+  TrendingUp, BookOpen, AlertOctagon, Scale,
 } from "lucide-react";
 
 
@@ -19,6 +19,7 @@ const DecartLazy = lazy(() => import("@/components/tabs/decart"));
 const KotterLazy = lazy(() => import("@/components/tabs/kotter"));
 const SengeLazy = lazy(() => import("@/components/tabs/senge"));
 const ConflictsLazy = lazy(() => import("@/components/tabs/conflicts"));
+const MediationLazy = lazy(() => import("@/components/tabs/mediation"));
 const SosLazy = lazy(() => import("@/components/tabs/sos"));
 const RapportLazy = lazy(() => import("@/components/tabs/rapport"));
 const SmartGoalLazy = lazy(() => import("@/components/tabs/smart"));
