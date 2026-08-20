@@ -16,6 +16,7 @@ const SwotLazy = lazy(() => import("@/components/tabs/swot"));
 const SoarLazy = lazy(() => import("@/components/tabs/soar"));
 const ScoreLazy = lazy(() => import("@/components/tabs/score"));
 const DecartLazy = lazy(() => import("@/components/tabs/decart"));
+const KotterLazy = lazy(() => import("@/components/tabs/kotter"));
 const SosLazy = lazy(() => import("@/components/tabs/sos"));
 const RapportLazy = lazy(() => import("@/components/tabs/rapport"));
 const SmartGoalLazy = lazy(() => import("@/components/tabs/smart"));
@@ -25,6 +26,7 @@ const SupervisionLazy = lazy(() => import("@/components/tabs/supervision"));
 const OsvkLazy = lazy(() => import("@/components/tabs/osvk"));
 const CompetenciesLazy = lazy(() => import("@/components/tabs/competencies"));
 const TeamCoachingLazy = lazy(() => import("@/components/tabs/team-coaching"));
+
 
 export const Route = createFileRoute("/")({
   component: CoachSpace,
@@ -137,7 +139,7 @@ function ExportModal({ text, onClose }: { text: string; onClose: () => void }) {
   );
 }
 
-type TabId = "session" | "team-coaching" | "competencies" | "erickson" | "rapport" | "values" | "sos" | "grow" | "soar" | "score" | "decart" | "swot" | "smart" | "supervision" | "osvk";
+type TabId = "session" | "team-coaching" | "competencies" | "erickson" | "rapport" | "values" | "sos" | "grow" | "soar" | "score" | "decart" | "kotter" | "swot" | "smart" | "supervision" | "osvk";
 
 type NavEntry =
   | { type: "tab"; id: TabId; label: string; icon: any }
@@ -170,8 +172,10 @@ const NAV: NavEntry[] = [
   { type: "tab",     id: "soar",          label: "SOAR",                icon: Workflow },
   { type: "tab",     id: "score",         label: "S.C.O.R.E.",          icon: Compass },
   { type: "tab",     id: "decart",        label: "Квадрат Декарта",     icon: Grid2x2 },
+  { type: "tab",     id: "kotter",        label: "Модель Коттера",     icon: TrendingUp },
   { type: "tab",     id: "smart",         label: "SMART-цель",          icon: CheckCircle2 },
   { type: "tab",     id: "swot",          label: "SWOT",                icon: Layers },
+
   { type: "section", label: "СУПЕРВИЗИЯ И ОСВК" },
   { type: "tab",     id: "supervision",   label: "Супервизия",          icon: Users },
   { type: "tab",     id: "osvk",          label: "ОСВК",                icon: Award },
@@ -193,7 +197,9 @@ function CoachSpace() {
       import("@/components/tabs/soar");
       import("@/components/tabs/score");
       import("@/components/tabs/decart");
+      import("@/components/tabs/kotter");
       import("@/components/tabs/sos");
+
       import("@/components/tabs/rapport");
       import("@/components/tabs/smart");
       import("@/components/tabs/erickson");
@@ -726,8 +732,10 @@ ${notesRef.current || "—"}
             {tab === "soar" && <SoarLazy />}
             {tab === "score" && <ScoreLazy />}
             {tab === "decart" && <DecartLazy />}
+            {tab === "kotter" && <KotterLazy />}
             {tab === "swot" && <SwotLazy />}
             {tab === "sos" && <SosLazy />}
+
             {tab === "rapport" && <RapportLazy />}
             {tab === "smart" && <SmartGoalLazy />}
             {tab === "erickson" && <EricksonStarLazy />}
