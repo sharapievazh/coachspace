@@ -6,7 +6,7 @@ import {
   Timer,
   Gem, Users, GraduationCap, Star, CheckCircle2,
   AlertTriangle, Award, Sparkles, Workflow, Compass, Grid2x2,
-  TrendingUp, BookOpen,
+  TrendingUp, BookOpen, AlertOctagon,
 } from "lucide-react";
 
 
