@@ -176,6 +176,7 @@ const NAV: NavEntry[] = [
   { type: "tab",     id: "decart",        label: "Квадрат Декарта",     icon: Grid2x2 },
   { type: "tab",     id: "kotter",        label: "Модель Коттера",     icon: TrendingUp },
   { type: "tab",     id: "senge",         label: "Модель Сенге",       icon: BookOpen },
+  { type: "tab",     id: "conflicts",     label: "Конфликты",          icon: AlertOctagon },
   { type: "tab",     id: "smart",         label: "SMART-цель",          icon: CheckCircle2 },
   { type: "tab",     id: "swot",          label: "SWOT",                icon: Layers },
 
