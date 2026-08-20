@@ -6,7 +6,9 @@ import {
   Timer,
   Gem, Users, GraduationCap, Star, CheckCircle2,
   AlertTriangle, Award, Sparkles, Workflow, Compass, Grid2x2,
+  TrendingUp,
 } from "lucide-react";
+
 
 const SessionPanelLazy = lazy(() => import("@/components/tabs/session"));
 const GrowLazy = lazy(() => import("@/components/tabs/grow"));
