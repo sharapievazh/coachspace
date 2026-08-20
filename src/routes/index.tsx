@@ -6,7 +6,7 @@ import {
   Timer,
   Gem, Users, GraduationCap, Star, CheckCircle2,
   AlertTriangle, Award, Sparkles, Workflow, Compass, Grid2x2,
-  TrendingUp, BookOpen, AlertOctagon,
+  TrendingUp, BookOpen, AlertOctagon, Scale,
 } from "lucide-react";
 
 
@@ -19,6 +19,7 @@ const DecartLazy = lazy(() => import("@/components/tabs/decart"));
 const KotterLazy = lazy(() => import("@/components/tabs/kotter"));
 const SengeLazy = lazy(() => import("@/components/tabs/senge"));
 const ConflictsLazy = lazy(() => import("@/components/tabs/conflicts"));
+const MediationLazy = lazy(() => import("@/components/tabs/mediation"));
 const SosLazy = lazy(() => import("@/components/tabs/sos"));
 const RapportLazy = lazy(() => import("@/components/tabs/rapport"));
 const SmartGoalLazy = lazy(() => import("@/components/tabs/smart"));
@@ -141,7 +142,7 @@ function ExportModal({ text, onClose }: { text: string; onClose: () => void }) {
   );
 }
 
-type TabId = "session" | "team-coaching" | "competencies" | "erickson" | "rapport" | "values" | "sos" | "grow" | "soar" | "score" | "decart" | "kotter" | "senge" | "conflicts" | "swot" | "smart" | "supervision" | "osvk";
+type TabId = "session" | "team-coaching" | "competencies" | "erickson" | "rapport" | "values" | "sos" | "grow" | "soar" | "score" | "decart" | "kotter" | "senge" | "conflicts" | "mediation" | "swot" | "smart" | "supervision" | "osvk";
 
 type NavEntry =
   | { type: "tab"; id: TabId; label: string; icon: any }
@@ -177,6 +178,7 @@ const NAV: NavEntry[] = [
   { type: "tab",     id: "kotter",        label: "Модель Коттера",     icon: TrendingUp },
   { type: "tab",     id: "senge",         label: "Модель Сенге",       icon: BookOpen },
   { type: "tab",     id: "conflicts",     label: "Конфликты",          icon: AlertOctagon },
+  { type: "tab",     id: "mediation",     label: "Медиация",           icon: Scale },
   { type: "tab",     id: "smart",         label: "SMART-цель",          icon: CheckCircle2 },
   { type: "tab",     id: "swot",          label: "SWOT",                icon: Layers },
 
@@ -204,6 +206,7 @@ function CoachSpace() {
       import("@/components/tabs/kotter");
       import("@/components/tabs/senge");
       import("@/components/tabs/conflicts");
+      import("@/components/tabs/mediation");
       import("@/components/tabs/sos");
 
       import("@/components/tabs/rapport");
@@ -741,6 +744,7 @@ ${notesRef.current || "—"}
             {tab === "kotter" && <KotterLazy />}
             {tab === "senge" && <SengeLazy />}
             {tab === "conflicts" && <ConflictsLazy />}
+            {tab === "mediation" && <MediationLazy />}
             {tab === "swot" && <SwotLazy />}
             {tab === "sos" && <SosLazy />}
 
