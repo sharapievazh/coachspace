@@ -206,6 +206,7 @@ function CoachSpace() {
       import("@/components/tabs/kotter");
       import("@/components/tabs/senge");
       import("@/components/tabs/conflicts");
+      import("@/components/tabs/mediation");
       import("@/components/tabs/sos");
 
       import("@/components/tabs/rapport");
@@ -743,6 +744,7 @@ ${notesRef.current || "—"}
             {tab === "kotter" && <KotterLazy />}
             {tab === "senge" && <SengeLazy />}
             {tab === "conflicts" && <ConflictsLazy />}
+            {tab === "mediation" && <MediationLazy />}
             {tab === "swot" && <SwotLazy />}
             {tab === "sos" && <SosLazy />}
 
