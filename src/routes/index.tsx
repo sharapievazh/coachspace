@@ -203,6 +203,7 @@ function CoachSpace() {
       import("@/components/tabs/decart");
       import("@/components/tabs/kotter");
       import("@/components/tabs/senge");
+      import("@/components/tabs/conflicts");
       import("@/components/tabs/sos");
 
       import("@/components/tabs/rapport");
