@@ -18,6 +18,7 @@ const ScoreLazy = lazy(() => import("@/components/tabs/score"));
 const DecartLazy = lazy(() => import("@/components/tabs/decart"));
 const KotterLazy = lazy(() => import("@/components/tabs/kotter"));
 const SengeLazy = lazy(() => import("@/components/tabs/senge"));
+const ConflictsLazy = lazy(() => import("@/components/tabs/conflicts"));
 const SosLazy = lazy(() => import("@/components/tabs/sos"));
 const RapportLazy = lazy(() => import("@/components/tabs/rapport"));
 const SmartGoalLazy = lazy(() => import("@/components/tabs/smart"));
