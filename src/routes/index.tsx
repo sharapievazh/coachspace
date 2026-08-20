@@ -141,7 +141,7 @@ function ExportModal({ text, onClose }: { text: string; onClose: () => void }) {
   );
 }
 
-type TabId = "session" | "team-coaching" | "competencies" | "erickson" | "rapport" | "values" | "sos" | "grow" | "soar" | "score" | "decart" | "kotter" | "senge" | "swot" | "smart" | "supervision" | "osvk";
+type TabId = "session" | "team-coaching" | "competencies" | "erickson" | "rapport" | "values" | "sos" | "grow" | "soar" | "score" | "decart" | "kotter" | "senge" | "conflicts" | "swot" | "smart" | "supervision" | "osvk";
 
 type NavEntry =
   | { type: "tab"; id: TabId; label: string; icon: any }
