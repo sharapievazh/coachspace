@@ -740,6 +740,7 @@ ${notesRef.current || "—"}
             {tab === "decart" && <DecartLazy />}
             {tab === "kotter" && <KotterLazy />}
             {tab === "senge" && <SengeLazy />}
+            {tab === "conflicts" && <ConflictsLazy />}
             {tab === "swot" && <SwotLazy />}
             {tab === "sos" && <SosLazy />}
 
