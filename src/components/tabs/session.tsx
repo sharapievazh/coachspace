@@ -1104,25 +1104,27 @@ function SessionPanel(p: Props) {
   return (
     <div className="flex flex-col gap-4 max-w-full">
       {/* ── Данные сессии ── */}
-      <div className="bg-card rounded-xl border border-border px-3 py-2 flex items-center gap-2 flex-nowrap">
-        <input defaultValue={p.clientNameRef.current}
-          onInput={(e) => { p.clientNameRef.current = e.currentTarget.value; }}
-          placeholder="Клиент" autoComplete="off" autoCorrect="off" autoCapitalize="words" spellCheck={false}
-          className="min-w-0 flex-1 px-2 py-1.5 rounded-md border border-border bg-background text-xs focus:outline-none focus:ring-1 focus:ring-ring" />
-        <input defaultValue={p.coachNameRef?.current ?? ""}
-          onInput={(e) => { if (p.coachNameRef) p.coachNameRef.current = e.currentTarget.value; }}
-          placeholder="Коуч" autoComplete="off" autoCorrect="off" autoCapitalize="words" spellCheck={false}
-          className="min-w-0 flex-1 px-2 py-1.5 rounded-md border border-border bg-background text-xs focus:outline-none focus:ring-1 focus:ring-ring" />
+      <div className="bg-card rounded-xl border border-border px-3 py-2 space-y-2">
+        <div className="flex items-center gap-2 flex-nowrap">
+          <input defaultValue={p.clientNameRef.current}
+            onInput={(e) => { p.clientNameRef.current = e.currentTarget.value; }}
+            placeholder="Клиент" autoComplete="off" autoCorrect="off" autoCapitalize="words" spellCheck={false}
+            className="min-w-0 flex-1 px-2 py-1.5 rounded-md border border-border bg-background text-xs focus:outline-none focus:ring-1 focus:ring-ring" />
+          <input defaultValue={p.coachNameRef?.current ?? ""}
+            onInput={(e) => { if (p.coachNameRef) p.coachNameRef.current = e.currentTarget.value; }}
+            placeholder="Коуч" autoComplete="off" autoCorrect="off" autoCapitalize="words" spellCheck={false}
+            className="min-w-0 flex-1 px-2 py-1.5 rounded-md border border-border bg-background text-xs focus:outline-none focus:ring-1 focus:ring-ring" />
+          <div className="flex items-center gap-1 shrink-0">
+            <input type="number" min="1" max="480" disabled={p.running} value={minutesInput}
+              onChange={(e) => { setMinutesInput(e.target.value); const m = parseInt(e.target.value, 10); if (!isNaN(m) && m > 0) p.setDuration(m * 60); }}
+              className="w-12 px-1 py-1.5 rounded-md border border-border bg-background text-center focus:outline-none focus:ring-1 focus:ring-ring disabled:opacity-40 text-xs" />
+            <span className="text-xs text-muted-foreground whitespace-nowrap">мин</span>
+          </div>
+        </div>
         <input defaultValue={p.topicRef.current}
           onInput={(e) => { p.topicRef.current = e.currentTarget.value; }}
           placeholder="Тема сессии" autoComplete="off" autoCorrect="off" spellCheck={false}
-          className="min-w-0 flex-1 px-2 py-1.5 rounded-md border border-border bg-background text-xs focus:outline-none focus:ring-1 focus:ring-ring hidden sm:block" />
-        <div className="flex items-center gap-1 shrink-0">
-          <input type="number" min="1" max="480" disabled={p.running} value={minutesInput}
-            onChange={(e) => { setMinutesInput(e.target.value); const m = parseInt(e.target.value, 10); if (!isNaN(m) && m > 0) p.setDuration(m * 60); }}
-            className="w-12 px-1 py-1.5 rounded-md border border-border bg-background text-center focus:outline-none focus:ring-1 focus:ring-ring disabled:opacity-40 text-xs" />
-          <span className="text-xs text-muted-foreground whitespace-nowrap">мин</span>
-        </div>
+          className="w-full px-2 py-1.5 rounded-md border border-border bg-background text-xs focus:outline-none focus:ring-1 focus:ring-ring" />
       </div>
 
       {/* ── Рабочее пространство ── */}
