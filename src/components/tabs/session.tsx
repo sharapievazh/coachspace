@@ -1103,43 +1103,25 @@ function SessionPanel(p: Props) {
 
   return (
     <div className="flex flex-col gap-4 max-w-full">
-      {/* ── Компактная шапка-таймер ── */}
+      {/* ── Данные сессии ── */}
       <div className="bg-card rounded-xl border border-border px-4 py-2.5 flex items-center gap-3 flex-wrap">
-        <Sparkles size={14} className="text-primary shrink-0" />
-        <span ref={mmssElRef} className="font-mono text-lg tabular-nums text-foreground font-medium">{p.mmss}</span>
-        <div className="flex items-center gap-1.5">
-          <button onClick={() => p.setRunning(!p.running)}
-            className="inline-flex items-center gap-1 px-3 py-1 rounded-md bg-primary text-primary-foreground hover:opacity-90 text-xs font-medium">
-            {p.running ? <Pause size={12}/> : <Play size={12}/>} {p.running ? "Пауза" : "Старт"}
-          </button>
-          <button onClick={() => { p.reset(); setMinutesInput(String(Math.floor(p.duration / 60))); }}
-            className="inline-flex items-center justify-center w-7 h-7 rounded-md bg-secondary hover:bg-muted">
-            <RotateCcw size={12}/>
-          </button>
-          <button onClick={p.testSound}
-            className="inline-flex items-center justify-center w-7 h-7 rounded-md border border-border bg-background hover:bg-secondary">
-            <Bell size={12} className="text-primary"/>
-          </button>
-        </div>
-        <div className="flex items-center gap-2 ml-auto flex-wrap">
-          <input defaultValue={p.clientNameRef.current}
-            onInput={(e) => { p.clientNameRef.current = e.currentTarget.value; }}
-            placeholder="Клиент" autoComplete="off" autoCorrect="off" autoCapitalize="words" spellCheck={false}
-            className="w-28 px-2 py-1 rounded-md border border-border bg-background text-xs focus:outline-none focus:ring-1 focus:ring-ring" />
-          <input defaultValue={p.coachNameRef?.current ?? ""}
-            onInput={(e) => { if (p.coachNameRef) p.coachNameRef.current = e.currentTarget.value; }}
-            placeholder="Коуч" autoComplete="off" autoCorrect="off" autoCapitalize="words" spellCheck={false}
-            className="w-28 px-2 py-1 rounded-md border border-border bg-background text-xs focus:outline-none focus:ring-1 focus:ring-ring" />
-          <input defaultValue={p.topicRef.current}
-            onInput={(e) => { p.topicRef.current = e.currentTarget.value; }}
-            placeholder="Тема сессии" autoComplete="off" autoCorrect="off" spellCheck={false}
-            className="w-36 px-2 py-1 rounded-md border border-border bg-background text-xs focus:outline-none focus:ring-1 focus:ring-ring hidden sm:block" />
-          <div className="flex items-center gap-1">
-            <input type="number" min="1" max="480" disabled={p.running} value={minutesInput}
-              onChange={(e) => { setMinutesInput(e.target.value); const m = parseInt(e.target.value, 10); if (!isNaN(m) && m > 0) p.setDuration(m * 60); }}
-              className="w-14 px-2 py-1 rounded-md border border-border bg-background text-center focus:outline-none focus:ring-1 focus:ring-ring disabled:opacity-40 text-xs" />
-            <span className="text-xs text-muted-foreground">мин</span>
-          </div>
+        <input defaultValue={p.clientNameRef.current}
+          onInput={(e) => { p.clientNameRef.current = e.currentTarget.value; }}
+          placeholder="Клиент" autoComplete="off" autoCorrect="off" autoCapitalize="words" spellCheck={false}
+          className="w-28 px-2 py-1 rounded-md border border-border bg-background text-xs focus:outline-none focus:ring-1 focus:ring-ring" />
+        <input defaultValue={p.coachNameRef?.current ?? ""}
+          onInput={(e) => { if (p.coachNameRef) p.coachNameRef.current = e.currentTarget.value; }}
+          placeholder="Коуч" autoComplete="off" autoCorrect="off" autoCapitalize="words" spellCheck={false}
+          className="w-28 px-2 py-1 rounded-md border border-border bg-background text-xs focus:outline-none focus:ring-1 focus:ring-ring" />
+        <input defaultValue={p.topicRef.current}
+          onInput={(e) => { p.topicRef.current = e.currentTarget.value; }}
+          placeholder="Тема сессии" autoComplete="off" autoCorrect="off" spellCheck={false}
+          className="w-36 px-2 py-1 rounded-md border border-border bg-background text-xs focus:outline-none focus:ring-1 focus:ring-ring hidden sm:block" />
+        <div className="flex items-center gap-1 ml-auto">
+          <input type="number" min="1" max="480" disabled={p.running} value={minutesInput}
+            onChange={(e) => { setMinutesInput(e.target.value); const m = parseInt(e.target.value, 10); if (!isNaN(m) && m > 0) p.setDuration(m * 60); }}
+            className="w-14 px-2 py-1 rounded-md border border-border bg-background text-center focus:outline-none focus:ring-1 focus:ring-ring disabled:opacity-40 text-xs" />
+          <span className="text-xs text-muted-foreground">мин</span>
         </div>
       </div>
 
