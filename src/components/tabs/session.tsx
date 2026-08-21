@@ -6,6 +6,7 @@ import {
 } from "lucide-react";
 // OSVK_TEMPLATE kept for potential future use but supervision now uses interactive checklist
 import { BalanceRadar } from "@/components/coach/CoachVisuals";
+import DrawCanvas from "@/components/coach/DrawCanvas";
 
 type Props = {
   duration: number;
@@ -1087,6 +1088,7 @@ function SessionPanel(p: Props) {
   const [minutesInput, setMinutesInput] = useState(() => String(Math.floor(p.duration / 60)));
   const [activeTab, setActiveTab] = useState<Tab>("notes");
   const [markerOpen, setMarkerOpen] = useState(false);
+  const [notesMode, setNotesMode] = useState<"text" | "draw">("text");
 
   const appendToNotes = useCallback((text: string) => {
     const el = notesElRef.current;
