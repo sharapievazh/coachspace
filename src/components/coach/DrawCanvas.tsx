@@ -8,37 +8,64 @@ const WIDTHS: { label: string; w: number }[] = [
   { label: "Толсто", w: 14 },
 ];
 
+const HEIGHT = 420;
+
 export default function DrawCanvas() {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const drawing = useRef(false);
   const last = useRef<{ x: number; y: number } | null>(null);
+  const cssSize = useRef<{ w: number; h: number }>({ w: 0, h: HEIGHT });
   const [color, setColor] = useState(COLORS[0]);
   const [width, setWidth] = useState(6);
   const [eraser, setEraser] = useState(false);
 
-  // размер холста — один раз, чтобы не терять рисунок
+  // Размер холста пересчитывается при любом изменении ширины контейнера
+  // (в т.ч. когда вкладка была скрыта и ширина была 0), рисунок сохраняется.
   useEffect(() => {
     const c = canvasRef.current;
     if (!c) return;
-    const dpr = Math.min(window.devicePixelRatio || 1, 2);
-    const rect = c.getBoundingClientRect();
-    const w = rect.width || 320;
-    const h = 420;
-    c.width = Math.round(w * dpr);
-    c.height = Math.round(h * dpr);
-    c.style.height = `${h}px`;
-    const ctx = c.getContext("2d");
-    if (!ctx) return;
-    ctx.scale(dpr, dpr);
-    ctx.fillStyle = "#ffffff";
-    ctx.fillRect(0, 0, w, h);
-    ctx.lineCap = "round";
-    ctx.lineJoin = "round";
+
+    const resize = () => {
+      const rect = c.getBoundingClientRect();
+      const w = Math.round(rect.width);
+      if (!w || w === cssSize.current.w) return;
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+
+      // сохраняем текущее содержимое
+      let prev: HTMLCanvasElement | null = null;
+      if (c.width > 0 && c.height > 0) {
+        prev = document.createElement("canvas");
+        prev.width = c.width;
+        prev.height = c.height;
+        prev.getContext("2d")?.drawImage(c, 0, 0);
+      }
+
+      c.width = Math.round(w * dpr);
+      c.height = Math.round(HEIGHT * dpr);
+      c.style.height = `${HEIGHT}px`;
+      cssSize.current = { w, h: HEIGHT };
+
+      const ctx = c.getContext("2d");
+      if (!ctx) return;
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      ctx.fillStyle = "#ffffff";
+      ctx.fillRect(0, 0, w, HEIGHT);
+      if (prev) ctx.drawImage(prev, 0, 0, prev.width, prev.height, 0, 0, w, HEIGHT);
+      ctx.lineCap = "round";
+      ctx.lineJoin = "round";
+    };
+
+    resize();
+    const ro = new ResizeObserver(resize);
+    ro.observe(c);
+    return () => ro.disconnect();
   }, []);
 
   const pos = (e: React.PointerEvent<HTMLCanvasElement>) => {
     const r = e.currentTarget.getBoundingClientRect();
-    return { x: e.clientX - r.left, y: e.clientY - r.top };
+    const sx = r.width ? cssSize.current.w / r.width : 1;
+    const sy = r.height ? cssSize.current.h / r.height : 1;
+    return { x: (e.clientX - r.left) * sx, y: (e.clientY - r.top) * sy };
   };
 
   const stroke = (from: { x: number; y: number }, to: { x: number; y: number }) => {
@@ -69,13 +96,12 @@ export default function DrawCanvas() {
   const onUp = () => { drawing.current = false; last.current = null; };
 
   const clear = () => {
-    const c = canvasRef.current;
-    const ctx = c?.getContext("2d");
-    if (!c || !ctx) return;
-    const r = c.getBoundingClientRect();
+    const ctx = canvasRef.current?.getContext("2d");
+    if (!ctx) return;
     ctx.fillStyle = "#ffffff";
-    ctx.fillRect(0, 0, r.width, parseFloat(c.style.height || "420"));
+    ctx.fillRect(0, 0, cssSize.current.w, cssSize.current.h);
   };
+
 
   return (
     <div className="space-y-3">
