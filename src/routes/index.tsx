@@ -637,9 +637,23 @@ ${notesRef.current || "—"}
             <button
               onClick={toggleTimer}
               className="min-w-11 min-h-11 grid place-items-center rounded-md bg-primary text-primary-foreground hover:opacity-90"
-              aria-label="toggle"
+              aria-label={running ? "Пауза" : "Старт"}
             >
               {running ? <Pause size={18} /> : <Play size={18} />}
+            </button>
+            <button
+              onClick={resetTimer}
+              className="min-w-9 min-h-9 grid place-items-center rounded-md bg-background text-foreground hover:bg-muted"
+              aria-label="Сбросить таймер"
+            >
+              <RotateCcw size={16} />
+            </button>
+            <button
+              onClick={testSound}
+              className="min-w-9 min-h-9 grid place-items-center rounded-md bg-background text-foreground hover:bg-muted"
+              aria-label="Тест звонка"
+            >
+              <Bell size={16} />
             </button>
           </div>
         </div>
