@@ -1084,15 +1084,9 @@ class ToolErrorBoundary extends React.Component<
 
 function SessionPanel(p: Props) {
   const notesElRef = useRef<HTMLTextAreaElement | null>(null);
-  const mmssElRef = useRef<HTMLSpanElement | null>(null);
   const [minutesInput, setMinutesInput] = useState(() => String(Math.floor(p.duration / 60)));
   const [activeTab, setActiveTab] = useState<Tab>("notes");
   const [markerOpen, setMarkerOpen] = useState(false);
-
-  // Update timer display directly in DOM — no React re-render on every tick
-  useEffect(() => {
-    if (mmssElRef.current) mmssElRef.current.textContent = p.mmss;
-  }, [p.mmss]);
 
   const appendToNotes = useCallback((text: string) => {
     const el = notesElRef.current;
