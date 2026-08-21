@@ -6,6 +6,7 @@ import {
 } from "lucide-react";
 // OSVK_TEMPLATE kept for potential future use but supervision now uses interactive checklist
 import { BalanceRadar } from "@/components/coach/CoachVisuals";
+import DrawCanvas from "@/components/coach/DrawCanvas";
 
 type Props = {
   duration: number;
@@ -1087,6 +1088,7 @@ function SessionPanel(p: Props) {
   const [minutesInput, setMinutesInput] = useState(() => String(Math.floor(p.duration / 60)));
   const [activeTab, setActiveTab] = useState<Tab>("notes");
   const [markerOpen, setMarkerOpen] = useState(false);
+  const [notesMode, setNotesMode] = useState<"text" | "draw">("text");
 
   const appendToNotes = useCallback((text: string) => {
     const el = notesElRef.current;
@@ -1145,20 +1147,38 @@ function SessionPanel(p: Props) {
         <div className="p-5">
           <div className={activeTab === "notes" ? "" : "hidden"}>
             <div className="space-y-3">
-              <textarea ref={notesElRef} defaultValue={p.notesRef.current}
-                onInput={(e) => { p.notesRef.current = e.currentTarget.value; }}
-                rows={20} placeholder="Ценностные слова, инсайты, цитаты клиента…"
-                inputMode="text" autoComplete="off" autoCorrect="off" spellCheck={false}
-                className="w-full px-3 py-2 rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-ring resize-none text-sm" />
-              <div className="flex items-center justify-between gap-2 flex-wrap">
-                <button onClick={() => setMarkerOpen(true)}
-                  className="inline-flex items-center gap-2 px-4 min-h-10 rounded-lg border border-amber-500/40 bg-gradient-to-r from-amber-500/15 to-orange-500/10 hover:from-amber-500/25 hover:to-orange-500/20 text-sm text-amber-700 dark:text-amber-300 font-medium">
-                  ✦ Маркер Супервизии
-                </button>
-                <button onClick={p.exportSession}
-                  className="inline-flex items-center gap-2 px-4 min-h-10 rounded-lg bg-primary text-primary-foreground hover:opacity-90 text-sm">
-                  <Download size={15}/> Экспорт
-                </button>
+              {/* Сегментированный переключатель Текст / Рисунок */}
+              <div className="inline-flex items-center gap-1 p-1 rounded-lg bg-secondary">
+                {([["text", "✏️ Текст"], ["draw", "🖌️ Рисунок"]] as const).map(([m, label]) => (
+                  <button key={m} type="button" onClick={() => setNotesMode(m)}
+                    className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${
+                      notesMode === m ? "bg-card text-foreground shadow-sm" : "text-muted-foreground"
+                    }`}>
+                    {label}
+                  </button>
+                ))}
+              </div>
+
+              <div className={notesMode === "text" ? "space-y-3" : "hidden"}>
+                <textarea ref={notesElRef} defaultValue={p.notesRef.current}
+                  onInput={(e) => { p.notesRef.current = e.currentTarget.value; }}
+                  rows={20} placeholder="Ценностные слова, инсайты, цитаты клиента…"
+                  inputMode="text" autoComplete="off" autoCorrect="off" spellCheck={false}
+                  className="w-full px-3 py-2 rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-ring resize-none text-sm" />
+                <div className="flex items-center justify-between gap-2 flex-wrap">
+                  <button onClick={() => setMarkerOpen(true)}
+                    className="inline-flex items-center gap-2 px-4 min-h-10 rounded-lg border border-amber-500/40 bg-gradient-to-r from-amber-500/15 to-orange-500/10 hover:from-amber-500/25 hover:to-orange-500/20 text-sm text-amber-700 dark:text-amber-300 font-medium">
+                    ✦ Маркер Супервизии
+                  </button>
+                  <button onClick={p.exportSession}
+                    className="inline-flex items-center gap-2 px-4 min-h-10 rounded-lg bg-primary text-primary-foreground hover:opacity-90 text-sm">
+                    <Download size={15}/> Экспорт
+                  </button>
+                </div>
+              </div>
+
+              <div className={notesMode === "draw" ? "" : "hidden"}>
+                <DrawCanvas />
               </div>
             </div>
           </div>
