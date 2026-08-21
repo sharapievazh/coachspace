@@ -1,6 +1,6 @@
-import React, { memo, useRef, useState, useCallback, useMemo, useEffect, MutableRefObject } from "react";
+import React, { memo, useRef, useState, useCallback, useMemo, MutableRefObject } from "react";
 import {
-  Bell, Download, Pause, Play, RotateCcw, Sparkles,
+  Download,
   FileText, BarChart2, CircleDot, Triangle, LayoutGrid, Plus, X,
   GitBranch, Target, ChevronDown, ChevronUp, ArrowRight,
 } from "lucide-react";
