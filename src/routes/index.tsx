@@ -223,6 +223,8 @@ const NAV: NavEntry[] = [
   { type: "tab",     id: "metaprograms",  label: "Метапрограммы",           icon: ScanSearch },
   { type: "tab",     id: "values",        label: "Ценности / Спиральная динамика", icon: Rainbow },
   { type: "tab",     id: "psychk",        label: "PSYCH-K / Lab-профиль",   icon: KeyRound },
+  { type: "tab",     id: "tr-sessions",   label: "Сессии трансформации",    icon: Sparkles },
+  { type: "tab",     id: "meditations",   label: "Медитации",               icon: Moon },
   { type: "section", label: "ИНСТРУМЕНТЫ" },
   { type: "tab",     id: "decart",        label: "Квадрат Декарта",         icon: Grid2x2 },
   { type: "tab",     id: "swot",          label: "SWOT",                    icon: Layers },
@@ -233,9 +235,6 @@ const NAV: NavEntry[] = [
   { type: "tab",     id: "nlu",           label: "Пирамида Дилтса",         icon: Triangle },
   { type: "tab",     id: "burger",        label: "Гамбургер ОСВК",          icon: UtensilsCrossed },
   { type: "tab",     id: "rules",         label: "8 Правил ОСВК",           icon: ListChecks },
-  { type: "tab",     id: "tr-sessions",   label: "Сессии трансформации",    icon: Sparkles },
-  { type: "section", label: "МЕДИТАЦИИ" },
-  { type: "tab",     id: "meditations",   label: "Медитации",               icon: Moon },
 ];
 
 
