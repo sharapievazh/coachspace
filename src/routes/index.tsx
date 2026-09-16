@@ -7,6 +7,7 @@ import {
   Gem, Users, GraduationCap, Star, CheckCircle2,
   AlertTriangle, Award, Sparkles, Workflow, Compass, Grid2x2,
   TrendingUp, BookOpen, AlertOctagon, Scale, RotateCcw, Bell,
+  Waves, Brain, Split, Rocket,
 } from "lucide-react";
 
 
@@ -29,6 +30,11 @@ const SupervisionLazy = lazy(() => import("@/components/tabs/supervision"));
 const OsvkLazy = lazy(() => import("@/components/tabs/osvk"));
 const CompetenciesLazy = lazy(() => import("@/components/tabs/competencies"));
 const TeamCoachingLazy = lazy(() => import("@/components/tabs/team-coaching"));
+const TransformTechLazy = lazy(() => import("@/components/tabs/transform-tech"));
+const TransformBeliefsLazy = lazy(() => import("@/components/tabs/transform-beliefs"));
+const TransformTaLazy = lazy(() => import("@/components/tabs/transform-ta"));
+const TransformSessionsLazy = lazy(() => import("@/components/tabs/transform-sessions"));
+const PotentialLazy = lazy(() => import("@/components/tabs/potential"));
 
 
 export const Route = createFileRoute("/")({
@@ -142,7 +148,7 @@ function ExportModal({ text, onClose }: { text: string; onClose: () => void }) {
   );
 }
 
-type TabId = "session" | "team-coaching" | "competencies" | "erickson" | "rapport" | "values" | "sos" | "grow" | "soar" | "score" | "decart" | "kotter" | "senge" | "conflicts" | "mediation" | "swot" | "smart" | "supervision" | "osvk";
+type TabId = "session" | "team-coaching" | "competencies" | "erickson" | "rapport" | "values" | "sos" | "grow" | "soar" | "score" | "decart" | "kotter" | "senge" | "conflicts" | "mediation" | "swot" | "smart" | "supervision" | "osvk" | "tr-tech" | "tr-beliefs" | "tr-ta" | "tr-sessions" | "potential";
 
 type NavEntry =
   | { type: "tab"; id: TabId; label: string; icon: any }
@@ -181,6 +187,14 @@ const NAV: NavEntry[] = [
   { type: "tab",     id: "mediation",     label: "Медиация",           icon: Scale },
   { type: "tab",     id: "smart",         label: "SMART-цель",          icon: CheckCircle2 },
   { type: "tab",     id: "swot",          label: "SWOT",                icon: Layers },
+  { type: "tab",     id: "potential",     label: "Мой потенциал",       icon: Rocket },
+
+  { type: "section", label: "ТРАНСФОРМАЦИЯ" },
+  { type: "tab",     id: "tr-tech",       label: "Технологии",          icon: Waves },
+  { type: "tab",     id: "tr-beliefs",    label: "Работа с убеждениями", icon: Brain },
+  { type: "tab",     id: "tr-ta",         label: "Трансактный анализ",  icon: Split },
+  { type: "tab",     id: "tr-sessions",   label: "Сессии трансформации", icon: Sparkles },
+
 
   { type: "section", label: "СУПЕРВИЗИЯ И ОСВК" },
   { type: "tab",     id: "supervision",   label: "Супервизия",          icon: Users },
@@ -217,6 +231,11 @@ function CoachSpace() {
       import("@/components/tabs/osvk");
       import("@/components/tabs/competencies");
       import("@/components/tabs/team-coaching");
+      import("@/components/tabs/transform-tech");
+      import("@/components/tabs/transform-beliefs");
+      import("@/components/tabs/transform-ta");
+      import("@/components/tabs/transform-sessions");
+      import("@/components/tabs/potential");
     }, 800);
     return () => clearTimeout(t);
   }, []);
@@ -770,6 +789,11 @@ ${notesRef.current || "—"}
             {tab === "osvk" && <OsvkLazy />}
             {tab === "competencies" && <CompetenciesLazy />}
             {tab === "team-coaching" && <TeamCoachingLazy />}
+            {tab === "tr-tech" && <TransformTechLazy />}
+            {tab === "tr-beliefs" && <TransformBeliefsLazy />}
+            {tab === "tr-ta" && <TransformTaLazy />}
+            {tab === "tr-sessions" && <TransformSessionsLazy />}
+            {tab === "potential" && <PotentialLazy />}
           </Suspense>
         </main>
 
