@@ -7,7 +7,7 @@ import {
   Gem, Users, GraduationCap, Star, CheckCircle2,
   AlertTriangle, Award, Sparkles, Workflow, Compass, Grid2x2,
   TrendingUp, BookOpen, AlertOctagon, Scale, RotateCcw, Bell,
-  Waves, Brain, Split, Rocket,
+  Waves, Brain, Split, Rocket, ClipboardCheck,
 } from "lucide-react";
 
 
@@ -35,6 +35,7 @@ const TransformBeliefsLazy = lazy(() => import("@/components/tabs/transform-beli
 const TransformTaLazy = lazy(() => import("@/components/tabs/transform-ta"));
 const TransformSessionsLazy = lazy(() => import("@/components/tabs/transform-sessions"));
 const PotentialLazy = lazy(() => import("@/components/tabs/potential"));
+const QuizLazy = lazy(() => import("@/components/tabs/quiz"));
 
 
 export const Route = createFileRoute("/")({
@@ -148,7 +149,7 @@ function ExportModal({ text, onClose }: { text: string; onClose: () => void }) {
   );
 }
 
-type TabId = "session" | "team-coaching" | "competencies" | "erickson" | "rapport" | "values" | "sos" | "grow" | "soar" | "score" | "decart" | "kotter" | "senge" | "conflicts" | "mediation" | "swot" | "smart" | "supervision" | "osvk" | "tr-tech" | "tr-beliefs" | "tr-ta" | "tr-sessions" | "potential";
+type TabId = "session" | "team-coaching" | "competencies" | "erickson" | "rapport" | "values" | "sos" | "grow" | "soar" | "score" | "decart" | "kotter" | "senge" | "conflicts" | "mediation" | "swot" | "smart" | "supervision" | "osvk" | "tr-tech" | "tr-beliefs" | "tr-ta" | "tr-sessions" | "potential" | "quiz";
 
 type NavEntry =
   | { type: "tab"; id: TabId; label: string; icon: any }
@@ -170,6 +171,7 @@ const buildSmartParagraph = (d: SmartData) => {
 const NAV: NavEntry[] = [
   { type: "tab",     id: "session",       label: "Вести Сессию",       icon: Sparkles },
   { type: "tab",     id: "team-coaching", label: "Командный коучинг",   icon: Users },
+  { type: "tab",     id: "quiz",          label: "Тест",                icon: ClipboardCheck },
   { type: "section", label: "ТЕОРИЯ" },
   { type: "tab",     id: "competencies",  label: "16 Компетенций",      icon: GraduationCap },
   { type: "tab",     id: "erickson",      label: "Звезда Эриксона",     icon: Star },
@@ -236,6 +238,7 @@ function CoachSpace() {
       import("@/components/tabs/transform-ta");
       import("@/components/tabs/transform-sessions");
       import("@/components/tabs/potential");
+      import("@/components/tabs/quiz");
     }, 800);
     return () => clearTimeout(t);
   }, []);
@@ -794,6 +797,7 @@ ${notesRef.current || "—"}
             {tab === "tr-ta" && <TransformTaLazy />}
             {tab === "tr-sessions" && <TransformSessionsLazy />}
             {tab === "potential" && <PotentialLazy />}
+            {tab === "quiz" && <QuizLazy />}
           </Suspense>
         </main>
 
