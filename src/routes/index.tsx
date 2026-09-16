@@ -8,7 +8,7 @@ import {
   AlertTriangle, Award, Sparkles, Workflow, Compass, Grid2x2,
   TrendingUp, BookOpen, AlertOctagon, Scale, RotateCcw, Bell,
   Waves, Brain, Split, Rocket, ClipboardCheck,
-  Map, Repeat, Box, Network, Lightbulb, Clock, Puzzle, KeyRound,
+  Map as MapIcon, Repeat, Box, Network, Lightbulb, Clock, Puzzle, KeyRound,
   Fingerprint, ShieldCheck, UserCheck, Rainbow, ScanSearch,
   UtensilsCrossed, ListChecks,
 } from "lucide-react";
@@ -199,7 +199,7 @@ const NAV: NavEntry[] = [
   { type: "section", label: "МОДУЛЬ 2 · ИНДИВИДУАЛЬНЫЙ КОУЧИНГ" },
   { type: "tab",     id: "supervision",   label: "Супервизия",              icon: UserCheck },
   { type: "tab",     id: "balance",       label: "Колесо жизни",            icon: Gem },
-  { type: "tab",     id: "strategy",      label: "Стратегический коучинг",  icon: Map },
+  { type: "tab",     id: "strategy",      label: "Стратегический коучинг",  icon: MapIcon },
   { type: "tab",     id: "habits",        label: "Работа с привычками",     icon: Repeat },
   { type: "section", label: "МОДУЛЬ 3 · КОМАНДНЫЙ КОУЧИНГ" },
   { type: "tab",     id: "team-coaching", label: "Классический командный",  icon: Users },
