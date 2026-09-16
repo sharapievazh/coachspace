@@ -19,7 +19,6 @@ const GrowLazy = lazy(() => import("@/components/tabs/grow"));
 const SwotLazy = lazy(() => import("@/components/tabs/swot"));
 const SoarLazy = lazy(() => import("@/components/tabs/soar"));
 const DecartLazy = lazy(() => import("@/components/tabs/decart"));
-const DecartLazy = lazy(() => import("@/components/tabs/decart"));
 const KotterLazy = lazy(() => import("@/components/tabs/kotter"));
 const SengeLazy = lazy(() => import("@/components/tabs/senge"));
 const SosLazy = lazy(() => import("@/components/tabs/sos"));
