@@ -7,6 +7,7 @@ import {
   Gem, Users, GraduationCap, Star, CheckCircle2,
   AlertTriangle, Award, Sparkles, Workflow, Compass, Grid2x2,
   TrendingUp, BookOpen, AlertOctagon, Scale, RotateCcw, Bell,
+  Waves, Brain, Split, Rocket,
 } from "lucide-react";
 
 
@@ -29,6 +30,11 @@ const SupervisionLazy = lazy(() => import("@/components/tabs/supervision"));
 const OsvkLazy = lazy(() => import("@/components/tabs/osvk"));
 const CompetenciesLazy = lazy(() => import("@/components/tabs/competencies"));
 const TeamCoachingLazy = lazy(() => import("@/components/tabs/team-coaching"));
+const TransformTechLazy = lazy(() => import("@/components/tabs/transform-tech"));
+const TransformBeliefsLazy = lazy(() => import("@/components/tabs/transform-beliefs"));
+const TransformTaLazy = lazy(() => import("@/components/tabs/transform-ta"));
+const TransformSessionsLazy = lazy(() => import("@/components/tabs/transform-sessions"));
+const PotentialLazy = lazy(() => import("@/components/tabs/potential"));
 
 
 export const Route = createFileRoute("/")({
