@@ -231,6 +231,11 @@ function CoachSpace() {
       import("@/components/tabs/osvk");
       import("@/components/tabs/competencies");
       import("@/components/tabs/team-coaching");
+      import("@/components/tabs/transform-tech");
+      import("@/components/tabs/transform-beliefs");
+      import("@/components/tabs/transform-ta");
+      import("@/components/tabs/transform-sessions");
+      import("@/components/tabs/potential");
     }, 800);
     return () => clearTimeout(t);
   }, []);
