@@ -823,13 +823,14 @@ ${notesRef.current || "—"}
           <Suspense fallback={<div className="py-10 text-center text-sm text-muted-foreground">Загрузка…</div>}>
             {tab === "session" && <SessionPanelLazy duration={duration} setDuration={changeDuration} remaining={remaining} running={running} setRunning={handleSetRunning} reset={resetTimer} mmss={mmss} clientNameRef={clientNameRef} coachNameRef={coachNameRef} topicRef={topicRef} notesRef={notesRef} exportSession={exportSession} testSound={testSound} />}
             {tab === "grow" && <GrowLazy />}
+            {tab === "models" && <ModelsLazy />}
+            {tab === "merrill" && <MerrillLazy />}
+            {tab === "ethics" && <EthicsLazy />}
             {tab === "soar" && <SoarLazy />}
-            {tab === "score" && <ScoreLazy />}
             {tab === "decart" && <DecartLazy />}
             {tab === "kotter" && <KotterLazy />}
             {tab === "senge" && <SengeLazy />}
-            {tab === "conflicts" && <ConflictsLazy />}
-            {tab === "mediation" && <MediationLazy />}
+            {tab === "conflict-med" && <ConflictMedLazy />}
             {tab === "swot" && <SwotLazy />}
             {tab === "sos" && <SosLazy />}
 
@@ -839,12 +840,25 @@ ${notesRef.current || "—"}
             {tab === "values" && <ValuesLazy />}
             {tab === "supervision" && <SupervisionLazy />}
             {tab === "osvk" && <OsvkLazy />}
+            {tab === "nlu" && <NluLazy />}
+            {tab === "burger" && <BurgerLazy />}
+            {tab === "rules" && <RulesLazy />}
+            {tab === "balance" && <BalanceTabLazy />}
+            {tab === "strategy" && <StrategyLazy />}
+            {tab === "habits" && <HabitsLazy />}
             {tab === "competencies" && <CompetenciesLazy />}
             {tab === "team-coaching" && <TeamCoachingLazy />}
+            {tab === "cube" && <CubeLazy />}
+            {tab === "teambuilding" && <TeambuildingLazy />}
+            {tab === "brainstorm" && <BrainstormLazy />}
             {tab === "tr-tech" && <TransformTechLazy />}
             {tab === "tr-beliefs" && <TransformBeliefsLazy />}
             {tab === "tr-ta" && <TransformTaLazy />}
             {tab === "tr-sessions" && <TransformSessionsLazy />}
+            {tab === "timeline" && <TimelineLazy />}
+            {tab === "parts" && <PartsLazy />}
+            {tab === "metaprograms" && <MetaprogramsLazy />}
+            {tab === "psychk" && <PsychKLazy />}
             {tab === "potential" && <PotentialLazy />}
             {tab === "quiz" && <QuizLazy />}
           </Suspense>
