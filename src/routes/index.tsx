@@ -8,6 +8,9 @@ import {
   AlertTriangle, Award, Sparkles, Workflow, Compass, Grid2x2,
   TrendingUp, BookOpen, AlertOctagon, Scale, RotateCcw, Bell,
   Waves, Brain, Split, Rocket, ClipboardCheck,
+  Map, Repeat, Box, Network, Lightbulb, Clock, Puzzle, KeyRound,
+  Fingerprint, ShieldCheck, UserCheck, Rainbow, ScanSearch,
+  UtensilsCrossed, ListChecks,
 } from "lucide-react";
 
 
@@ -36,6 +39,23 @@ const TransformTaLazy = lazy(() => import("@/components/tabs/transform-ta"));
 const TransformSessionsLazy = lazy(() => import("@/components/tabs/transform-sessions"));
 const PotentialLazy = lazy(() => import("@/components/tabs/potential"));
 const QuizLazy = lazy(() => import("@/components/tabs/quiz"));
+const ModelsLazy = lazy(() => import("@/components/tabs/models"));
+const MerrillLazy = lazy(() => import("@/components/tabs/merrill"));
+const EthicsLazy = lazy(() => import("@/components/tabs/ethics"));
+const StrategyLazy = lazy(() => import("@/components/tabs/strategy"));
+const HabitsLazy = lazy(() => import("@/components/tabs/habits"));
+const CubeLazy = lazy(() => import("@/components/tabs/cube"));
+const TeambuildingLazy = lazy(() => import("@/components/tabs/teambuilding"));
+const BrainstormLazy = lazy(() => import("@/components/tabs/brainstorm"));
+const ConflictMedLazy = lazy(() => import("@/components/tabs/conflict-med"));
+const TimelineLazy = lazy(() => import("@/components/tabs/timeline"));
+const PartsLazy = lazy(() => import("@/components/tabs/parts"));
+const MetaprogramsLazy = lazy(() => import("@/components/tabs/metaprograms"));
+const PsychKLazy = lazy(() => import("@/components/tabs/psychk"));
+const BalanceTabLazy = lazy(() => import("@/components/tabs/balance-tab"));
+const NluLazy = lazy(() => import("@/components/tabs/nlu"));
+const BurgerLazy = lazy(() => import("@/components/tabs/burger"));
+const RulesLazy = lazy(() => import("@/components/tabs/rules"));
 
 
 export const Route = createFileRoute("/")({
@@ -149,7 +169,7 @@ function ExportModal({ text, onClose }: { text: string; onClose: () => void }) {
   );
 }
 
-type TabId = "session" | "team-coaching" | "competencies" | "erickson" | "rapport" | "values" | "sos" | "grow" | "soar" | "score" | "decart" | "kotter" | "senge" | "conflicts" | "mediation" | "swot" | "smart" | "supervision" | "osvk" | "tr-tech" | "tr-beliefs" | "tr-ta" | "tr-sessions" | "potential" | "quiz";
+type TabId = "session" | "quiz" | "grow" | "models" | "competencies" | "rapport" | "merrill" | "ethics" | "supervision" | "balance" | "strategy" | "habits" | "team-coaching" | "cube" | "teambuilding" | "brainstorm" | "senge" | "kotter" | "soar" | "sos" | "conflict-med" | "tr-tech" | "timeline" | "parts" | "tr-beliefs" | "tr-ta" | "metaprograms" | "values" | "psychk" | "decart" | "swot" | "smart" | "potential" | "erickson" | "osvk" | "nlu" | "burger" | "rules" | "tr-sessions";
 
 type NavEntry =
   | { type: "tab"; id: TabId; label: string; icon: any }
@@ -169,38 +189,52 @@ const buildSmartParagraph = (d: SmartData) => {
 };
 
 const NAV: NavEntry[] = [
-  { type: "tab",     id: "session",       label: "Вести Сессию",       icon: Sparkles },
-  { type: "tab",     id: "team-coaching", label: "Командный коучинг",   icon: Users },
-  { type: "tab",     id: "quiz",          label: "Тест",                icon: ClipboardCheck },
-  { type: "section", label: "ТЕОРИЯ" },
-  { type: "tab",     id: "competencies",  label: "16 Компетенций",      icon: GraduationCap },
-  { type: "tab",     id: "erickson",      label: "Звезда Эриксона",     icon: Star },
-  { type: "tab",     id: "rapport",       label: "Раппорт",             icon: Heart },
-  { type: "tab",     id: "values",        label: "Ценности",            icon: Gem },
-  { type: "tab",     id: "sos",           label: "SOS Карпман",         icon: AlertTriangle },
+  { type: "section", label: "ДЕЙСТВИЕ" },
+  { type: "tab",     id: "session",       label: "Вести Сессию",            icon: Sparkles },
+  { type: "tab",     id: "quiz",          label: "Тест",                    icon: ClipboardCheck },
+  { type: "section", label: "МОДУЛЬ 1 · БАЗОВЫЕ МОДЕЛИ" },
+  { type: "tab",     id: "grow",          label: "GROW (макро + микро)",    icon: Target },
+  { type: "tab",     id: "models",        label: "SCORE · SOAR · ABC",      icon: Compass },
+  { type: "tab",     id: "competencies",  label: "Компетенции коуча",       icon: GraduationCap },
+  { type: "tab",     id: "rapport",       label: "Раппорт и взаимодействие", icon: Heart },
+  { type: "tab",     id: "merrill",       label: "Типология MERRILL",       icon: Fingerprint },
+  { type: "tab",     id: "ethics",        label: "Этика коуча",             icon: ShieldCheck },
+  { type: "section", label: "МОДУЛЬ 2 · ИНДИВИДУАЛЬНЫЙ КОУЧИНГ" },
+  { type: "tab",     id: "supervision",   label: "Супервизия",              icon: UserCheck },
+  { type: "tab",     id: "balance",       label: "Колесо жизни",            icon: Gem },
+  { type: "tab",     id: "strategy",      label: "Стратегический коучинг",  icon: Map },
+  { type: "tab",     id: "habits",        label: "Работа с привычками",     icon: Repeat },
+  { type: "section", label: "МОДУЛЬ 3 · КОМАНДНЫЙ КОУЧИНГ" },
+  { type: "tab",     id: "team-coaching", label: "Классический командный",  icon: Users },
+  { type: "tab",     id: "cube",          label: "Коучинг-тренинг «Кубик»", icon: Box },
+  { type: "tab",     id: "teambuilding",  label: "Командообразование",      icon: Network },
+  { type: "tab",     id: "brainstorm",    label: "Брейнсторминг",           icon: Lightbulb },
+  { type: "section", label: "МОДУЛЬ 4 · СИСТЕМНЫЙ КОУЧИНГ" },
+  { type: "tab",     id: "senge",         label: "Модель Сенге",            icon: BookOpen },
+  { type: "tab",     id: "kotter",        label: "Модель Коттера",          icon: TrendingUp },
+  { type: "tab",     id: "soar",          label: "SOAR (системный)",        icon: Workflow },
+  { type: "tab",     id: "sos",           label: "SOS Карпман",             icon: AlertTriangle },
+  { type: "tab",     id: "conflict-med",  label: "Конфликты / Медиация",    icon: Scale },
+  { type: "section", label: "МОДУЛЬ 5 · ТРАНСФОРМАЦИЯ" },
+  { type: "tab",     id: "tr-tech",       label: "Трансформационный коучинг", icon: Waves },
+  { type: "tab",     id: "timeline",      label: "Линия времени",           icon: Clock },
+  { type: "tab",     id: "parts",         label: "Части личности",          icon: Puzzle },
+  { type: "tab",     id: "tr-beliefs",    label: "Убеждения",               icon: Brain },
+  { type: "tab",     id: "tr-ta",         label: "Трансактный анализ",      icon: Split },
+  { type: "tab",     id: "metaprograms",  label: "Метапрограммы",           icon: ScanSearch },
+  { type: "tab",     id: "values",        label: "Ценности / Спиральная динамика", icon: Rainbow },
+  { type: "tab",     id: "psychk",        label: "PSYCH-K / Lab-профиль",   icon: KeyRound },
   { type: "section", label: "ИНСТРУМЕНТЫ" },
-  { type: "tab",     id: "grow",          label: "GROW",                icon: Target },
-  { type: "tab",     id: "soar",          label: "SOAR",                icon: Workflow },
-  { type: "tab",     id: "score",         label: "S.C.O.R.E.",          icon: Compass },
-  { type: "tab",     id: "decart",        label: "Квадрат Декарта",     icon: Grid2x2 },
-  { type: "tab",     id: "kotter",        label: "Модель Коттера",     icon: TrendingUp },
-  { type: "tab",     id: "senge",         label: "Модель Сенге",       icon: BookOpen },
-  { type: "tab",     id: "conflicts",     label: "Конфликты",          icon: AlertOctagon },
-  { type: "tab",     id: "mediation",     label: "Медиация",           icon: Scale },
-  { type: "tab",     id: "smart",         label: "SMART-цель",          icon: CheckCircle2 },
-  { type: "tab",     id: "swot",          label: "SWOT",                icon: Layers },
-  { type: "tab",     id: "potential",     label: "Мой потенциал",       icon: Rocket },
-
-  { type: "section", label: "ТРАНСФОРМАЦИЯ" },
-  { type: "tab",     id: "tr-tech",       label: "Технологии",          icon: Waves },
-  { type: "tab",     id: "tr-beliefs",    label: "Работа с убеждениями", icon: Brain },
-  { type: "tab",     id: "tr-ta",         label: "Трансактный анализ",  icon: Split },
-  { type: "tab",     id: "tr-sessions",   label: "Сессии трансформации", icon: Sparkles },
-
-
-  { type: "section", label: "СУПЕРВИЗИЯ И ОСВК" },
-  { type: "tab",     id: "supervision",   label: "Супервизия",          icon: Users },
-  { type: "tab",     id: "osvk",          label: "ОСВК",                icon: Award },
+  { type: "tab",     id: "decart",        label: "Квадрат Декарта",         icon: Grid2x2 },
+  { type: "tab",     id: "swot",          label: "SWOT",                    icon: Layers },
+  { type: "tab",     id: "smart",         label: "SMART-цель",              icon: CheckCircle2 },
+  { type: "tab",     id: "potential",     label: "Мой потенциал",           icon: Rocket },
+  { type: "tab",     id: "erickson",      label: "Звезда Эриксона",         icon: Star },
+  { type: "tab",     id: "osvk",          label: "ОСВК",                    icon: Award },
+  { type: "tab",     id: "nlu",           label: "Пирамида Дилтса",         icon: Triangle },
+  { type: "tab",     id: "burger",        label: "Гамбургер ОСВК",          icon: UtensilsCrossed },
+  { type: "tab",     id: "rules",         label: "8 Правил ОСВК",           icon: ListChecks },
+  { type: "tab",     id: "tr-sessions",   label: "Сессии трансформации",    icon: Sparkles },
 ];
 
 const TIMER_STORAGE_KEY = "coach-space-session-timer";
@@ -221,8 +255,7 @@ function CoachSpace() {
       import("@/components/tabs/decart");
       import("@/components/tabs/kotter");
       import("@/components/tabs/senge");
-      import("@/components/tabs/conflicts");
-      import("@/components/tabs/mediation");
+      import("@/components/tabs/conflict-med");
       import("@/components/tabs/sos");
 
       import("@/components/tabs/rapport");
@@ -239,6 +272,22 @@ function CoachSpace() {
       import("@/components/tabs/transform-sessions");
       import("@/components/tabs/potential");
       import("@/components/tabs/quiz");
+      import("@/components/tabs/models");
+      import("@/components/tabs/merrill");
+      import("@/components/tabs/ethics");
+      import("@/components/tabs/strategy");
+      import("@/components/tabs/habits");
+      import("@/components/tabs/cube");
+      import("@/components/tabs/teambuilding");
+      import("@/components/tabs/brainstorm");
+      import("@/components/tabs/timeline");
+      import("@/components/tabs/parts");
+      import("@/components/tabs/metaprograms");
+      import("@/components/tabs/psychk");
+      import("@/components/tabs/balance-tab");
+      import("@/components/tabs/nlu");
+      import("@/components/tabs/burger");
+      import("@/components/tabs/rules");
     }, 800);
     return () => clearTimeout(t);
   }, []);
