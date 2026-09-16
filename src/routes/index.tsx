@@ -10,7 +10,7 @@ import {
   Waves, Brain, Split, Rocket, ClipboardCheck,
   Map as MapIcon, Repeat, Box, Network, Lightbulb, Clock, Puzzle, KeyRound,
   Fingerprint, ShieldCheck, UserCheck, Rainbow, ScanSearch,
-  UtensilsCrossed, ListChecks,
+  UtensilsCrossed, ListChecks, Moon,
 } from "lucide-react";
 
 
@@ -53,6 +53,8 @@ const BalanceTabLazy = lazy(() => import("@/components/tabs/balance-tab"));
 const NluLazy = lazy(() => import("@/components/tabs/nlu"));
 const BurgerLazy = lazy(() => import("@/components/tabs/burger"));
 const RulesLazy = lazy(() => import("@/components/tabs/rules"));
+const MeditationsLazy = lazy(() => import("@/components/tabs/meditations"));
+
 
 
 export const Route = createFileRoute("/")({
@@ -166,7 +168,7 @@ function ExportModal({ text, onClose }: { text: string; onClose: () => void }) {
   );
 }
 
-type TabId = "session" | "quiz" | "grow" | "models" | "competencies" | "rapport" | "merrill" | "ethics" | "supervision" | "balance" | "strategy" | "habits" | "team-coaching" | "cube" | "teambuilding" | "brainstorm" | "senge" | "kotter" | "soar" | "sos" | "conflict-med" | "tr-tech" | "timeline" | "parts" | "tr-beliefs" | "tr-ta" | "metaprograms" | "values" | "psychk" | "decart" | "swot" | "smart" | "potential" | "erickson" | "osvk" | "nlu" | "burger" | "rules" | "tr-sessions";
+type TabId = "session" | "quiz" | "grow" | "models" | "competencies" | "rapport" | "merrill" | "ethics" | "supervision" | "balance" | "strategy" | "habits" | "team-coaching" | "cube" | "teambuilding" | "brainstorm" | "senge" | "kotter" | "soar" | "sos" | "conflict-med" | "tr-tech" | "timeline" | "parts" | "tr-beliefs" | "tr-ta" | "metaprograms" | "values" | "psychk" | "decart" | "swot" | "smart" | "potential" | "erickson" | "osvk" | "nlu" | "burger" | "rules" | "tr-sessions" | "meditations";
 
 type NavEntry =
   | { type: "tab"; id: TabId; label: string; icon: any }
@@ -232,7 +234,10 @@ const NAV: NavEntry[] = [
   { type: "tab",     id: "burger",        label: "Гамбургер ОСВК",          icon: UtensilsCrossed },
   { type: "tab",     id: "rules",         label: "8 Правил ОСВК",           icon: ListChecks },
   { type: "tab",     id: "tr-sessions",   label: "Сессии трансформации",    icon: Sparkles },
+  { type: "section", label: "МЕДИТАЦИИ" },
+  { type: "tab",     id: "meditations",   label: "Медитации",               icon: Moon },
 ];
+
 
 const TIMER_STORAGE_KEY = "coach-space-session-timer";
 
@@ -285,6 +290,8 @@ function CoachSpace() {
       import("@/components/tabs/nlu");
       import("@/components/tabs/burger");
       import("@/components/tabs/rules");
+      import("@/components/tabs/meditations");
+
     }, 800);
     return () => clearTimeout(t);
   }, []);
@@ -858,6 +865,8 @@ ${notesRef.current || "—"}
             {tab === "psychk" && <PsychKLazy />}
             {tab === "potential" && <PotentialLazy />}
             {tab === "quiz" && <QuizLazy />}
+            {tab === "meditations" && <MeditationsLazy />}
+
           </Suspense>
         </main>
 
