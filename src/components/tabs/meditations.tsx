@@ -164,7 +164,7 @@ function CheckList({ scope, items, accent }: { scope: string; items: string[]; a
   const [checks, setChecks] = useState<Record<string, boolean>>(() => loadChecks(scope));
   const toggle = (i: number) => {
     setChecks((c) => {
-      const next = { ...c, [i]: !c[i] };
+      const next: Record<string, boolean> = { ...c, [i]: !c[i] };
       saveCheck(scope, i, next[i]);
       return next;
     });
