@@ -789,6 +789,11 @@ ${notesRef.current || "—"}
             {tab === "osvk" && <OsvkLazy />}
             {tab === "competencies" && <CompetenciesLazy />}
             {tab === "team-coaching" && <TeamCoachingLazy />}
+            {tab === "tr-tech" && <TransformTechLazy />}
+            {tab === "tr-beliefs" && <TransformBeliefsLazy />}
+            {tab === "tr-ta" && <TransformTaLazy />}
+            {tab === "tr-sessions" && <TransformSessionsLazy />}
+            {tab === "potential" && <PotentialLazy />}
           </Suspense>
         </main>
 
