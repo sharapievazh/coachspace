@@ -148,7 +148,7 @@ function ExportModal({ text, onClose }: { text: string; onClose: () => void }) {
   );
 }
 
-type TabId = "session" | "team-coaching" | "competencies" | "erickson" | "rapport" | "values" | "sos" | "grow" | "soar" | "score" | "decart" | "kotter" | "senge" | "conflicts" | "mediation" | "swot" | "smart" | "supervision" | "osvk";
+type TabId = "session" | "team-coaching" | "competencies" | "erickson" | "rapport" | "values" | "sos" | "grow" | "soar" | "score" | "decart" | "kotter" | "senge" | "conflicts" | "mediation" | "swot" | "smart" | "supervision" | "osvk" | "tr-tech" | "tr-beliefs" | "tr-ta" | "tr-sessions" | "potential";
 
 type NavEntry =
   | { type: "tab"; id: TabId; label: string; icon: any }
@@ -187,6 +187,14 @@ const NAV: NavEntry[] = [
   { type: "tab",     id: "mediation",     label: "Медиация",           icon: Scale },
   { type: "tab",     id: "smart",         label: "SMART-цель",          icon: CheckCircle2 },
   { type: "tab",     id: "swot",          label: "SWOT",                icon: Layers },
+  { type: "tab",     id: "potential",     label: "Мой потенциал",       icon: Rocket },
+
+  { type: "section", label: "ТРАНСФОРМАЦИЯ" },
+  { type: "tab",     id: "tr-tech",       label: "Технологии",          icon: Waves },
+  { type: "tab",     id: "tr-beliefs",    label: "Работа с убеждениями", icon: Brain },
+  { type: "tab",     id: "tr-ta",         label: "Трансактный анализ",  icon: Split },
+  { type: "tab",     id: "tr-sessions",   label: "Сессии трансформации", icon: Sparkles },
+
 
   { type: "section", label: "СУПЕРВИЗИЯ И ОСВК" },
   { type: "tab",     id: "supervision",   label: "Супервизия",          icon: Users },
