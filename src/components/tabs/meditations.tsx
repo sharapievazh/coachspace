@@ -1,6 +1,6 @@
 import { useState } from "react";
 import {
-  Brain, Check, Clock, Copy, Footprints, HeartHandshake, HelpCircle, ListChecks, Mic,
+  Brain, Check, Clock, Copy, HeartHandshake, HelpCircle, ListChecks, Mic,
   Moon, Puzzle, Sparkles, Timer, Users, Wind,
 } from "lucide-react";
 import { SectionHead } from "./_shared";
@@ -863,8 +863,5 @@ function Meditations() {
     </div>
   );
 }
-
-// Footprints imported for potential future use; keep tree-shaking simple.
-void Footprints;
 
 export default Meditations;
