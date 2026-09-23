@@ -2,10 +2,11 @@ import { createFileRoute } from "@tanstack/react-router";
 import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Onboarding, { isOnboardingDone } from "@/components/onboarding";
 import {
-  Play, Pause, Target, Heart, Triangle, Layers,
+  Play, Pause, RotateCcw, Bell, Target, Heart, Triangle, Layers,
   Timer,
   Gem, Users, GraduationCap, Star, CheckCircle2,
   AlertTriangle, Award, Sparkles,
+  TrendingUp, BookOpen, AlertOctagon, Scale, Grid2x2,
 } from "lucide-react";
 
 const SessionPanelLazy = lazy(() => import("@/components/tabs/session"));
@@ -20,6 +21,11 @@ const SupervisionLazy = lazy(() => import("@/components/tabs/supervision"));
 const OsvkLazy = lazy(() => import("@/components/tabs/osvk"));
 const CompetenciesLazy = lazy(() => import("@/components/tabs/competencies"));
 const TeamCoachingLazy = lazy(() => import("@/components/tabs/team-coaching"));
+const KotterLazy = lazy(() => import("@/components/tabs/kotter"));
+const SengeLazy = lazy(() => import("@/components/tabs/senge"));
+const ConflictsLazy = lazy(() => import("@/components/tabs/conflicts"));
+const MediationLazy = lazy(() => import("@/components/tabs/mediation"));
+const DescartesLazy = lazy(() => import("@/components/tabs/descartes"));
 
 export const Route = createFileRoute("/")({
   component: CoachSpace,
@@ -85,6 +91,7 @@ function ExportModal({ text, onClose }: { text: string; onClose: () => void }) {
         {/* Text preview */}
         <textarea
           readOnly
+          tabIndex={-1}
           value={text}
           rows={10}
           className="w-full px-5 py-4 bg-background text-xs font-mono text-foreground resize-none focus:outline-none"
@@ -132,7 +139,7 @@ function ExportModal({ text, onClose }: { text: string; onClose: () => void }) {
   );
 }
 
-type TabId = "session" | "team-coaching" | "competencies" | "erickson" | "rapport" | "values" | "sos" | "grow" | "swot" | "smart" | "supervision" | "osvk";
+type TabId = "session" | "team-coaching" | "competencies" | "erickson" | "rapport" | "values" | "sos" | "grow" | "swot" | "smart" | "supervision" | "osvk" | "kotter" | "senge" | "conflicts" | "mediation" | "descartes";
 
 type NavEntry =
   | { type: "tab"; id: TabId; label: string; icon: any }
@@ -164,6 +171,11 @@ const NAV: NavEntry[] = [
   { type: "tab",     id: "grow",          label: "GROW",                icon: Target },
   { type: "tab",     id: "smart",         label: "SMART-цель",          icon: CheckCircle2 },
   { type: "tab",     id: "swot",          label: "SWOT",                icon: Layers },
+  { type: "tab",     id: "kotter",        label: "Модель Коттера",      icon: TrendingUp },
+  { type: "tab",     id: "senge",         label: "Модель Сенге",        icon: BookOpen },
+  { type: "tab",     id: "conflicts",     label: "Коучинг в конфликтах",icon: AlertOctagon },
+  { type: "tab",     id: "mediation",     label: "Медиация",            icon: Scale },
+  { type: "tab",     id: "descartes",     label: "Квадрат Декарта",     icon: Grid2x2 },
   { type: "section", label: "СУПЕРВИЗИЯ И ОСВК" },
   { type: "tab",     id: "supervision",   label: "Супервизия",          icon: Users },
   { type: "tab",     id: "osvk",          label: "ОСВК",                icon: Award },
@@ -191,6 +203,11 @@ function CoachSpace() {
       import("@/components/tabs/osvk");
       import("@/components/tabs/competencies");
       import("@/components/tabs/team-coaching");
+      import("@/components/tabs/kotter");
+      import("@/components/tabs/senge");
+      import("@/components/tabs/conflicts");
+      import("@/components/tabs/mediation");
+      import("@/components/tabs/descartes");
     }, 800);
     return () => clearTimeout(t);
   }, []);
@@ -548,6 +565,11 @@ function CoachSpace() {
     return `${m}:${s}`;
   }, [remaining]);
 
+  // Stable ref that always holds the current mmss string.
+  // Passed to SessionPanel so it can poll without re-rendering on every tick.
+  const mmssRef = useRef(mmss);
+  mmssRef.current = mmss;
+
   const exportSession = useCallback(() => {
     let smartBlock = "";
     try {
@@ -596,8 +618,8 @@ ${notesRef.current || "—"}
   }
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
-      <header className="border-b border-border bg-card">
+    <div className="min-h-screen bg-background text-foreground" id="app-scroll-root">
+      <header className="sticky top-0 z-30 border-b border-border bg-card">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-[env(safe-area-inset-top)] pb-4 flex items-center justify-between gap-4">
           <div className="flex items-center gap-3 min-w-0">
             <div className="w-11 h-11 rounded-xl bg-primary text-primary-foreground grid place-items-center font-bold shrink-0">CS</div>
@@ -606,7 +628,7 @@ ${notesRef.current || "—"}
               <p className="text-xs text-muted-foreground truncate">Рабочее пространство коуча</p>
             </div>
           </div>
-          <div className="flex items-center gap-2 sm:gap-3 px-3 py-2 rounded-lg bg-secondary shrink-0">
+          <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-secondary shrink-0">
             <div className="font-mono text-base sm:text-xl tabular-nums">{mmss}</div>
             <button
               onClick={toggleTimer}
@@ -614,6 +636,22 @@ ${notesRef.current || "—"}
               aria-label="toggle"
             >
               {running ? <Pause size={18} /> : <Play size={18} />}
+            </button>
+            <button
+              onClick={resetTimer}
+              className="min-w-9 min-h-9 grid place-items-center rounded-md bg-card hover:bg-muted border border-border"
+              aria-label="reset"
+              title="Сбросить таймер"
+            >
+              <RotateCcw size={15} />
+            </button>
+            <button
+              onClick={testSound}
+              className="min-w-9 min-h-9 grid place-items-center rounded-md bg-card hover:bg-muted border border-border"
+              aria-label="bell"
+              title="Проверить звонок"
+            >
+              <Bell size={15} className="text-primary" />
             </button>
           </div>
         </div>
@@ -710,7 +748,7 @@ ${notesRef.current || "—"}
 
         <main className="flex-1 min-w-0 px-4 sm:px-6 md:px-0 py-6">
           <Suspense fallback={<div className="py-10 text-center text-sm text-muted-foreground">Загрузка…</div>}>
-            {tab === "session" && <SessionPanelLazy duration={duration} setDuration={changeDuration} remaining={remaining} running={running} setRunning={handleSetRunning} reset={resetTimer} mmss={mmss} clientNameRef={clientNameRef} coachNameRef={coachNameRef} topicRef={topicRef} notesRef={notesRef} exportSession={exportSession} testSound={testSound} />}
+            {tab === "session" && <SessionPanelLazy duration={duration} setDuration={changeDuration} running={running} setRunning={handleSetRunning} reset={resetTimer} mmssRef={mmssRef} clientNameRef={clientNameRef} coachNameRef={coachNameRef} topicRef={topicRef} notesRef={notesRef} exportSession={exportSession} testSound={testSound} />}
             {tab === "grow" && <GrowLazy />}
             {tab === "swot" && <SwotLazy />}
             {tab === "sos" && <SosLazy />}
@@ -722,6 +760,11 @@ ${notesRef.current || "—"}
             {tab === "osvk" && <OsvkLazy />}
             {tab === "competencies" && <CompetenciesLazy />}
             {tab === "team-coaching" && <TeamCoachingLazy />}
+            {tab === "kotter"        && <KotterLazy />}
+            {tab === "senge"         && <SengeLazy />}
+            {tab === "conflicts"     && <ConflictsLazy />}
+            {tab === "mediation"     && <MediationLazy />}
+            {tab === "descartes"     && <DescartesLazy />}
           </Suspense>
         </main>
 

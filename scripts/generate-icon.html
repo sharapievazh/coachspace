@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>* { margin: 0; padding: 0; }</style>
+</head>
+<body>
+<canvas id="c" width="1024" height="1024"></canvas>
+<script>
+const canvas = document.getElementById('c');
+const ctx = canvas.getContext('2d');
+
+// Background gradient
+const grad = ctx.createLinearGradient(0, 0, 1024, 1024);
+grad.addColorStop(0, '#12002e');
+grad.addColorStop(1, '#1e0060');
+ctx.fillStyle = grad;
+// Rounded rect
+const r = 225;
+ctx.beginPath();
+ctx.moveTo(r, 0);
+ctx.lineTo(1024 - r, 0);
+ctx.arcTo(1024, 0, 1024, r, r);
+ctx.lineTo(1024, 1024 - r);
+ctx.arcTo(1024, 1024, 1024 - r, 1024, r);
+ctx.lineTo(r, 1024);
+ctx.arcTo(0, 1024, 0, 1024 - r, r);
+ctx.lineTo(0, r);
+ctx.arcTo(0, 0, r, 0, r);
+ctx.closePath();
+ctx.fill();
+
+// C letter
+ctx.font = 'bold 520px Georgia, serif';
+ctx.textAlign = 'center';
+ctx.textBaseline = 'middle';
+ctx.fillStyle = '#a78bfa';
+ctx.fillText('C', 370, 530);
+
+// S letter
+ctx.fillStyle = '#ffffff';
+ctx.fillText('S', 660, 530);
+
+// Export
+const link = document.createElement('a');
+link.download = 'AppIcon-1024.png';
+link.href = canvas.toDataURL('image/png');
+link.click();
+</script>
+</body>
+</html>

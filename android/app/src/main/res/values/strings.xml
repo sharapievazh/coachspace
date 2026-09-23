@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">CoachSpace</string>
+    <string name="title_activity_main">CoachSpace</string>
+    <string name="package_name">com.sharapieva.coachspace</string>
+    <string name="custom_url_scheme">com.sharapieva.coachspace</string>
+</resources>

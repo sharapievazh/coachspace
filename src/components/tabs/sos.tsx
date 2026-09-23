@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { AlertTriangle } from "lucide-react";
+import { AlertTriangle, X } from "lucide-react";
 import { KarpmanTriangleSvg } from "@/components/coach/CoachVisuals";
 import { SectionHead } from "./_shared";
 
@@ -20,6 +20,8 @@ function Sos() {
   const [sosOpen, setSosOpen] = useState(false);
   const activeRole = ROLES.find((r) => r.name === active) || null;
 
+  const closeAll = () => { setActive(null); setSosOpen(false); };
+
   return (
     <div className="space-y-6 max-w-full overflow-hidden">
       <SectionHead title="SOS · Треугольник Карпмана" subtitle="Шпаргалка-предохранитель для растождествления" />
@@ -30,77 +32,68 @@ function Sos() {
         </p>
         <KarpmanTriangleSvg
           active={active}
-          onSelect={(r) => { setSosOpen(false); setActive(r); }}
-          onSosSelect={() => { setActive(null); setSosOpen(true); }}
+          onSelect={(r) => { setSosOpen(false); setActive(r === active ? null : r); }}
+          onSosSelect={() => { setActive(null); setSosOpen(!sosOpen); }}
         />
       </div>
 
+      {/* Оверлей для роли */}
       {activeRole && (
-        <div className="rounded-2xl border border-border bg-card p-4 space-y-4">
-          <div className="flex items-center gap-3">
-            <div
-              className="w-11 h-11 rounded-xl grid place-items-center shrink-0"
-              style={{ background: roleAccent[activeRole.name] }}
-            >
-              <AlertTriangle size={22} className="text-white" />
+        <div className="fixed inset-0 z-50 flex items-end" style={{ background: "rgba(0,0,0,0.5)" }} onClick={closeAll}>
+          <div className="w-full rounded-t-3xl bg-card p-5 space-y-4" style={{ maxHeight: "70vh", overflowY: "auto" }} onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center gap-3">
+              <div className="w-11 h-11 rounded-xl grid place-items-center shrink-0" style={{ background: roleAccent[activeRole.name] }}>
+                <AlertTriangle size={22} className="text-white" />
+              </div>
+              <div className="min-w-0 flex-1">
+                <div className="text-lg font-extrabold">{activeRole.name}</div>
+                <div className="text-sm text-muted-foreground">Роль в треугольнике</div>
+              </div>
+              <button type="button" onClick={closeAll} className="w-9 h-9 rounded-full bg-muted grid place-items-center" aria-label="Закрыть">
+                <X size={18} />
+              </button>
             </div>
-            <div className="min-w-0 flex-1">
-              <div className="text-lg font-extrabold">{activeRole.name}</div>
-              <div className="text-sm text-muted-foreground">Роль в треугольнике</div>
+            <div>
+              <div className="text-xs uppercase tracking-wide text-muted-foreground mb-1">Признаки</div>
+              <ul className="text-sm space-y-1">{activeRole.signs.map((s, i) => <li key={i}>· {s}</li>)}</ul>
             </div>
-            <button
-              type="button"
-              onClick={() => setActive(null)}
-              className="text-xs text-muted-foreground px-2 py-1 rounded-md hover:bg-muted"
-              aria-label="Закрыть"
-            >
-              ✕
-            </button>
-          </div>
-          <div>
-            <div className="text-xs uppercase tracking-wide text-muted-foreground mb-1">Признаки</div>
-            <ul className="text-sm space-y-1">{activeRole.signs.map((s, i) => <li key={i}>· {s}</li>)}</ul>
-          </div>
-          <div className="rounded-xl p-3" style={{ background: roleAccent[activeRole.name] + "1A" }}>
-            <div className="text-xs uppercase tracking-wide text-muted-foreground mb-1">Антидот</div>
-            <p className="text-sm font-semibold">{activeRole.antidote}</p>
-          </div>
-          <div>
-            <div className="text-xs uppercase tracking-wide text-muted-foreground mb-1">SOS-вопросы</div>
-            <ul className="text-sm space-y-1">{activeRole.q.map((s, i) => <li key={i}>→ {s}</li>)}</ul>
+            <div className="rounded-xl p-3" style={{ background: roleAccent[activeRole.name] + "1A" }}>
+              <div className="text-xs uppercase tracking-wide text-muted-foreground mb-1">Антидот</div>
+              <p className="text-sm font-semibold">{activeRole.antidote}</p>
+            </div>
+            <div>
+              <div className="text-xs uppercase tracking-wide text-muted-foreground mb-1">SOS-вопросы</div>
+              <ul className="text-sm space-y-1">{activeRole.q.map((s, i) => <li key={i}>→ {s}</li>)}</ul>
+            </div>
           </div>
         </div>
       )}
 
+      {/* Оверлей для SOS-центра */}
       {sosOpen && (
-        <div className="rounded-2xl border border-border bg-card p-4 space-y-4">
-          <div className="flex items-center gap-3">
-            <div className="w-11 h-11 rounded-xl grid place-items-center shrink-0 bg-foreground text-background font-black">
-              SOS
+        <div className="fixed inset-0 z-50 flex items-end" style={{ background: "rgba(0,0,0,0.5)" }} onClick={closeAll}>
+          <div className="w-full rounded-t-3xl bg-card p-5 space-y-4" style={{ maxHeight: "70vh", overflowY: "auto" }} onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center gap-3">
+              <div className="w-11 h-11 rounded-xl grid place-items-center shrink-0 bg-foreground text-background font-black">SOS</div>
+              <div className="min-w-0 flex-1">
+                <div className="text-lg font-extrabold">Растождествление</div>
+                <div className="text-sm text-muted-foreground">Точка выхода из треугольника</div>
+              </div>
+              <button type="button" onClick={closeAll} className="w-9 h-9 rounded-full bg-muted grid place-items-center" aria-label="Закрыть">
+                <X size={18} />
+              </button>
             </div>
-            <div className="min-w-0 flex-1">
-              <div className="text-lg font-extrabold">Растождествление</div>
-              <div className="text-sm text-muted-foreground">Точка выхода из треугольника</div>
+            <p className="text-[15px] leading-relaxed text-foreground/90">
+              Растождествление — это способность заметить: «я сейчас в роли», сделать шаг в сторону и увидеть ситуацию со стороны. Не роль управляет тобой, а ты выбираешь ответ.
+            </p>
+            <div className="rounded-xl p-3 bg-muted">
+              <div className="text-xs uppercase tracking-wide text-muted-foreground mb-2">Коуч-вопросы</div>
+              <ul className="text-sm space-y-1.5">
+                <li>→ В какой роли я сейчас нахожусь?</li>
+                <li>→ Что я выбираю вместо этой роли?</li>
+                <li>→ Какой мой следующий взрослый шаг?</li>
+              </ul>
             </div>
-            <button
-              type="button"
-              onClick={() => setSosOpen(false)}
-              className="text-xs text-muted-foreground px-2 py-1 rounded-md hover:bg-muted"
-              aria-label="Закрыть"
-            >
-              ✕
-            </button>
-          </div>
-          <p className="text-[15px] leading-relaxed text-foreground/90">
-            Растождествление — это способность заметить: «я сейчас в роли», сделать шаг в сторону и увидеть ситуацию со стороны. Не роль управляет тобой, а ты выбираешь ответ.
-          </p>
-          <div className="rounded-xl p-3 bg-muted">
-            <div className="text-xs uppercase tracking-wide text-muted-foreground mb-2">Коуч-вопросы</div>
-            <ul className="text-sm space-y-1.5">
-              <li>→ В какой роли я сейчас нахожусь?</li>
-              <li>→ Что я выбираю вместо этой роли?</li>
-              <li>→ Какой мой следующий взрослый шаг?</li>
-            </ul>
           </div>
         </div>
       )}

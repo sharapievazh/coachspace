@@ -242,14 +242,6 @@
     user-select: text;
     -webkit-touch-callout: default;
     touch-action: auto;
-    transform: translateZ(0);
-  }
-
-  .ios-keyboard-active input,
-  .ios-keyboard-active textarea,
-  .ios-keyboard-active select {
-    scroll-margin-top: 96px;
-    scroll-margin-bottom: 320px;
   }
 
   input::placeholder,
@@ -282,6 +274,42 @@
   padding: 16px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
   border: none;
+}
+
+/* On Capacitor iOS, CARenderServer is unavailable → CPU rendering only.
+   CSS transitions require a composite frame per animation step:
+   0.15s transition × ~60fps = 9 frames × 800ms/frame = 7s of JS blocking.
+   Disabling all transitions/animations eliminates this CPU compositing cascade. */
+.cap-ios * {
+  transition-duration: 0ms !important;
+  animation-duration: 0ms !important;
+}
+
+/* focus:ring / focus:outline trigger a box-shadow change → full CPU repaint
+   (~800ms). iOS sends RTI IPC during this window to establish keyboard input;
+   WebContent can't respond → RTI disconnects → keyboard goes silent.
+   Removing all focus ring visuals on iOS prevents this repaint on tap. */
+.cap-ios input:focus,
+.cap-ios textarea:focus,
+.cap-ios select:focus,
+.cap-ios [contenteditable]:focus {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+/* contain:layout paint tells the browser the painted dirty region is limited
+   to the element's own bounding box. Without CARenderServer (CPU rendering),
+   any change inside an input/textarea repaints the ENTIRE page (~800ms).
+   With contain:paint, only the element's box is repainted (~200-350ms),
+   giving the RTI IPC enough time to set up keyboard input. */
+.cap-ios input,
+.cap-ios textarea,
+.cap-ios select {
+  contain: layout paint;
+  /* Hide the text cursor: cursor appearance triggers a separate WebKit render
+     pass (~800ms on CPU). Transparent caret eliminates this render entirely,
+     removing one source of WebContent blocking during RTI setup. */
+  caret-color: transparent;
 }
 
 

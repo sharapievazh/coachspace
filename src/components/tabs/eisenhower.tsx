@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { CalendarCheck, Flame, LayoutGrid, Trash2, UserPlus } from "lucide-react";
+import { CalendarCheck, Flame, LayoutGrid, Trash2, UserPlus, X } from "lucide-react";
 
 const EISENHOWER_DATA = [
   {
@@ -140,55 +140,45 @@ function Eisenhower() {
         })}
       </div>
 
+      {/* Оверлей поверх экрана */}
       {active && (
-        <div className={`mt-4 rounded-2xl border ${active.border} ${active.lightBg} p-4 space-y-4`}>
-          <div className="flex items-center gap-2">
-            <div className={`w-8 h-8 rounded-lg ${active.color} grid place-items-center shadow-sm`}>
-              <active.icon size={16} className="text-white" />
-            </div>
-            <div className="flex-1 min-w-0">
-              <div className={`text-base font-bold ${active.text}`}>
-                {active.en} — {active.title}
+        <div className="fixed inset-0 z-50 flex items-end" style={{ background: "rgba(0,0,0,0.5)" }} onClick={() => setOpenKey(null)}>
+          <div className="w-full rounded-t-3xl bg-card p-5 space-y-4" style={{ maxHeight: "70vh", overflowY: "auto" }} onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center gap-2">
+              <div className={`w-9 h-9 rounded-lg ${active.color} grid place-items-center shadow-sm shrink-0`}>
+                <active.icon size={18} className="text-white" />
               </div>
-              <div className="text-sm font-medium text-foreground">{active.action}</div>
+              <div className="flex-1 min-w-0">
+                <div className={`text-base font-bold ${active.text}`}>{active.en} — {active.title}</div>
+                <div className="text-sm font-medium text-foreground">{active.action}</div>
+              </div>
+              <button type="button" onClick={() => setOpenKey(null)} className="w-9 h-9 rounded-full bg-muted grid place-items-center shrink-0" aria-label="Закрыть">
+                <X size={18} />
+              </button>
             </div>
-            <button
-              type="button"
-              onClick={() => setOpenKey(null)}
-              className="text-xs text-muted-foreground px-2 py-1 rounded-md hover:bg-white/40"
-              aria-label="Закрыть"
-            >
-              ✕
-            </button>
-          </div>
-          <p className="text-sm text-secondary-foreground leading-relaxed">
-            {active.desc}
-          </p>
-          <div>
-            <div className="text-xs font-semibold text-secondary-foreground uppercase tracking-wider mb-2">
-              Примеры задач
+            <p className="text-sm text-secondary-foreground leading-relaxed">{active.desc}</p>
+            <div>
+              <div className="text-xs font-semibold text-secondary-foreground uppercase tracking-wider mb-2">Примеры задач</div>
+              <ul className="space-y-2">
+                {active.examples.map((ex, idx) => (
+                  <li key={idx} className="flex items-start gap-2 text-sm text-foreground">
+                    <span className={`shrink-0 mt-1.5 w-1.5 h-1.5 rounded-full ${active.color}`} />
+                    <span>{ex}</span>
+                  </li>
+                ))}
+              </ul>
             </div>
-            <ul className="space-y-2">
-              {active.examples.map((ex, idx) => (
-                <li key={idx} className="flex items-start gap-2 text-sm text-foreground">
-                  <span className={`shrink-0 mt-1.5 w-1.5 h-1.5 rounded-full ${active.color}`} />
-                  <span>{ex}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
-          <div>
-            <div className="text-xs font-semibold text-secondary-foreground uppercase tracking-wider mb-2">
-              Наводящие вопросы для клиента
+            <div>
+              <div className="text-xs font-semibold text-secondary-foreground uppercase tracking-wider mb-2">Наводящие вопросы для клиента</div>
+              <ul className="space-y-2">
+                {active.questions.map((q, idx) => (
+                  <li key={idx} className="flex items-start gap-2 text-sm text-foreground">
+                    <span className="shrink-0 mt-1 text-muted-foreground">•</span>
+                    <span>{q}</span>
+                  </li>
+                ))}
+              </ul>
             </div>
-            <ul className="space-y-2">
-              {active.questions.map((q, idx) => (
-                <li key={idx} className="flex items-start gap-2 text-sm text-foreground">
-                  <span className="shrink-0 mt-1 text-muted-foreground">•</span>
-                  <span>{q}</span>
-                </li>
-              ))}
-            </ul>
           </div>
         </div>
       )}

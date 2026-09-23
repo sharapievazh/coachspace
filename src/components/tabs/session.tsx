@@ -1,8 +1,7 @@
 import React, { memo, useRef, useState, useCallback, useMemo, useEffect, MutableRefObject } from "react";
 import {
-  Bell, Download, Pause, Play, RotateCcw, Sparkles,
-  FileText, BarChart2, CircleDot, Triangle, LayoutGrid, Plus, X,
-  GitBranch, Target, ChevronDown, ChevronUp, ArrowRight,
+  Download,
+  Plus, X, ChevronDown, ChevronUp, ArrowRight,
 } from "lucide-react";
 // OSVK_TEMPLATE kept for potential future use but supervision now uses interactive checklist
 import { BalanceRadar } from "@/components/coach/CoachVisuals";
@@ -10,11 +9,10 @@ import { BalanceRadar } from "@/components/coach/CoachVisuals";
 type Props = {
   duration: number;
   setDuration: (v: number) => void;
-  remaining?: number;
   running: boolean;
   setRunning: (v: boolean) => void;
   reset: () => void;
-  mmss: string;
+  mmssRef: MutableRefObject<string>;
   clientNameRef: MutableRefObject<string>;
   coachNameRef?: MutableRefObject<string>;
   topicRef: MutableRefObject<string>;
@@ -351,11 +349,12 @@ function MindMapTool({ onExport }: { onExport: (text: string) => void }) {
     setEditTextState(t);
   };
 
-  // Focus input when editing starts (avoids autoFocus issues on iOS WebView)
+  // Focus input when editing starts; select all so user can immediately replace text
   useEffect(() => {
     if (editingId !== null) {
       const ref = viewMode === "radial" ? editInputRef : listEditInputRef;
       ref.current?.focus();
+      ref.current?.select();
     }
   }, [editingId, viewMode]);
 
@@ -894,17 +893,16 @@ function SixHatsTool({ onExport }: { onExport: (text: string) => void }) {
 }
 
 // ─── Главный компонент ────────────────────────────────────────────────────────
-type Tab = "notes" | "scale" | "balance" | "dilts" | "matrix" | "mindmap" | "grow" | "hats";
+type Tab = "notes" | "scale" | "balance" | "dilts" | "matrix" | "grow" | "hats";
 
-const TABS: { id: Tab; label: string; icon: React.ReactNode }[] = [
-  { id: "notes",   label: "Заметки",    icon: <FileText size={13}/> },
-  { id: "scale",   label: "Шкала 1-10", icon: <BarChart2 size={13}/> },
-  { id: "balance", label: "Колесо",     icon: <CircleDot size={13}/> },
-  { id: "dilts",   label: "Пирамида",   icon: <Triangle size={13}/> },
-  { id: "matrix",  label: "Матрица",    icon: <LayoutGrid size={13}/> },
-  { id: "mindmap", label: "Mind Map",   icon: <GitBranch size={13}/> },
-  { id: "grow",    label: "GROW",       icon: <Target size={13}/> },
-  { id: "hats",    label: "6 шляп",     icon: <span className="text-[11px]">🎩</span> },
+const TABS: { id: Tab; label: string }[] = [
+  { id: "notes",   label: "Заметки"    },
+  { id: "scale",   label: "Шкала 1-10" },
+  { id: "balance", label: "Колесо"     },
+  { id: "dilts",   label: "Пирамида"   },
+  { id: "matrix",  label: "Матрица"    },
+  { id: "grow",    label: "GROW"       },
+  { id: "hats",    label: "6 шляп"     },
 ];
 
 // ─── Маркер Супервизии (интерактивный) ───────────────────────────────────────
@@ -1082,17 +1080,157 @@ class ToolErrorBoundary extends React.Component<
   }
 }
 
+// ─── Drawing Canvas ───────────────────────────────────────────────────────────
+
+const DRAW_COLORS = [
+  "#1c1c1c", "#ef4444", "#f97316", "#eab308",
+  "#22c55e", "#3b82f6", "#8b5cf6", "#ffffff",
+];
+
+function DrawingCanvas() {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const isDrawing = useRef(false);
+  const dprRef = useRef(1);
+  const [color, setColor] = useState("#1c1c1c");
+  const [lineWidth, setLineWidth] = useState(4);
+  const [erasing, setErasing] = useState(false);
+
+  // Use ResizeObserver to initialize canvas resolution only when the element
+  // becomes visible (width > 0). This avoids an infinite rAF polling loop
+  // while the canvas is inside a hidden div, which would waste CPU and
+  // could push RTI timeout over the edge in Capacitor/WKWebView.
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    let initialized = false;
+    const observer = new ResizeObserver((entries) => {
+      if (initialized) return;
+      const w = entries[0]?.contentRect.width ?? 0;
+      const h = entries[0]?.contentRect.height ?? 0;
+      if (w === 0 || h === 0) return;
+      initialized = true;
+      const dpr = window.devicePixelRatio || 1;
+      dprRef.current = dpr;
+      canvas.width  = Math.round(w * dpr);
+      canvas.height = Math.round(h * dpr);
+      const ctx = canvas.getContext("2d");
+      if (ctx) ctx.scale(dpr, dpr);
+      observer.disconnect();
+    });
+    observer.observe(canvas);
+    return () => observer.disconnect();
+  }, []);
+
+  // After ctx.scale(dpr, dpr) all coordinates are CSS pixels — no extra scaling needed.
+  const getPos = (e: React.TouchEvent | React.MouseEvent): { x: number; y: number } | null => {
+    const canvas = canvasRef.current;
+    if (!canvas) return null;
+    const rect = canvas.getBoundingClientRect();
+    if ("touches" in e) {
+      if (e.touches.length === 0) return null;
+      return { x: e.touches[0].clientX - rect.left, y: e.touches[0].clientY - rect.top };
+    }
+    return { x: e.clientX - rect.left, y: e.clientY - rect.top };
+  };
+
+  const beginStroke = (e: React.TouchEvent | React.MouseEvent) => {
+    const pos = getPos(e);
+    if (!pos) return;
+    const ctx = canvasRef.current?.getContext("2d");
+    if (!ctx) return;
+    isDrawing.current = true;
+    ctx.beginPath();
+    ctx.moveTo(pos.x, pos.y);
+  };
+
+  const continueStroke = (e: React.TouchEvent | React.MouseEvent) => {
+    if (!isDrawing.current) return;
+    const pos = getPos(e);
+    if (!pos) return;
+    const ctx = canvasRef.current?.getContext("2d");
+    if (!ctx) return;
+    ctx.globalCompositeOperation = erasing ? "destination-out" : "source-over";
+    ctx.strokeStyle = erasing ? "rgba(0,0,0,1)" : color;
+    ctx.lineWidth   = erasing ? lineWidth * 3 : lineWidth;
+    ctx.lineCap     = "round";
+    ctx.lineJoin    = "round";
+    ctx.lineTo(pos.x, pos.y);
+    ctx.stroke();
+  };
+
+  const endStroke = () => { isDrawing.current = false; };
+
+  const clearCanvas = () => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const dpr = dprRef.current;
+    // clearRect operates in CSS-pixel space after ctx.scale(dpr, dpr)
+    canvas.getContext("2d")?.clearRect(0, 0, canvas.width / dpr, canvas.height / dpr);
+  };
+
+
+  return (
+    <div className="space-y-3">
+      {/* Toolbar */}
+      <div className="flex items-center gap-2 flex-wrap">
+        <div className="flex gap-1.5 items-center">
+          {DRAW_COLORS.map((c) => (
+            <button key={c} tabIndex={-1}
+              onClick={() => { setColor(c); setErasing(false); }}
+              style={{
+                backgroundColor: c,
+                borderColor: !erasing && color === c ? "var(--primary)" : c === "#ffffff" ? "#d1d5db" : "transparent",
+                boxShadow: !erasing && color === c ? "0 0 0 2px var(--primary)" : undefined,
+              }}
+              className="w-6 h-6 rounded-full border-2 transition-transform hover:scale-110 shrink-0" />
+          ))}
+        </div>
+        <div className="flex gap-1 ml-1">
+          {([[ 2, "Тонко"], [6, "Средне"], [14, "Толсто"]] as [number, string][]).map(([w, label]) => (
+            <button key={w} tabIndex={-1} onClick={() => { setLineWidth(w); setErasing(false); }}
+              className={`px-2 py-1 rounded text-xs ${!erasing && lineWidth === w ? "bg-primary text-primary-foreground" : "bg-secondary hover:bg-muted"}`}>
+              {label}
+            </button>
+          ))}
+        </div>
+        <button tabIndex={-1} onClick={() => setErasing((v) => !v)}
+          className={`px-2 py-1 rounded text-xs ${erasing ? "bg-primary text-primary-foreground" : "bg-secondary hover:bg-muted"}`}>
+          Ластик
+        </button>
+        <button tabIndex={-1} onClick={clearCanvas}
+          className="px-2 py-1 rounded text-xs bg-secondary hover:bg-muted">
+          Очистить
+        </button>
+      </div>
+      {/* Canvas fills its container width; height is set via aspect-ratio so it's
+          always proportional. Actual pixel resolution is set dynamically on mount. */}
+      <canvas
+        ref={canvasRef}
+        className="w-full rounded-xl border border-border bg-white touch-none"
+        style={{ cursor: erasing ? "cell" : "crosshair", aspectRatio: "4/3" }}
+        onMouseDown={beginStroke} onMouseMove={continueStroke} onMouseUp={endStroke} onMouseLeave={endStroke}
+        onTouchStart={beginStroke} onTouchMove={continueStroke} onTouchEnd={endStroke}
+      />
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+
 function SessionPanel(p: Props) {
   const notesElRef = useRef<HTMLTextAreaElement | null>(null);
-  const mmssElRef = useRef<HTMLSpanElement | null>(null);
   const [minutesInput, setMinutesInput] = useState(() => String(Math.floor(p.duration / 60)));
+  const [notesMode, setNotesMode] = useState<"text" | "draw">("text");
   const [activeTab, setActiveTab] = useState<Tab>("notes");
+  // Track which tabs have been opened at least once — render only visited tabs
+  // to avoid mounting all heavy tools (MindMap SVG, Radar chart, etc.) upfront.
+  const [visitedTabs, setVisitedTabs] = useState<Set<Tab>>(() => new Set<Tab>(["notes"]));
   const [markerOpen, setMarkerOpen] = useState(false);
 
-  // Update timer display directly in DOM — no React re-render on every tick
-  useEffect(() => {
-    if (mmssElRef.current) mmssElRef.current.textContent = p.mmss;
-  }, [p.mmss]);
+  const switchTab = useCallback((t: Tab) => {
+    setActiveTab(t);
+    setVisitedTabs((prev) => { const n = new Set(prev); n.add(t); return n; });
+  }, []);
 
   const appendToNotes = useCallback((text: string) => {
     const el = notesElRef.current;
@@ -1109,44 +1247,29 @@ function SessionPanel(p: Props) {
 
   return (
     <div className="flex flex-col gap-4 max-w-full">
-      {/* ── Компактная шапка-таймер ── */}
-      <div className="bg-card rounded-xl border border-border px-4 py-2.5 flex items-center gap-3 flex-wrap">
-        <Sparkles size={14} className="text-primary shrink-0" />
-        <span ref={mmssElRef} className="font-mono text-lg tabular-nums text-foreground font-medium">{p.mmss}</span>
-        <div className="flex items-center gap-1.5">
-          <button onClick={() => p.setRunning(!p.running)}
-            className="inline-flex items-center gap-1 px-3 py-1 rounded-md bg-primary text-primary-foreground hover:opacity-90 text-xs font-medium">
-            {p.running ? <Pause size={12}/> : <Play size={12}/>} {p.running ? "Пауза" : "Старт"}
-          </button>
-          <button onClick={() => { p.reset(); setMinutesInput(String(Math.floor(p.duration / 60))); }}
-            className="inline-flex items-center justify-center w-7 h-7 rounded-md bg-secondary hover:bg-muted">
-            <RotateCcw size={12}/>
-          </button>
-          <button onClick={p.testSound}
-            className="inline-flex items-center justify-center w-7 h-7 rounded-md border border-border bg-background hover:bg-secondary">
-            <Bell size={12} className="text-primary"/>
-          </button>
-        </div>
-        <div className="flex items-center gap-2 ml-auto flex-wrap">
+      {/* ── Настройки сессии ── */}
+      <div className="bg-card rounded-xl border border-border px-4 py-2.5 flex flex-col gap-2">
+        <div className="flex items-center gap-2 flex-wrap">
           <input defaultValue={p.clientNameRef.current}
             onInput={(e) => { p.clientNameRef.current = e.currentTarget.value; }}
-            placeholder="Клиент" autoComplete="off" autoCorrect="off" autoCapitalize="words" spellCheck={false}
+            placeholder="Клиент" autoComplete="off" autoCorrect="off" autoCapitalize="words" spellCheck={false} tabIndex={-1}
             className="w-28 px-2 py-1 rounded-md border border-border bg-background text-xs focus:outline-none focus:ring-1 focus:ring-ring" />
           <input defaultValue={p.coachNameRef?.current ?? ""}
             onInput={(e) => { if (p.coachNameRef) p.coachNameRef.current = e.currentTarget.value; }}
-            placeholder="Коуч" autoComplete="off" autoCorrect="off" autoCapitalize="words" spellCheck={false}
+            placeholder="Коуч" autoComplete="off" autoCorrect="off" autoCapitalize="words" spellCheck={false} tabIndex={-1}
             className="w-28 px-2 py-1 rounded-md border border-border bg-background text-xs focus:outline-none focus:ring-1 focus:ring-ring" />
-          <input defaultValue={p.topicRef.current}
-            onInput={(e) => { p.topicRef.current = e.currentTarget.value; }}
-            placeholder="Тема сессии" autoComplete="off" autoCorrect="off" spellCheck={false}
-            className="w-36 px-2 py-1 rounded-md border border-border bg-background text-xs focus:outline-none focus:ring-1 focus:ring-ring hidden sm:block" />
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-1 ml-auto">
             <input type="number" min="1" max="480" disabled={p.running} value={minutesInput}
               onChange={(e) => { setMinutesInput(e.target.value); const m = parseInt(e.target.value, 10); if (!isNaN(m) && m > 0) p.setDuration(m * 60); }}
+              tabIndex={-1}
               className="w-14 px-2 py-1 rounded-md border border-border bg-background text-center focus:outline-none focus:ring-1 focus:ring-ring disabled:opacity-40 text-xs" />
             <span className="text-xs text-muted-foreground">мин</span>
           </div>
         </div>
+        <input defaultValue={p.topicRef.current}
+          onInput={(e) => { p.topicRef.current = e.currentTarget.value; }}
+          placeholder="Тема сессии" autoComplete="off" autoCorrect="off" spellCheck={false} tabIndex={-1}
+          className="w-full px-2 py-1 rounded-md border border-border bg-background text-xs focus:outline-none focus:ring-1 focus:ring-ring" />
       </div>
 
       {/* ── Рабочее пространство ── */}
@@ -1154,43 +1277,66 @@ function SessionPanel(p: Props) {
         {/* Вкладки (скролл на малых экранах) */}
         <div className="flex border-b border-border overflow-x-auto scrollbar-none" style={{ touchAction: "pan-x" }}>
           {TABS.map((t) => (
-            <button key={t.id} onClick={() => setActiveTab(t.id)}
-              className={`flex items-center gap-1.5 px-3 py-3 text-xs font-medium whitespace-nowrap transition-colors border-b-2 -mb-px shrink-0 ${
-                activeTab === t.id ? "border-primary text-primary" : "border-transparent text-muted-foreground hover:text-foreground"
+            <button key={t.id} onClick={() => switchTab(t.id)} tabIndex={-1}
+              className={`px-3 py-3 text-xs font-medium whitespace-nowrap border-b-2 -mb-px shrink-0 ${
+                activeTab === t.id ? "border-primary text-primary" : "border-transparent text-muted-foreground"
               }`}>
-              {t.icon} {t.label}
+              {t.label}
             </button>
           ))}
         </div>
 
-        {/* Все панели всегда смонтированы — данные не теряются при переключении */}
+        {/* Ленивый рендер: вкладка монтируется только при первом посещении,
+            затем скрывается через CSS — данные не теряются, начальная нагрузка минимальна */}
         <div className="p-5">
           <div className={activeTab === "notes" ? "" : "hidden"}>
             <div className="space-y-3">
-              <textarea ref={notesElRef} defaultValue={p.notesRef.current}
-                onInput={(e) => { p.notesRef.current = e.currentTarget.value; }}
-                rows={20} placeholder="Ценностные слова, инсайты, цитаты клиента…"
-                inputMode="text" autoComplete="off" autoCorrect="off" spellCheck={false}
-                className="w-full px-3 py-2 rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-ring resize-none text-sm" />
-              <div className="flex items-center justify-between gap-2 flex-wrap">
-                <button onClick={() => setMarkerOpen(true)}
-                  className="inline-flex items-center gap-2 px-4 min-h-10 rounded-lg border border-amber-500/40 bg-gradient-to-r from-amber-500/15 to-orange-500/10 hover:from-amber-500/25 hover:to-orange-500/20 text-sm text-amber-700 dark:text-amber-300 font-medium">
-                  ✦ Маркер Супервизии
+              {/* Mode toggle */}
+              <div className="flex gap-0.5 p-0.5 rounded-lg bg-secondary w-fit">
+                <button tabIndex={-1} onClick={() => setNotesMode("text")}
+                  className={`px-3 py-1 rounded-md text-xs font-medium transition-colors ${notesMode === "text" ? "bg-card text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"}`}>
+                  ✏️ Текст
                 </button>
-                <button onClick={p.exportSession}
-                  className="inline-flex items-center gap-2 px-4 min-h-10 rounded-lg bg-primary text-primary-foreground hover:opacity-90 text-sm">
-                  <Download size={15}/> Экспорт
+                <button tabIndex={-1} onClick={() => setNotesMode("draw")}
+                  className={`px-3 py-1 rounded-md text-xs font-medium transition-colors ${notesMode === "draw" ? "bg-card text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"}`}>
+                  🖌️ Рисунок
                 </button>
+              </div>
+
+              {/* Text mode */}
+              <div className={notesMode === "text" ? "" : "hidden"}>
+                <div className="space-y-3">
+                  <textarea ref={notesElRef} defaultValue={p.notesRef.current}
+                    onInput={(e) => { p.notesRef.current = e.currentTarget.value; }}
+                    rows={20} placeholder="Ценностные слова, инсайты, цитаты клиента…"
+                    inputMode="text" autoComplete="off" autoCorrect="off" spellCheck={false} tabIndex={-1}
+                    className="w-full px-3 py-2 rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-ring resize-none text-sm" />
+                  <div className="flex items-center justify-between gap-2 flex-wrap">
+                    <button onClick={() => setMarkerOpen(true)} tabIndex={-1}
+                      className="inline-flex items-center gap-2 px-4 min-h-10 rounded-lg border border-amber-500/40 bg-gradient-to-r from-amber-500/15 to-orange-500/10 hover:from-amber-500/25 hover:to-orange-500/20 text-sm text-amber-700 dark:text-amber-300 font-medium">
+                      ✦ Маркер Супервизии
+                    </button>
+                    <button onClick={p.exportSession} tabIndex={-1}
+                      className="inline-flex items-center gap-2 px-4 min-h-10 rounded-lg bg-primary text-primary-foreground hover:opacity-90 text-sm">
+                      <Download size={15}/> Экспорт
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              {/* Draw mode — stays mounted to preserve drawing */}
+              <div className={notesMode === "draw" ? "" : "hidden"}>
+                <DrawingCanvas />
               </div>
             </div>
           </div>
-          <div className={activeTab === "scale"   ? "" : "hidden"}><ScaleTool      onExport={appendToNotes} /></div>
-          <div className={activeTab === "balance" ? "" : "hidden"}><BalanceTool    onExport={appendToNotes} /></div>
-          <div className={activeTab === "dilts"   ? "" : "hidden"}><DiltsTool      onExport={appendToNotes} /></div>
-          <div className={activeTab === "matrix"  ? "" : "hidden"}><EisenhowerTool onExport={appendToNotes} /></div>
-          <div className={activeTab === "mindmap" ? "" : "hidden"}><ToolErrorBoundary><MindMapTool onExport={appendToNotes} /></ToolErrorBoundary></div>
-          <div className={activeTab === "grow"    ? "" : "hidden"}><GrowTool       onExport={appendToNotes} /></div>
-          <div className={activeTab === "hats"    ? "" : "hidden"}><SixHatsTool    onExport={appendToNotes} /></div>
+          {visitedTabs.has("scale")   && <div className={activeTab === "scale"   ? "" : "hidden"}><ScaleTool      onExport={appendToNotes} /></div>}
+          {visitedTabs.has("balance") && <div className={activeTab === "balance" ? "" : "hidden"}><BalanceTool    onExport={appendToNotes} /></div>}
+          {visitedTabs.has("dilts")   && <div className={activeTab === "dilts"   ? "" : "hidden"}><DiltsTool      onExport={appendToNotes} /></div>}
+          {visitedTabs.has("matrix")  && <div className={activeTab === "matrix"  ? "" : "hidden"}><EisenhowerTool onExport={appendToNotes} /></div>}
+
+          {visitedTabs.has("grow")    && <div className={activeTab === "grow"    ? "" : "hidden"}><GrowTool       onExport={appendToNotes} /></div>}
+          {visitedTabs.has("hats")    && <div className={activeTab === "hats"    ? "" : "hidden"}><SixHatsTool    onExport={appendToNotes} /></div>}
         </div>
       </section>
 
@@ -1204,21 +1350,6 @@ function SessionPanel(p: Props) {
   );
 }
 
-// Custom comparator: skip re-render when only mmss/remaining change (timer ticks).
-// The timer display is updated directly via mmssElRef, no React render needed.
-export default memo(SessionPanel, (prev, next) => {
-  return (
-    prev.duration === next.duration &&
-    prev.running === next.running &&
-    prev.setDuration === next.setDuration &&
-    prev.setRunning === next.setRunning &&
-    prev.reset === next.reset &&
-    prev.exportSession === next.exportSession &&
-    prev.testSound === next.testSound &&
-    prev.clientNameRef === next.clientNameRef &&
-    prev.coachNameRef === next.coachNameRef &&
-    prev.topicRef === next.topicRef &&
-    prev.notesRef === next.notesRef
-    // mmss and remaining intentionally excluded — updated via DOM ref
-  );
-});
+// memo with default shallow comparator: all props are stable refs/values that
+// only change on real user actions (not timer ticks), so no custom comparator needed.
+export default memo(SessionPanel);
