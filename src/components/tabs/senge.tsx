@@ -1,26 +1,39 @@
 import { useState } from "react";
-import {
-  ArrowRight, BookOpen, Brain, ChevronRight, Compass,
-  Flag, Globe, HelpCircle, Layers, MessageSquare,
-  Network, Search, Star, Users,
-} from "lucide-react";
+import { BookOpen, Star, Flag, Users, Brain, Network, Search, Compass, MessageSquare, Globe, Layers, ChevronRight, ArrowRight, HelpCircle } from "lucide-react";
 import { SectionHead } from "./_shared";
 
-const DISCIPLINES = [
+type Block = {
+  title: string;
+  icon: any;
+  tone: string;
+  questions: string[];
+};
+
+type Discipline = {
+  id: string;
+  n: number;
+  short: string;
+  title: string;
+  icon: any;
+  tone: string;
+  accent: string;
+  desc: string;
+  blocks: Block[];
+};
+
+const DISCIPLINES: Discipline[] = [
   {
-    id: "1",
-    label: "ЛИЧНОЕ\nМАСТЕРСТВО",
-    labelShort: "ЛИЧНОЕ",
-    subtitle: "Непрерывный личностный рост и развитие",
+    id: "mastery",
+    n: 1,
+    short: "ЛИЧНОЕ МАСТЕРСТВО",
+    title: "ДИСЦИПЛИНА 1 — ЛИЧНОЕ МАСТЕРСТВО",
     icon: Star,
+    tone: "from-amber-500 to-yellow-500",
     accent: "from-amber-500/15 to-amber-500/5 border-amber-500/30",
-    labelColor: "text-amber-700 dark:text-amber-400",
-    gradientFrom: "from-amber-500",
-    gradientTo: "to-yellow-500",
     desc: "Организации обучаются только через обучающихся людей. Личное мастерство — способность непрерывно прояснять своё видение и объективно оценивать реальность.",
     blocks: [
       {
-        head: "САМОСОЗНАНИЕ",
+        title: "САМОСОЗНАНИЕ",
         icon: Search,
         tone: "from-amber-500 to-yellow-500",
         questions: [
@@ -30,9 +43,9 @@ const DISCIPLINES = [
         ],
       },
       {
-        head: "ВИДЕНИЕ И ЦЕННОСТИ",
+        title: "ВИДЕНИЕ И ЦЕННОСТИ",
         icon: Compass,
-        tone: "from-orange-500 to-amber-600",
+        tone: "from-orange-500 to-amber-500",
         questions: [
           "Каковы мои ценности? Что для меня важнее всего?",
           "Что движет мной на самом деле?",
@@ -42,19 +55,17 @@ const DISCIPLINES = [
     ],
   },
   {
-    id: "2",
-    label: "ОБЩЕЕ\nВИДЕНИЕ",
-    labelShort: "ВИДЕНИЕ",
-    subtitle: "Единый образ желаемого будущего команды",
+    id: "vision",
+    n: 2,
+    short: "ОБЩЕЕ ВИДЕНИЕ",
+    title: "ДИСЦИПЛИНА 2 — ОБЩЕЕ ВИДЕНИЕ",
     icon: Flag,
+    tone: "from-sky-500 to-blue-600",
     accent: "from-sky-500/15 to-sky-500/5 border-sky-500/30",
-    labelColor: "text-sky-700 dark:text-sky-400",
-    gradientFrom: "from-sky-500",
-    gradientTo: "to-blue-600",
-    desc: "Общее видение создаёт связь людей с организацией. Это не лозунг сверху — это живая цель, которую люди хотят достичь вместе.",
+    desc: "Общее видение создаёт связь людей с организацией. Это не лозунг сверху — живая цель, которую люди хотят достичь вместе.",
     blocks: [
       {
-        head: "НАМЕРЕНИЕ И ВИДЕНИЕ",
+        title: "НАМЕРЕНИЕ И ВИДЕНИЕ",
         icon: Flag,
         tone: "from-sky-500 to-blue-600",
         questions: [
@@ -64,7 +75,7 @@ const DISCIPLINES = [
         ],
       },
       {
-        head: "ОБЩАЯ ЦЕЛЬ И РОЛЬ",
+        title: "ОБЩАЯ ЦЕЛЬ И РОЛЬ",
         icon: Star,
         tone: "from-blue-500 to-indigo-600",
         questions: [
@@ -76,19 +87,17 @@ const DISCIPLINES = [
     ],
   },
   {
-    id: "3",
-    label: "ГРУППОВОЕ\nОБУЧЕНИЕ",
-    labelShort: "КОМАНДА",
-    subtitle: "Команда умнее суммы её участников",
+    id: "learning",
+    n: 3,
+    short: "ГРУППОВОЕ ОБУЧЕНИЕ",
+    title: "ДИСЦИПЛИНА 3 — ГРУППОВОЕ ОБУЧЕНИЕ",
     icon: Users,
+    tone: "from-emerald-500 to-teal-500",
     accent: "from-emerald-500/15 to-emerald-500/5 border-emerald-500/30",
-    labelColor: "text-emerald-700 dark:text-emerald-400",
-    gradientFrom: "from-emerald-500",
-    gradientTo: "to-teal-500",
-    desc: "Диалог — основной инструмент группового обучения. Команда исследует сложные вопросы вместе, приостанавливая суждения и защитные реакции.",
+    desc: "Диалог — основной инструмент группового обучения. Команда исследует сложные вопросы вместе, приостанавливая суждения.",
     blocks: [
       {
-        head: "ДИАЛОГ В КОМАНДЕ",
+        title: "ДИАЛОГ В КОМАНДЕ",
         icon: MessageSquare,
         tone: "from-emerald-500 to-teal-500",
         questions: [
@@ -101,19 +110,17 @@ const DISCIPLINES = [
     ],
   },
   {
-    id: "4",
-    label: "ИНТЕЛЛЕКТ.\nМОДЕЛИ",
-    labelShort: "МОДЕЛИ",
-    subtitle: "Глубинные убеждения, формирующие восприятие",
+    id: "models",
+    n: 4,
+    short: "МЕНТАЛЬНЫЕ МОДЕЛИ",
+    title: "ДИСЦИПЛИНА 4 — ИНТЕЛЛЕКТУАЛЬНЫЕ МОДЕЛИ",
     icon: Brain,
+    tone: "from-rose-500 to-pink-600",
     accent: "from-rose-500/15 to-rose-500/5 border-rose-500/30",
-    labelColor: "text-rose-700 dark:text-rose-400",
-    gradientFrom: "from-rose-500",
-    gradientTo: "to-pink-600",
-    desc: "Интеллектуальные модели — внутренние образы мира, определяющие наши действия. Они часто неосознаны, но именно они мешают или помогают изменениям.",
+    desc: "Внутренние образы мира, определяющие наши действия. Часто неосознаны, но именно они мешают или помогают изменениям.",
     blocks: [
       {
-        head: "ОСОЗНАНИЕ МОДЕЛЕЙ",
+        title: "ОСОЗНАНИЕ МОДЕЛЕЙ",
         icon: Brain,
         tone: "from-rose-500 to-pink-600",
         questions: [
@@ -126,19 +133,17 @@ const DISCIPLINES = [
     ],
   },
   {
-    id: "5",
-    label: "СИСТЕМНОЕ\nМЫШЛЕНИЕ",
-    labelShort: "СИСТЕМЫ",
-    subtitle: "Пятая дисциплина — объединяющая все остальные",
+    id: "systems",
+    n: 5,
+    short: "СИСТЕМНОЕ МЫШЛЕНИЕ",
+    title: "ДИСЦИПЛИНА 5 — СИСТЕМНОЕ МЫШЛЕНИЕ",
     icon: Network,
+    tone: "from-violet-500 to-indigo-600",
     accent: "from-violet-500/15 to-violet-500/5 border-violet-500/30",
-    labelColor: "text-violet-700 dark:text-violet-400",
-    gradientFrom: "from-violet-500",
-    gradientTo: "to-indigo-600",
-    desc: "Системное мышление — способность видеть взаимосвязи, а не только цепочки причин и следствий. Видеть процессы изменений, а не мгновенные снимки.",
+    desc: "Пятая и объединяющая дисциплина. Видеть взаимосвязи, а не цепочки причин и следствий.",
     blocks: [
       {
-        head: "ВИДЕНИЕ СИСТЕМЫ",
+        title: "ВИДЕНИЕ СИСТЕМЫ",
         icon: Globe,
         tone: "from-violet-500 to-indigo-600",
         questions: [
@@ -148,7 +153,7 @@ const DISCIPLINES = [
         ],
       },
       {
-        head: "ГЛУБИННЫЕ ПРИЧИНЫ",
+        title: "ГЛУБИННЫЕ ПРИЧИНЫ",
         icon: Layers,
         tone: "from-indigo-500 to-blue-600",
         questions: [
@@ -161,140 +166,132 @@ const DISCIPLINES = [
   },
 ];
 
-function QuestionCard({ head, icon: Icon, tone, questions }: {
-  head: string; icon: any; tone: string; questions: string[];
-}) {
-  return (
-    <div className="relative overflow-hidden bg-card rounded-2xl border border-border p-4 hover:border-primary/40 transition-colors">
-      <Icon size={140} className="absolute -right-6 -bottom-8 text-foreground/[0.04] pointer-events-none" strokeWidth={1.2} />
-      <div className="relative flex items-center gap-3 mb-3">
-        <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${tone} text-white grid place-items-center shadow-md shadow-primary/20 shrink-0`}>
-          <Icon size={20} />
-        </div>
-        <div className="text-[11px] font-bold uppercase tracking-wider text-foreground/80 leading-tight">{head}</div>
-      </div>
-      <ul className="relative space-y-1.5 text-sm">
-        {questions.map((q, i) => (
-          <li key={i} className="flex items-start gap-2">
-            <ChevronRight size={14} className="text-primary mt-0.5 shrink-0" />
-            <span className="text-foreground/90">{q}</span>
-          </li>
-        ))}
-      </ul>
-    </div>
-  );
-}
-
 function Senge() {
-  const [active, setActive] = useState("1");
-  const disc = DISCIPLINES.find((d) => d.id === active)!;
+  const [active, setActive] = useState("mastery");
+  const d = DISCIPLINES.find((x) => x.id === active)!;
+  const I = d.icon;
 
   return (
     <div className="space-y-6 max-w-full overflow-hidden">
-      <SectionHead
-        title="Модель Сенге"
-        subtitle="Обучающаяся организация · 5 дисциплин"
-      />
+      <SectionHead title="Обучающаяся организация" subtitle="Питер Сенге · 5 дисциплин · Пятая дисциплина" />
 
-      {/* Banner */}
-      <div className="rounded-2xl bg-gradient-to-r from-amber-500/20 via-violet-500/10 to-sky-500/20 border border-primary/20 p-4 text-center">
-        <div className="text-xs uppercase tracking-widest text-muted-foreground mb-1">Объединяющая дисциплина</div>
-        <div className="font-bold text-base tracking-wide">
-          Системное мышление · Пятая дисциплина
-        </div>
-        <div className="text-xs text-muted-foreground mt-1">Без неё остальные 4 остаются изолированными практиками</div>
+      {/* Баннер */}
+      <div className="relative overflow-hidden rounded-2xl border border-primary/30 bg-gradient-to-br from-violet-500/20 via-indigo-500/10 to-blue-500/20 p-5">
+        <BookOpen className="absolute right-5 top-4 text-primary/25" size={26} />
+        <h3 className="text-base font-semibold text-foreground">5 дисциплин · Личное мастерство → Системное мышление</h3>
+        <p className="mt-1 text-sm text-foreground/80">
+          Системное мышление — пятая и объединяющая дисциплина
+        </p>
       </div>
 
-      {/* Discipline tabs */}
-      <div className="grid grid-cols-5 gap-1">
-        {DISCIPLINES.map((d) => {
-          const act = active === d.id;
-          const I = d.icon;
+      {/* Селектор 5 дисциплин */}
+      <div className="grid grid-cols-5 gap-2 sm:gap-3">
+        {DISCIPLINES.map((s) => {
+          const act = active === s.id;
+          const Icon = s.icon;
           return (
             <button
-              key={d.id}
-              onClick={() => setActive(d.id)}
-              className={`p-2 rounded-xl border text-center transition-all ${
+              key={s.id}
+              onClick={() => setActive(s.id)}
+              className={`relative overflow-hidden p-2 sm:p-3 rounded-2xl border text-center transition-all ${
                 act
                   ? "bg-primary text-primary-foreground border-primary shadow-lg"
                   : "bg-card border-border hover:border-primary/40"
               }`}
             >
-              <I size={16} className="mx-auto mb-1" />
-              <div className="font-extrabold text-base leading-none">{d.id}</div>
-              <div className={`text-[8px] leading-tight mt-0.5 ${act ? "opacity-90" : "text-muted-foreground"}`}>
-                {d.labelShort}
+              <div className={`w-8 h-8 sm:w-10 sm:h-10 rounded-xl mx-auto mb-1.5 grid place-items-center ${act ? "bg-white/20 text-white" : `bg-gradient-to-br ${s.tone} text-white`}`}>
+                <Icon size={18} />
               </div>
+              <div className={`text-[10px] sm:text-xs font-bold leading-tight ${act ? "opacity-95" : "text-muted-foreground"}`}>
+                {s.n}
+              </div>
+              <div className={`text-[8px] sm:text-[10px] font-bold leading-tight ${act ? "" : "text-foreground"}`}>
+                {s.short.split(" ").slice(0, 2).join(" ")}
+              </div>
+              {act && (
+                <div className="absolute top-2 right-2 w-1.5 h-1.5 rounded-full bg-white/90" />
+              )}
             </button>
           );
         })}
       </div>
 
-      {/* Active discipline */}
-      <div className={`relative overflow-hidden rounded-2xl border p-5 bg-gradient-to-br ${disc.accent}`}>
-        <disc.icon size={200} className="absolute -right-10 -top-10 opacity-[0.04] pointer-events-none" strokeWidth={1} />
-
-        <div className="relative flex items-center gap-4 mb-4">
-          <div className={`w-16 h-16 rounded-2xl bg-gradient-to-br ${disc.gradientFrom} ${disc.gradientTo} text-white grid place-items-center shadow-lg shrink-0`}>
-            <span className="text-3xl font-extrabold">{disc.id}</span>
+      {/* Активная дисциплина */}
+      <div className={`relative overflow-hidden rounded-2xl border p-5 bg-gradient-to-br ${d.accent}`}>
+        <I size={180} strokeWidth={1} className="absolute -right-6 -top-6 text-foreground/[0.05] pointer-events-none" />
+        <div className="relative flex items-center gap-4 rounded-2xl bg-card shadow-xl ring-2 ring-white/40 p-4">
+          <div className={`w-14 h-14 sm:w-16 sm:h-16 rounded-2xl shrink-0 grid place-items-center bg-gradient-to-br ${d.tone} text-white`}>
+            <I size={28} />
           </div>
-          <div>
-            <div className={`text-[10px] uppercase tracking-widest font-bold ${disc.labelColor}`}>
-              ДИСЦИПЛИНА {disc.id}
+          <div className="min-w-0">
+            <div className="text-xs uppercase tracking-wide opacity-80 font-semibold">Дисциплина {d.n}</div>
+            <h3 className="text-lg sm:text-[clamp(22px,5vw,34px)] font-extrabold tracking-tight leading-tight">{d.title}</h3>
+          </div>
+        </div>
+
+        <div className="relative mt-4 bg-card rounded-2xl border border-border p-4">
+          <p className="text-sm text-foreground/90 leading-relaxed">{d.desc}</p>
+        </div>
+
+        {d.blocks.map((block, idx) => (
+          <div key={idx} className="relative mt-3 bg-card rounded-2xl border border-border p-4">
+            <div className="flex items-center gap-2 mb-3">
+              <div className={`w-8 h-8 rounded-lg bg-gradient-to-br ${block.tone} text-white grid place-items-center`}>
+                <block.icon size={16} />
+              </div>
+              <div className="text-[11px] font-bold uppercase tracking-wider text-foreground/80">{block.title}</div>
             </div>
-            <div className="text-lg font-bold text-foreground mt-0.5">{disc.subtitle}</div>
+            <ul className="space-y-2">
+              {block.questions.map((q, i) => (
+                <li key={i} className="flex items-start gap-2 text-sm">
+                  <ChevronRight size={14} className="text-primary mt-0.5 shrink-0" />
+                  <span className="text-foreground/90">{q}</span>
+                </li>
+              ))}
+            </ul>
           </div>
-        </div>
-
-        <p className="relative text-sm text-foreground/75 mb-4 leading-relaxed">{disc.desc}</p>
-
-        <div className="relative grid sm:grid-cols-2 gap-3">
-          {disc.blocks.map((b, i) => (
-            <QuestionCard key={i} head={b.head} icon={b.icon} tone={b.tone} questions={b.questions} />
-          ))}
-        </div>
+        ))}
       </div>
 
-      {/* Overview */}
+      {/* Обзорный список */}
       <div className="bg-card rounded-2xl border border-border p-5">
-        <div className="flex items-center gap-2 mb-4">
-          <BookOpen size={20} className="text-primary shrink-0" />
-          <h3 className="font-semibold">Все 5 дисциплин</h3>
-        </div>
-        <div className="space-y-2">
-          {DISCIPLINES.map((d) => {
-            const I = d.icon;
+        <div className="text-[11px] font-bold uppercase tracking-wider text-foreground/70 mb-3">Все 5 дисциплин Сенге</div>
+        <div className="grid grid-cols-1 gap-2">
+          {DISCIPLINES.map((s) => {
+            const act = active === s.id;
+            const Icon = s.icon;
             return (
               <button
-                key={d.id}
-                onClick={() => setActive(d.id)}
-                className={`w-full flex items-center gap-3 p-3 rounded-xl border text-left transition-all ${
-                  active === d.id
-                    ? "border-primary/50 bg-primary/10"
-                    : "border-border hover:border-primary/30 bg-secondary/40"
+                key={s.id}
+                onClick={() => setActive(s.id)}
+                className={`flex items-center gap-3 p-3 rounded-xl border text-left transition-all ${
+                  act
+                    ? "bg-primary text-primary-foreground border-primary"
+                    : "bg-background border-border hover:border-primary/40"
                 }`}
               >
-                <div className={`w-8 h-8 rounded-lg bg-gradient-to-br ${d.gradientFrom} ${d.gradientTo} text-white grid place-items-center shrink-0`}>
-                  <span className="font-extrabold text-sm">{d.id}</span>
+                <div className={`w-8 h-8 rounded-lg grid place-items-center text-white shrink-0 ${act ? "bg-white/20" : `bg-gradient-to-br ${s.tone}`}`}>
+                  <Icon size={16} />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <div className="font-semibold text-sm">{d.labelShort}</div>
-                  <div className="text-xs text-muted-foreground truncate">{d.subtitle}</div>
+                  <div className={`text-sm font-bold ${act ? "" : "text-foreground"}`}>
+                    {s.n}. {s.short}
+                  </div>
                 </div>
-                <ArrowRight size={14} className={active === d.id ? "text-primary" : "text-muted-foreground"} />
+                <ArrowRight size={16} className={`shrink-0 ${act ? "text-primary-foreground/80" : "text-muted-foreground"}`} />
               </button>
             );
           })}
         </div>
       </div>
 
-      {/* Tip */}
-      <div className="rounded-2xl border border-primary/30 bg-primary/10 p-4 flex items-start gap-3">
+      {/* Tip block */}
+      <div className="rounded-2xl border border-primary/30 bg-primary/10 p-5 flex items-start gap-3">
         <HelpCircle size={20} className="text-primary mt-0.5 shrink-0" />
         <div>
-          <div className="text-xs uppercase tracking-wide text-primary font-bold mb-1">Ключевая идея</div>
-          <div className="text-sm font-medium">
-            Пятая дисциплина интегрирует все остальные. Без системного мышления личное мастерство и общее видение остаются изолированными практиками. Вместе они создают организацию, способную непрерывно обучаться и адаптироваться.
+          <div className="text-xs uppercase tracking-wide text-primary font-bold mb-1">Пятая дисциплина</div>
+          <div className="text-sm font-medium text-foreground/90">
+            Пятая дисциплина интегрирует все остальные. Без системного мышления личное мастерство и общее видение остаются изолированными практиками. Вместе они создают организацию, способную непрерывно обучаться.
           </div>
         </div>
       </div>

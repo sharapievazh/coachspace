@@ -1,295 +1,166 @@
 import { useState } from "react";
-import {
-  ArrowRight, ChevronRight, Compass, HelpCircle,
-  Lightbulb, Network, Rocket, Search, Sparkles, Target, Zap,
-} from "lucide-react";
+import { ArrowRight, ChevronRight, Cog, Flag, Layers, Link2, Sparkles, Star, Target } from "lucide-react";
 import { SectionHead } from "./_shared";
 
-const SOAR_STEPS = [
+type Step = {
+  id: string;
+  label: string;
+  title: string;
+  subtitle: string;
+  icon: any;
+  accent: string;
+  tone: string;
+  desc: string;
+  questions: string[];
+};
+
+const SOAR_STEPS: Step[] = [
   {
-    id: "S",
-    letter: "S",
-    label: "STATE",
-    labelRu: "СОСТОЯНИЕ",
-    subtitle: "Определяем пространство проблемы",
-    time: "15 мин",
-    icon: Search,
+    id: "S", label: "STATE", title: "СОСТОЯНИЕ",
+    subtitle: "В каком состоянии находится система?",
+    icon: Layers,
     accent: "from-sky-500/15 to-sky-500/5 border-sky-500/30",
-    labelColor: "text-sky-700 dark:text-sky-400",
-    gradientFrom: "from-sky-500",
-    gradientTo: "to-blue-600",
+    tone: "from-sky-500 to-blue-600",
     desc: "Определение элементов системы, их взаимодействия и границ. В каком состоянии находится система?",
-    blocks: [
-      {
-        head: "КАРТА СИСТЕМЫ",
-        icon: Network,
-        tone: "from-sky-500 to-blue-600",
-        questions: [
-          "Каковы на твой взгляд существенные элементы той среды, в которой ты стремишься достичь свою цель?",
-          "Как происходит взаимодействие элементов?",
-          "Что является рычагом?",
-        ],
-      },
-      {
-        head: "ГРАНИЦЫ СИСТЕМЫ",
-        icon: Compass,
-        tone: "from-cyan-500 to-sky-600",
-        questions: [
-          "Где заканчивается твоя система?",
-          "Кто и что оказывает влияние на систему снаружи?",
-          "Что находится под твоим контролем?",
-        ],
-      },
+    questions: [
+      "Каковы на твой взгляд существенные элементы той среды, в которой ты стремишься достичь свою цель?",
+      "Как происходит взаимодействие элементов?",
+      "Что является рычагом?",
+      "Где заканчивается твоя система? Кто и что влияет на неё снаружи?",
     ],
   },
   {
-    id: "O",
-    letter: "O",
-    label: "OPERATOR",
-    labelRu: "ОПЕРАТОР",
-    subtitle: "Планирование и реализация действий",
-    time: "20 мин",
-    icon: Zap,
+    id: "O", label: "OPERATOR", title: "ОПЕРАТОР",
+    subtitle: "Действия, которые изменяют состояние системы",
+    icon: Cog,
     accent: "from-amber-500/15 to-amber-500/5 border-amber-500/30",
-    labelColor: "text-amber-700 dark:text-amber-400",
-    gradientFrom: "from-amber-500",
-    gradientTo: "to-orange-500",
+    tone: "from-amber-500 to-orange-600",
     desc: "Действия, которые изменяют состояние системы. Стимулирует новое состояние путём изменения параметров прежнего.",
-    blocks: [
-      {
-        head: "ПОИСК РЫЧАГА",
-        icon: Target,
-        tone: "from-amber-500 to-orange-500",
-        questions: [
-          "Какие возможности достижения цели тебе известны?",
-          "Какими ресурсами ты располагаешь?",
-          "Какой у тебя есть выбор?",
-          "Какое воздействие даст максимальный эффект при минимальных усилиях?",
-        ],
-      },
-      {
-        head: "ПЛАНИРОВАНИЕ ДЕЙСТВИЙ",
-        icon: Lightbulb,
-        tone: "from-orange-500 to-red-500",
-        questions: [
-          "Как можно воздействовать на систему через рычаг?",
-          "Какова цепочка передачи информационного воздействия?",
-          "Каково оптимальное время для воздействия?",
-          "Если рычаг не найден — как расширить систему, ввести новый элемент?",
-        ],
-      },
+    questions: [
+      "Какие возможности достижения цели тебе известны?",
+      "Какими ресурсами ты располагаешь?",
+      "Какой у тебя есть выбор?",
+      "Как воздействовать через рычаг?",
+      "Какова цепочка передачи воздействия?",
+      "Каково оптимальное время для воздействия?",
+      "Если рычаг не найден — как расширить систему, ввести новый элемент?",
     ],
   },
   {
-    id: "A",
-    letter: "A",
-    label: "AND",
-    labelRu: "И",
-    subtitle: "Связующий элемент — объединение S и R",
-    time: "—",
-    icon: Sparkles,
-    accent: "from-emerald-500/15 to-emerald-500/5 border-emerald-500/30",
-    labelColor: "text-emerald-700 dark:text-emerald-400",
-    gradientFrom: "from-emerald-500",
-    gradientTo: "to-teal-500",
-    desc: "«A» — связка «и». Модель описывает переход из текущего состояния (S) через оператора (O) к результату (R): [SO] → R",
-    blocks: [
-      {
-        head: "ФОРМУЛА МОДЕЛИ",
-        icon: Sparkles,
-        tone: "from-emerald-500 to-teal-500",
-        questions: [
-          "Текущее состояние [S] + Оператор [O] → Результат [R]",
-          "Если результат не достигнут — повторяем цикл SO с новыми параметрами",
-          "Каждый цикл приближает систему к желаемому состоянию",
-        ],
-      },
-    ],
-  },
-  {
-    id: "R",
-    letter: "R",
-    label: "RESULT",
-    labelRu: "РЕЗУЛЬТАТ",
-    subtitle: "Цель и анализ полученного",
-    time: "10 мин",
-    icon: Rocket,
+    id: "A", label: "AND", title: "И",
+    subtitle: "Связующий элемент модели",
+    icon: Link2,
     accent: "from-violet-500/15 to-violet-500/5 border-violet-500/30",
-    labelColor: "text-violet-700 dark:text-violet-400",
-    gradientFrom: "from-violet-500",
-    gradientTo: "to-purple-600",
-    desc: "Цель, к которой мы стремимся. Анализ полученных результатов. Если результат не достигнут — повторение цикла SO.",
-    blocks: [
-      {
-        head: "ЖЕЛАЕМЫЙ РЕЗУЛЬТАТ · R=S2",
-        icon: Rocket,
-        tone: "from-violet-500 to-purple-600",
-        questions: [
-          "Какой результат в критериях системы вы хотите получить?",
-          "Как вы поймёте, что система пришла в новое состояние?",
-          "Что изменится в системе после достижения результата?",
-        ],
-      },
-      {
-        head: "АНАЛИЗ РЕАКЦИИ СИСТЕМЫ",
-        icon: Search,
-        tone: "from-indigo-500 to-violet-600",
-        questions: [
-          "Как система отреагировала на оператора?",
-          "Что изменилось в поведении элементов?",
-          "Какой результат получен?",
-          "Если результат не достигнут — что нужно изменить в следующем цикле SO?",
-        ],
-      },
+    tone: "from-violet-500 to-indigo-600",
+    desc: "Связующий элемент — объединяет S и R. Текущее состояние [S] + Оператор [O] → Результат [R]. Если результат не достигнут — цикл SO повторяется.",
+    questions: [],
+  },
+  {
+    id: "R", label: "RESULT", title: "РЕЗУЛЬТАТ",
+    subtitle: "Цель, к которой стремимся",
+    icon: Target,
+    accent: "from-emerald-500/15 to-emerald-500/5 border-emerald-500/30",
+    tone: "from-emerald-500 to-teal-600",
+    desc: "Цель, к которой стремимся. Анализ полученных результатов. Если не достигнут — повторение SO.",
+    questions: [
+      "Какой результат в критериях системы вы хотите получить?",
+      "Как вы поймёте, что система пришла в новое состояние?",
+      "Как система отреагировала на оператора?",
+      "Что изменилось в поведении элементов?",
+      "Если результат не достигнут — что изменить в следующем цикле SO?",
     ],
   },
 ];
 
-function QuestionCard({
-  head, icon: Icon, tone, questions,
-}: {
-  head: string; icon: any; tone: string; questions: string[];
-}) {
-  return (
-    <div className="relative overflow-hidden bg-card rounded-2xl border border-border p-4 hover:border-primary/40 transition-colors">
-      <Icon size={140} className="absolute -right-6 -bottom-8 text-foreground/[0.04] pointer-events-none" strokeWidth={1.2} />
-      <div className="relative flex items-center gap-3 mb-3">
-        <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${tone} text-white grid place-items-center shadow-md shadow-primary/20 shrink-0`}>
-          <Icon size={20} />
-        </div>
-        <div className="text-[11px] font-bold uppercase tracking-wider text-foreground/80 leading-tight">{head}</div>
-      </div>
-      <ul className="relative space-y-1.5 text-sm">
-        {questions.map((q, i) => (
-          <li key={i} className="flex items-start gap-2">
-            <ChevronRight size={14} className="text-primary mt-0.5 shrink-0" />
-            <span className="text-foreground/90">{q}</span>
-          </li>
-        ))}
-      </ul>
-    </div>
-  );
-}
-
 function Soar() {
   const [active, setActive] = useState("S");
   const step = SOAR_STEPS.find((s) => s.id === active)!;
+  const I = step.icon;
 
   return (
     <div className="space-y-6 max-w-full overflow-hidden">
-      <SectionHead
-        title="Модель SOAR"
-        subtitle="Системный коучинг · А. Невел, Г. Саймон, К. Шоу"
-      />
+      <SectionHead title="Модель SOAR" subtitle="Системный коучинг · А. Невел, Г. Саймон, К. Шоу" />
 
-      {/* Formula banner */}
-      <div className="rounded-2xl bg-gradient-to-r from-sky-500/20 via-amber-500/10 to-violet-500/20 border border-primary/20 p-4 text-center">
-        <div className="text-xs uppercase tracking-widest text-muted-foreground mb-1">Формула модели</div>
-        <div className="font-mono text-xl font-extrabold tracking-wide">
-          [S <span className="text-primary">·</span> O] <ArrowRight className="inline" size={20} /> R
+      {/* Формула */}
+      <div className="relative overflow-hidden rounded-2xl border border-primary/30 bg-gradient-to-br from-primary/15 to-primary/5 p-5">
+        <Sparkles className="absolute right-6 top-4 text-primary/25" size={22} />
+        <div className="flex flex-wrap items-center justify-center gap-3">
+          <span className="px-4 py-2 rounded-xl bg-card border border-border font-extrabold text-xl">[S · O]</span>
+          <ArrowRight size={22} className="text-primary" />
+          <span className="px-4 py-2 rounded-xl bg-card border border-border font-extrabold text-xl">R</span>
         </div>
-        <div className="text-xs text-muted-foreground mt-1">State + Operator → Result</div>
+        <p className="mt-3 text-center text-xs text-muted-foreground">
+          State + Operator → Result
+        </p>
       </div>
 
-      {/* Step tabs */}
-      <div className="grid grid-cols-4 gap-2">
+      {/* Кнопки-вкладки */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
         {SOAR_STEPS.map((s) => {
           const act = active === s.id;
-          const I = s.icon;
+          const Ic = s.icon;
           return (
             <button
               key={s.id}
               onClick={() => setActive(s.id)}
-              className={`p-3 rounded-xl border text-center transition-all ${
-                act
-                  ? "bg-primary text-primary-foreground border-primary shadow-lg"
-                  : "bg-card border-border hover:border-primary/40"
-              }`}
+              className={`p-4 rounded-xl border text-left transition-all ${act ? "bg-primary text-primary-foreground border-primary shadow-lg" : "bg-card border-border hover:border-primary/40"}`}
             >
-              <I size={20} className="mx-auto mb-1" />
-              <div className="font-extrabold text-xl leading-none">{s.letter}</div>
-              <div className={`text-[9px] leading-tight mt-0.5 ${act ? "opacity-90" : "text-muted-foreground"}`}>
-                {s.labelRu}
+              <div className={`w-10 h-10 rounded-xl mb-2 grid place-items-center ${act ? "bg-white/20 text-white" : `bg-gradient-to-br ${s.tone} text-white`}`}>
+                <Ic size={20} />
               </div>
+              <div className="font-bold text-2xl">{s.id}</div>
+              <div className={`text-xs ${act ? "opacity-90" : "text-muted-foreground"}`}>{s.label}</div>
             </button>
           );
         })}
       </div>
 
-      {/* Active step */}
-      <div className={`relative overflow-hidden rounded-2xl border p-5 bg-gradient-to-br ${step.accent}`}>
-        <step.icon size={200} className="absolute -right-10 -top-10 opacity-[0.04] pointer-events-none" strokeWidth={1} />
-
-        {/* Header */}
-        <div className="relative flex items-center gap-4 mb-4">
-          <div className={`w-16 h-16 rounded-2xl bg-gradient-to-br ${step.gradientFrom} ${step.gradientTo} text-white grid place-items-center shadow-lg shrink-0`}>
-            <span className="text-3xl font-extrabold">{step.letter}</span>
+      {/* Активный раздел */}
+      <div className={`relative overflow-hidden rounded-2xl border p-6 bg-gradient-to-br ${step.accent}`}>
+        <I size={220} strokeWidth={1} className="absolute -right-8 -top-8 text-foreground/[0.05] pointer-events-none" />
+        <div className="relative flex items-center gap-4 rounded-2xl bg-card shadow-xl ring-2 ring-white/40 p-4">
+          <div className={`w-16 h-16 rounded-2xl shrink-0 grid place-items-center bg-gradient-to-br ${step.tone} text-white`}>
+            <I size={32} />
           </div>
-          <div>
-            <div className={`text-[10px] uppercase tracking-widest font-bold ${step.labelColor}`}>
-              {step.label} · {step.labelRu}
+          <div className="min-w-0">
+            <div className="text-xs uppercase tracking-wide opacity-80 font-semibold">{step.label}</div>
+            <h3 className="text-[clamp(24px,7vw,44px)] font-extrabold tracking-tight leading-none">{step.title}</h3>
+            <div className="text-sm text-muted-foreground mt-1">{step.subtitle}</div>
+          </div>
+        </div>
+
+        <div className="relative mt-4 bg-card rounded-2xl border border-border p-4">
+          <div className="text-[11px] font-bold uppercase tracking-wider text-foreground/70 mb-1.5">Описание</div>
+          <p className="text-sm text-foreground/90 leading-relaxed">{step.desc}</p>
+        </div>
+
+        {step.questions.length > 0 && (
+          <div className="relative mt-3 bg-card rounded-2xl border border-border p-4">
+            <div className="flex items-center gap-2 mb-3">
+              <div className={`w-8 h-8 rounded-lg bg-gradient-to-br ${step.tone} text-white grid place-items-center`}>
+                <Star size={16} />
+              </div>
+              <div className="text-[11px] font-bold uppercase tracking-wider text-foreground/80">Коучинговые вопросы</div>
             </div>
-            <div className="text-lg font-bold text-foreground mt-0.5">{step.subtitle}</div>
-            {step.time !== "—" && (
-              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-primary text-primary-foreground text-[10px] font-bold mt-1">
-                ⏱ {step.time}
-              </span>
-            )}
+            <ul className="space-y-2">
+              {step.questions.map((q, i) => (
+                <li key={i} className="flex items-start gap-2 text-sm">
+                  <ChevronRight size={14} className="text-primary mt-0.5 shrink-0" />
+                  <span className="text-foreground/90">{q}</span>
+                </li>
+              ))}
+            </ul>
           </div>
-        </div>
-
-        <p className="relative text-sm text-foreground/75 mb-4 leading-relaxed">{step.desc}</p>
-
-        <div className="relative grid sm:grid-cols-2 gap-3">
-          {step.blocks.map((b, i) => (
-            <QuestionCard key={i} head={b.head} icon={b.icon} tone={b.tone} questions={b.questions} />
-          ))}
-        </div>
+        )}
       </div>
 
-      {/* Overview list */}
-      <div className="bg-card rounded-2xl border border-border p-5">
-        <div className="flex items-center gap-2 mb-4">
-          <Network size={20} className="text-primary shrink-0" />
-          <h3 className="font-semibold">Все шаги SOAR</h3>
-        </div>
-        <div className="space-y-2">
-          {SOAR_STEPS.map((s) => {
-            const I = s.icon;
-            return (
-              <button
-                key={s.id}
-                onClick={() => setActive(s.id)}
-                className={`w-full flex items-center gap-3 p-3 rounded-xl border text-left transition-all ${
-                  active === s.id
-                    ? "border-primary/50 bg-primary/10"
-                    : "border-border hover:border-primary/30 bg-secondary/40"
-                }`}
-              >
-                <div className={`w-8 h-8 rounded-lg bg-gradient-to-br ${s.gradientFrom} ${s.gradientTo} text-white grid place-items-center shrink-0`}>
-                  <span className="font-extrabold text-sm">{s.letter}</span>
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="font-semibold text-sm">{s.labelRu}</div>
-                  <div className="text-xs text-muted-foreground truncate">{s.subtitle}</div>
-                </div>
-                <div className="flex items-center gap-1.5 shrink-0">
-                  {s.time !== "—" && <span className="text-xs text-muted-foreground">{s.time}</span>}
-                  <ArrowRight size={14} className={active === s.id ? "text-primary" : "text-muted-foreground"} />
-                </div>
-              </button>
-            );
-          })}
-        </div>
-      </div>
-
-      {/* Tip */}
-      <div className="rounded-2xl border border-primary/30 bg-primary/10 p-4 flex items-start gap-3">
-        <HelpCircle size={20} className="text-primary mt-0.5 shrink-0" />
+      <div className="rounded-2xl border border-primary/30 bg-primary/10 p-5 flex items-start gap-3">
+        <Flag size={20} className="text-primary mt-0.5 shrink-0" />
         <div>
-          <div className="text-xs uppercase tracking-wide text-primary font-bold mb-1">Ключевая идея</div>
+          <div className="text-xs uppercase tracking-wide text-primary font-bold mb-1">Как работать с моделью</div>
           <div className="text-sm font-medium">
-            SOAR — системная модель: коуч помогает клиенту осознать элементы своей системы, найти рычаг воздействия (Operator) и проанализировать результат. Если цель не достигнута — цикл [SO] повторяется с новыми параметрами.
+            SOAR — системная модель: коуч помогает клиенту осознать элементы своей системы, найти рычаг воздействия
+            (Operator) и проанализировать результат. Если цель не достигнута — цикл [SO] повторяется.
           </div>
         </div>
       </div>

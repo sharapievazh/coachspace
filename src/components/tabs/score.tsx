@@ -1,290 +1,184 @@
 import { useState } from "react";
-import {
-  AlertCircle, ArrowRight, Brain, ChevronRight, Compass, Eye,
-  HelpCircle, Lightbulb, Rocket, Sparkles, Target, TrendingUp,
-} from "lucide-react";
+import { Activity, ChevronRight, Coins, Flag, History, Sparkles, Star, Target, Timer, Waves, Wrench } from "lucide-react";
 import { SectionHead } from "./_shared";
 
-const SCORE_STEPS = [
+type Step = {
+  id: string;
+  label: string;
+  title: string;
+  time: string;
+  icon: any;
+  accent: string;
+  tone: string;
+  questions: string[];
+  tools?: { t: string; d: string }[];
+};
+
+const SCORE_STEPS: Step[] = [
   {
-    id: "S",
-    letter: "S",
-    label: "СИМПТОМЫ",
-    subtitle: "Что у вас сейчас?",
-    time: "2 мин",
-    icon: AlertCircle,
+    id: "S", label: "СИМПТОМЫ", title: "СИМПТОМЫ", time: "2 мин",
+    icon: Activity,
     accent: "from-rose-500/15 to-rose-500/5 border-rose-500/30",
-    labelColor: "text-rose-700 dark:text-rose-400",
-    gradientFrom: "from-rose-500",
-    gradientTo: "to-pink-500",
-    blocks: [
-      {
-        head: "ТЕКУЩАЯ СИТУАЦИЯ",
-        icon: AlertCircle,
-        tone: "from-rose-500 to-pink-500",
-        questions: [
-          "Что у вас сейчас?",
-          "Что вы хотите изменить?",
-          "Что вас беспокоит?",
-          "Как вы описываете происходящее?",
-        ],
-      },
-    ],
+    tone: "from-rose-500 to-red-600",
+    questions: ["Что у вас сейчас?", "Что вы хотите изменить?", "Что вас беспокоит?"],
   },
   {
-    id: "C",
-    letter: "C",
-    label: "РЕЗУЛЬТАТЫ",
-    subtitle: "Чего вы хотите достичь?",
-    time: "3 мин",
+    id: "C", label: "РЕЗУЛЬТАТЫ", title: "РЕЗУЛЬТАТЫ", time: "3 мин",
     icon: Target,
     accent: "from-emerald-500/15 to-emerald-500/5 border-emerald-500/30",
-    labelColor: "text-emerald-700 dark:text-emerald-400",
-    gradientFrom: "from-emerald-500",
-    gradientTo: "to-teal-500",
-    blocks: [
-      {
-        head: "ЖЕЛАЕМЫЙ РЕЗУЛЬТАТ",
-        icon: Target,
-        tone: "from-emerald-500 to-teal-500",
-        questions: [
-          "Что вы хотите получить в дальнейшем?",
-          "В чём будет выражен ваш результат?",
-          "Как вы поймёте, что достигли результата?",
-        ],
-      },
-      {
-        head: "ИНСТРУМЕНТЫ ПРОЯСНЕНИЯ ЦЕЛИ",
-        icon: Compass,
-        tone: "from-teal-500 to-cyan-500",
-        questions: [
-          "Визуализация — представьте результат достигнутым",
-          "Диссоциация — взгляд со стороны",
-          "Экология — как это повлияет на окружение?",
-          "Вторичные выгоды — что полезного в том, что этого пока нет?",
-        ],
-      },
-      {
-        head: "ЦЕННОСТНЫЙ КОНТЕКСТ · НЛУ",
-        icon: Sparkles,
-        tone: "from-violet-500 to-indigo-500",
-        questions: [
-          "Почему важно это изменить?",
-          "Какие ценности и убеждения стоят за этим?",
-          "Какой смысл вы вкладываете в этот результат?",
-        ],
-      },
+    tone: "from-emerald-500 to-teal-600",
+    questions: [
+      "Что вы хотите получить в дальнейшем?",
+      "В чём будет выражен ваш результат?",
+      "Как вы поймёте, что достигли результата?",
+    ],
+    tools: [
+      { t: "Визуализация, диссоциация", d: "Взгляд на ситуацию со стороны" },
+      { t: "Экология", d: "Как это повлияет на окружение?" },
+      { t: "Вторичные выгоды", d: "Что полезного в том, что этого пока нет?" },
+      { t: "Ценности, убеждения, смыслы", d: "Почему важно это изменить?" },
     ],
   },
   {
-    id: "O",
-    letter: "O",
-    label: "ЭФФЕКТЫ",
-    subtitle: "Что произойдёт после достижения цели?",
-    time: "2 мин",
-    icon: TrendingUp,
-    accent: "from-amber-500/15 to-amber-500/5 border-amber-500/30",
-    labelColor: "text-amber-700 dark:text-amber-400",
-    gradientFrom: "from-amber-500",
-    gradientTo: "to-orange-500",
-    blocks: [
-      {
-        head: "ДОЛГОСРОЧНЫЕ ПОСЛЕДСТВИЯ",
-        icon: TrendingUp,
-        tone: "from-amber-500 to-orange-500",
-        questions: [
-          "Что произойдёт после достижения вашей цели?",
-          "Что вам даст это изменение?",
-          "Как результаты отразятся на вашей жизни и окружении?",
-          "Какие более далёкие последствия вы можете предположить?",
-        ],
-      },
-    ],
-  },
-  {
-    id: "R",
-    letter: "R",
-    label: "ПРИЧИНЫ",
-    subtitle: "Что привело к текущей ситуации?",
-    time: "2 мин",
-    icon: Eye,
+    id: "O", label: "ЭФФЕКТЫ", title: "ЭФФЕКТЫ", time: "2 мин",
+    icon: Waves,
     accent: "from-sky-500/15 to-sky-500/5 border-sky-500/30",
-    labelColor: "text-sky-700 dark:text-sky-400",
-    gradientFrom: "from-sky-500",
-    gradientTo: "to-blue-500",
-    blocks: [
-      {
-        head: "АНАЛИЗ ПРИЧИН",
-        icon: Eye,
-        tone: "from-sky-500 to-blue-500",
-        questions: [
-          "Когда это случилось первый раз?",
-          "Что послужило причиной вашего сегодняшнего положения дел?",
-          "Когда вы впервые подумали об этом?",
-          "Что поддерживает эту ситуацию?",
-        ],
-      },
+    tone: "from-sky-500 to-blue-600",
+    questions: [
+      "Что произойдёт после достижения вашей цели?",
+      "Что вам даст это изменение?",
+      "Как полученные результаты отразятся на вашей жизни и окружении?",
+      "Какие более далёкие последствия вы можете предположить?",
     ],
   },
   {
-    id: "E",
-    letter: "E",
-    label: "РЕСУРСЫ",
-    subtitle: "Что поможет вам измениться?",
-    time: "3 мин",
-    icon: Rocket,
+    id: "R", label: "ПРИЧИНЫ", title: "ПРИЧИНЫ", time: "2 мин",
+    icon: History,
+    accent: "from-amber-500/15 to-amber-500/5 border-amber-500/30",
+    tone: "from-amber-500 to-orange-600",
+    questions: [
+      "Когда это случилось первый раз?",
+      "Что послужило причиной вашего сегодняшнего положения дел?",
+      "Когда вы впервые подумали об этом?",
+      "Что поддерживает эту ситуацию?",
+    ],
+  },
+  {
+    id: "E", label: "РЕСУРСЫ", title: "РЕСУРСЫ", time: "3 мин",
+    icon: Coins,
     accent: "from-violet-500/15 to-violet-500/5 border-violet-500/30",
-    labelColor: "text-violet-700 dark:text-violet-400",
-    gradientFrom: "from-violet-500",
-    gradientTo: "to-purple-500",
-    blocks: [
-      {
-        head: "РЕСУРСЫ ДЛЯ ИЗМЕНЕНИЙ",
-        icon: Rocket,
-        tone: "from-violet-500 to-purple-500",
-        questions: [
-          "Что вам нужно для достижения цели?",
-          "Что могло бы помочь перейти к быстрым изменениям?",
-          "Чего вам не хватало для получения результата раньше?",
-          "Какие ресурсы у вас уже есть?",
-        ],
-      },
+    tone: "from-violet-500 to-indigo-600",
+    questions: [
+      "Что вам нужно для достижения цели?",
+      "Что могло бы помочь перейти к быстрым изменениям?",
+      "Чего вам не хватало для получения результата раньше?",
+      "Какие ресурсы у вас уже есть?",
     ],
   },
 ];
 
-function QuestionCard({
-  head, icon: Icon, tone, questions,
-}: {
-  head: string; icon: any; tone: string; questions: string[];
-}) {
-  return (
-    <div className="relative overflow-hidden bg-card rounded-2xl border border-border p-4 group hover:border-primary/40 transition-colors">
-      <Icon size={140} className="absolute -right-6 -bottom-8 text-foreground/[0.04] pointer-events-none" strokeWidth={1.2} />
-      <div className="relative flex items-center gap-3 mb-3">
-        <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${tone} text-white grid place-items-center shadow-md shadow-primary/20 shrink-0`}>
-          <Icon size={20} />
-        </div>
-        <div className="text-[11px] font-bold uppercase tracking-wider text-foreground/80 leading-tight">{head}</div>
-      </div>
-      <ul className="relative space-y-1.5 text-sm">
-        {questions.map((q, i) => (
-          <li key={i} className="flex items-start gap-2">
-            <ChevronRight size={14} className="text-primary mt-0.5 shrink-0" />
-            <span className="text-foreground/90">{q}</span>
-          </li>
-        ))}
-      </ul>
-    </div>
-  );
-}
-
 function Score() {
   const [active, setActive] = useState("S");
   const step = SCORE_STEPS.find((s) => s.id === active)!;
+  const I = step.icon;
 
   return (
     <div className="space-y-6 max-w-full overflow-hidden">
-      <SectionHead
-        title="Модель S.C.O.R.E."
-        subtitle="Сбор информации при работе с клиентом · 12 минут"
-      />
+      <SectionHead title="Модель S.C.O.R.E." subtitle="Сбор информации при работе с клиентом · 12 минут" />
 
-      {/* Step selector */}
-      <div className="grid grid-cols-5 gap-1.5">
+      <div className="relative overflow-hidden rounded-2xl border border-primary/30 bg-gradient-to-br from-primary/15 to-primary/5 p-5">
+        <Sparkles className="absolute right-6 top-4 text-primary/25" size={22} />
+        <div className="flex flex-wrap items-center justify-center gap-2">
+          {SCORE_STEPS.map((s) => (
+            <span key={s.id} className="px-3 py-1.5 rounded-xl bg-card border border-border font-extrabold text-lg">
+              {s.id}
+            </span>
+          ))}
+        </div>
+        <p className="mt-3 text-center text-xs text-muted-foreground">
+          Симптомы → Результаты → Эффекты → Причины → Ресурсы
+        </p>
+      </div>
+
+      <div className="grid grid-cols-3 sm:grid-cols-5 gap-2">
         {SCORE_STEPS.map((s) => {
           const act = active === s.id;
-          const I = s.icon;
+          const Ic = s.icon;
           return (
             <button
               key={s.id}
               onClick={() => setActive(s.id)}
-              className={`p-2.5 rounded-xl border text-center transition-all ${
-                act
-                  ? "bg-primary text-primary-foreground border-primary shadow-lg"
-                  : "bg-card border-border hover:border-primary/40"
-              }`}
+              className={`p-3 rounded-xl border text-left transition-all ${act ? "bg-primary text-primary-foreground border-primary shadow-lg" : "bg-card border-border hover:border-primary/40"}`}
             >
-              <I size={20} className="mx-auto mb-1" />
-              <div className="font-extrabold text-lg leading-none">{s.letter}</div>
-              <div className={`text-[9px] leading-tight mt-0.5 ${act ? "opacity-90" : "text-muted-foreground"}`}>
-                {s.label}
+              <div className={`w-9 h-9 rounded-xl mb-2 grid place-items-center ${act ? "bg-white/20 text-white" : `bg-gradient-to-br ${s.tone} text-white`}`}>
+                <Ic size={18} />
               </div>
+              <div className="font-bold text-xl">{s.id}</div>
+              <div className={`text-[11px] leading-tight ${act ? "opacity-90" : "text-muted-foreground"}`}>{s.title}</div>
             </button>
           );
         })}
       </div>
 
-      {/* Active step card */}
-      <div className={`relative overflow-hidden rounded-2xl border p-5 bg-gradient-to-br ${step.accent}`}>
-        <step.icon size={200} className="absolute -right-10 -top-10 opacity-[0.04] pointer-events-none" strokeWidth={1} />
-
-        {/* Header */}
-        <div className="relative flex items-center gap-4 mb-5">
-          <div className={`w-16 h-16 rounded-2xl bg-gradient-to-br ${step.gradientFrom} ${step.gradientTo} text-white grid place-items-center shadow-lg shrink-0`}>
-            <span className="text-3xl font-extrabold">{step.letter}</span>
+      <div className={`relative overflow-hidden rounded-2xl border p-6 bg-gradient-to-br ${step.accent}`}>
+        <I size={220} strokeWidth={1} className="absolute -right-8 -top-8 text-foreground/[0.05] pointer-events-none" />
+        <div className="relative flex items-center gap-4 rounded-2xl bg-card shadow-xl ring-2 ring-white/40 p-4">
+          <div className={`w-16 h-16 rounded-2xl shrink-0 grid place-items-center bg-gradient-to-br ${step.tone} text-white`}>
+            <I size={32} />
           </div>
-          <div>
-            <div className={`text-xs uppercase tracking-widest font-bold ${step.labelColor}`}>{step.label}</div>
-            <div className="text-xl font-bold text-foreground mt-0.5">{step.subtitle}</div>
-            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-primary text-primary-foreground text-[10px] font-bold mt-1">
-              ⏱ {step.time}
+          <div className="min-w-0">
+            <div className="text-xs uppercase tracking-wide opacity-80 font-semibold">{step.label}</div>
+            <h3 className="text-[clamp(24px,7vw,40px)] font-extrabold tracking-tight leading-none">{step.title}</h3>
+            <span className="mt-2 inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-primary text-primary-foreground text-[11px] font-bold">
+              <Timer size={12} /> {step.time}
             </span>
           </div>
         </div>
 
-        {/* Question blocks */}
-        <div className="relative grid sm:grid-cols-2 gap-3">
-          {step.blocks.map((b, i) => (
-            <QuestionCard key={i} head={b.head} icon={b.icon} tone={b.tone} questions={b.questions} />
-          ))}
+        <div className="relative mt-4 bg-card rounded-2xl border border-border p-4">
+          <div className="flex items-center gap-2 mb-3">
+            <div className={`w-8 h-8 rounded-lg bg-gradient-to-br ${step.tone} text-white grid place-items-center`}>
+              <Star size={16} />
+            </div>
+            <div className="text-[11px] font-bold uppercase tracking-wider text-foreground/80">Вопросы</div>
+          </div>
+          <ul className="space-y-2">
+            {step.questions.map((q, i) => (
+              <li key={i} className="flex items-start gap-2 text-sm">
+                <ChevronRight size={14} className="text-primary mt-0.5 shrink-0" />
+                <span className="text-foreground/90">{q}</span>
+              </li>
+            ))}
+          </ul>
         </div>
+
+        {step.tools && (
+          <div className="relative mt-3 bg-card rounded-2xl border border-border p-4">
+            <div className="flex items-center gap-2 mb-3">
+              <div className={`w-8 h-8 rounded-lg bg-gradient-to-br ${step.tone} text-white grid place-items-center`}>
+                <Wrench size={16} />
+              </div>
+              <div className="text-[11px] font-bold uppercase tracking-wider text-foreground/80">Инструменты</div>
+            </div>
+            <div className="grid sm:grid-cols-2 gap-2">
+              {step.tools.map((t, i) => (
+                <div key={i} className="p-3 rounded-xl bg-secondary/60">
+                  <div className="font-semibold text-xs">{t.t}</div>
+                  <div className="text-xs text-muted-foreground mt-1">{t.d}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
 
-      {/* Full SCORE overview */}
-      <div className="bg-card rounded-2xl border border-border p-5">
-        <div className="flex items-center gap-2 mb-4">
-          <Brain size={20} className="text-primary shrink-0" />
-          <h3 className="font-semibold">Все шаги S.C.O.R.E.</h3>
-          <span className="ml-auto text-xs text-muted-foreground bg-secondary px-2 py-0.5 rounded-full">12 мин</span>
-        </div>
-        <div className="space-y-2">
-          {SCORE_STEPS.map((s, i) => {
-            const I = s.icon;
-            return (
-              <button
-                key={s.id}
-                onClick={() => setActive(s.id)}
-                className={`w-full flex items-center gap-3 p-3 rounded-xl border text-left transition-all ${
-                  active === s.id
-                    ? "border-primary/50 bg-primary/10"
-                    : "border-border hover:border-primary/30 bg-secondary/40"
-                }`}
-              >
-                <div className={`w-8 h-8 rounded-lg bg-gradient-to-br ${s.gradientFrom} ${s.gradientTo} text-white grid place-items-center shrink-0`}>
-                  <span className="font-extrabold text-sm">{s.letter}</span>
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="font-semibold text-sm">{s.label}</div>
-                  <div className="text-xs text-muted-foreground truncate">{s.subtitle}</div>
-                </div>
-                <div className="flex items-center gap-1.5 shrink-0">
-                  <span className="text-xs text-muted-foreground">{s.time}</span>
-                  <ArrowRight size={14} className={active === s.id ? "text-primary" : "text-muted-foreground"} />
-                </div>
-              </button>
-            );
-          })}
-        </div>
-      </div>
-
-      {/* Tip */}
-      <div className="rounded-2xl border border-primary/30 bg-primary/10 p-4 flex items-start gap-3">
-        <HelpCircle size={20} className="text-primary mt-0.5 shrink-0" />
+      <div className="rounded-2xl border border-primary/30 bg-primary/10 p-5 flex items-start gap-3">
+        <Flag size={20} className="text-primary mt-0.5 shrink-0" />
         <div>
-          <div className="text-xs uppercase tracking-wide text-primary font-bold mb-1">Формат работы</div>
+          <div className="text-xs uppercase tracking-wide text-primary font-bold mb-1">Как работать с моделью</div>
           <div className="text-sm font-medium">
-            S.C.O.R.E. используется как экспресс-сбор информации при работе в парах по 12 минут. Каждый шаг — короткая остановка для прояснения ключевого аспекта ситуации клиента.
+            S.C.O.R.E. используется как экспресс-сбор информации при работе в парах по 12 минут. Каждый шаг — короткая
+            остановка для прояснения ключевого аспекта ситуации клиента.
           </div>
         </div>
       </div>

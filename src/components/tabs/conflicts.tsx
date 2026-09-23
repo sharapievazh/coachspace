@@ -1,26 +1,43 @@
 import { useState } from "react";
 import {
-  AlertOctagon, AlertTriangle, ArrowRight, BookOpen,
-  CheckCircle, ChevronRight, Clock, Flame, HandMetal,
-  HelpCircle, MessageSquare, RefreshCw, Scale, Shield, Zap,
+  AlertOctagon, Shield, Zap, Clock, Scale,
+  Flame, MessageSquare, AlertTriangle, BookOpen,
+  CheckCircle, RefreshCw, ChevronRight,
 } from "lucide-react";
 import { SectionHead } from "./_shared";
 
-const STRATEGIES = [
+type Block = {
+  title: string;
+  icon: any;
+  tone: string;
+  questions: string[];
+};
+
+type Strategy = {
+  id: string;
+  n: number;
+  short: string;
+  title: string;
+  icon: any;
+  tone: string;
+  accent: string;
+  desc: string;
+  blocks: Block[];
+};
+
+const STRATEGIES: Strategy[] = [
   {
-    id: "1",
-    label: "ПРЕДУПРЕЖДЕНИЕ",
-    labelShort: "ПРЕДУПР.",
-    subtitle: "Профилактика до возникновения конфликта",
+    id: "prevention",
+    n: 1,
+    short: "ПРЕДУПРЕЖДЕНИЕ",
+    title: "СТРАТЕГИЯ 1 — ПРЕДУПРЕЖДЕНИЕ",
     icon: Shield,
+    tone: "from-sky-500 to-blue-600",
     accent: "from-sky-500/15 to-sky-500/5 border-sky-500/30",
-    labelColor: "text-sky-700 dark:text-sky-400",
-    gradientFrom: "from-sky-500",
-    gradientTo: "to-blue-600",
-    desc: "Предупреждение работает через правила (контракт), арбитраж (авторитетная третья сторона — например, суд), или когда одна из сторон добровольно уступает в пользу другой.",
+    desc: "Предупреждение работает через правила (контракт), арбитраж (авторитетная третья сторона), или когда одна из сторон добровольно уступает в пользу другой.",
     blocks: [
       {
-        head: "ПРОФИЛАКТИКА КОНФЛИКТА",
+        title: "ПРОФИЛАКТИКА КОНФЛИКТА",
         icon: Shield,
         tone: "from-sky-500 to-blue-600",
         questions: [
@@ -33,19 +50,17 @@ const STRATEGIES = [
     ],
   },
   {
-    id: "2",
-    label: "ПОДАВЛЕНИЕ",
-    labelShort: "ПОДАВЛ.",
-    subtitle: "Активные действия против другой стороны",
+    id: "suppression",
+    n: 2,
+    short: "ПОДАВЛЕНИЕ",
+    title: "СТРАТЕГИЯ 2 — ПОДАВЛЕНИЕ",
     icon: Zap,
+    tone: "from-red-500 to-rose-600",
     accent: "from-red-500/15 to-red-500/5 border-red-500/30",
-    labelColor: "text-red-700 dark:text-red-400",
-    gradientFrom: "from-red-500",
-    gradientTo: "to-rose-600",
-    desc: "Подавление — форсированное завершение конфликта через активные действия: увольнение, санкции, принуждение. Конфликт «закрыт», но предмет остался нетронутым.",
+    desc: "Форсированное завершение конфликта: увольнение, санкции, принуждение. Конфликт \"закрыт\", но предмет остался нетронутым.",
     blocks: [
       {
-        head: "АНАЛИЗ ПОДАВЛЕНИЯ",
+        title: "АНАЛИЗ ПОДАВЛЕНИЯ",
         icon: AlertTriangle,
         tone: "from-red-500 to-rose-600",
         questions: [
@@ -58,19 +73,17 @@ const STRATEGIES = [
     ],
   },
   {
-    id: "3",
-    label: "ОТСРОЧКА",
-    labelShort: "ОТСРОЧКА",
-    subtitle: "Устранение инцидента без устранения предмета",
+    id: "postponement",
+    n: 3,
+    short: "ОТСРОЧКА",
+    title: "СТРАТЕГИЯ 3 — ОТСРОЧКА",
     icon: Clock,
+    tone: "from-amber-500 to-orange-500",
     accent: "from-amber-500/15 to-amber-500/5 border-amber-500/30",
-    labelColor: "text-amber-700 dark:text-amber-400",
-    gradientFrom: "from-amber-500",
-    gradientTo: "to-orange-500",
-    desc: "Отсрочка — временное снятие напряжения без решения коренной причины. Инструменты: изменение отношения сторон, рефрейминг, демонстрация силы или апелляция к репутации.",
+    desc: "Временное снятие напряжения без решения коренной причины. Инструменты: рефрейминг, изменение отношения сторон, апелляция к репутации.",
     blocks: [
       {
-        head: "ИНСТРУМЕНТЫ ОТСРОЧКИ",
+        title: "ИНСТРУМЕНТЫ ОТСРОЧКИ",
         icon: Clock,
         tone: "from-amber-500 to-orange-500",
         questions: [
@@ -80,7 +93,7 @@ const STRATEGIES = [
         ],
       },
       {
-        head: "РЕФРЕЙМИНГ",
+        title: "РЕФРЕЙМИНГ",
         icon: RefreshCw,
         tone: "from-orange-500 to-red-500",
         questions: [
@@ -92,19 +105,17 @@ const STRATEGIES = [
     ],
   },
   {
-    id: "4",
-    label: "УЛАЖИВАНИЕ",
-    labelShort: "УЛАЖИВ.",
-    subtitle: "Взаимные уступки и поиск соглашения",
+    id: "settlement",
+    n: 4,
+    short: "УЛАЖИВАНИЕ",
+    title: "СТРАТЕГИЯ 4 — УЛАЖИВАНИЕ",
     icon: Scale,
+    tone: "from-emerald-500 to-teal-500",
     accent: "from-emerald-500/15 to-emerald-500/5 border-emerald-500/30",
-    labelColor: "text-emerald-700 dark:text-emerald-400",
-    gradientFrom: "from-emerald-500",
-    gradientTo: "to-teal-500",
-    desc: "Улаживание — поиск взаимовыгодного решения через уступки. Форматы: контрпредложение (пакетное соглашение), параллельное предложение (выход за рамки спора), компромисс.",
+    desc: "Поиск взаимовыгодного решения через уступки: контрпредложение, параллельное предложение, компромисс.",
     blocks: [
       {
-        head: "ФОРМАТЫ УЛАЖИВАНИЯ",
+        title: "ФОРМАТЫ УЛАЖИВАНИЯ",
         icon: Scale,
         tone: "from-emerald-500 to-teal-500",
         questions: [
@@ -114,7 +125,7 @@ const STRATEGIES = [
         ],
       },
       {
-        head: "ПЕРЕГОВОРНАЯ ПОЗИЦИЯ",
+        title: "ПЕРЕГОВОРНАЯ ПОЗИЦИЯ",
         icon: CheckCircle,
         tone: "from-teal-500 to-cyan-500",
         questions: [
@@ -128,157 +139,172 @@ const STRATEGIES = [
   },
 ];
 
-const TROUBLEMAKERS = [
-  { label: "Агрессивные", sub: "танки, снайперы, взрывники", icon: Flame, color: "from-red-500 to-rose-600" },
-  { label: "Жалобщики", sub: "постоянные обвинители", icon: MessageSquare, color: "from-orange-500 to-amber-500" },
-  { label: "Нерешительные", sub: "избегают конфликта", icon: AlertOctagon, color: "from-amber-500 to-yellow-500" },
-  { label: "Тревожные", sub: "личности, ищущие безопасности", icon: AlertTriangle, color: "from-sky-500 to-blue-500" },
-  { label: "Всезнайки", sub: "экспертная позиция", icon: BookOpen, color: "from-violet-500 to-indigo-500" },
+const DIFFICULT_TYPES = [
+  {
+    title: "Агрессивные",
+    note: "танки, снайперы, взрывники",
+    icon: Flame,
+    tone: "from-red-500 to-rose-600",
+  },
+  {
+    title: "Жалобщики",
+    note: "постоянные обвинители",
+    icon: MessageSquare,
+    tone: "from-orange-500 to-amber-500",
+  },
+  {
+    title: "Нерешительные",
+    note: "избегают конфликта",
+    icon: AlertOctagon,
+    tone: "from-amber-500 to-yellow-500",
+  },
+  {
+    title: "Тревожные личности",
+    note: "ищут безопасности",
+    icon: AlertTriangle,
+    tone: "from-sky-500 to-blue-500",
+  },
+  {
+    title: "Всезнайки",
+    note: "экспертная позиция",
+    icon: BookOpen,
+    tone: "from-violet-500 to-indigo-500",
+  },
 ];
 
-function QuestionCard({ head, icon: Icon, tone, questions }: {
-  head: string; icon: any; tone: string; questions: string[];
-}) {
-  return (
-    <div className="relative overflow-hidden bg-card rounded-2xl border border-border p-4 hover:border-primary/40 transition-colors">
-      <Icon size={140} className="absolute -right-6 -bottom-8 text-foreground/[0.04] pointer-events-none" strokeWidth={1.2} />
-      <div className="relative flex items-center gap-3 mb-3">
-        <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${tone} text-white grid place-items-center shadow-md shadow-primary/20 shrink-0`}>
-          <Icon size={20} />
-        </div>
-        <div className="text-[11px] font-bold uppercase tracking-wider text-foreground/80 leading-tight">{head}</div>
-      </div>
-      <ul className="relative space-y-1.5 text-sm">
-        {questions.map((q, i) => (
-          <li key={i} className="flex items-start gap-2">
-            <ChevronRight size={14} className="text-primary mt-0.5 shrink-0" />
-            <span className="text-foreground/90">{q}</span>
-          </li>
-        ))}
-      </ul>
-    </div>
-  );
-}
-
 function Conflicts() {
-  const [active, setActive] = useState("1");
-  const strat = STRATEGIES.find((s) => s.id === active)!;
+  const [active, setActive] = useState("prevention");
+  const s = STRATEGIES.find((x) => x.id === active)!;
+  const I = s.icon;
 
   return (
     <div className="space-y-6 max-w-full overflow-hidden">
-      <SectionHead
-        title="Коучинг в конфликтах"
-        subtitle="Стратегии управления конфликтом · Брамсон"
-      />
+      <SectionHead title="Коучинг в разрешении конфликтов" subtitle="Конфликт = Предмет + Инцидент · Стратегии управления" />
 
-      {/* Banner */}
-      <div className="rounded-2xl bg-gradient-to-r from-red-500/20 via-orange-500/10 to-amber-500/20 border border-primary/20 p-4 text-center">
-        <div className="text-xs uppercase tracking-widest text-muted-foreground mb-1">Ключевое различие</div>
-        <div className="font-bold text-base">
-          Предмет конфликта ≠ Инцидент
-        </div>
-        <div className="text-xs text-muted-foreground mt-1">Инцидент — триггер. Предмет — истинная причина. Работа только с инцидентом даёт лишь отсрочку.</div>
+      {/* Баннер */}
+      <div className="relative overflow-hidden rounded-2xl border border-primary/30 bg-gradient-to-br from-red-500/20 via-orange-500/10 to-amber-500/20 p-5">
+        <AlertOctagon className="absolute right-5 top-4 text-primary/25" size={26} />
+        <h3 className="text-base font-semibold text-foreground">Предмет конфликта ≠ Инцидент</h3>
+        <p className="mt-1 text-sm text-foreground/80">
+          Инцидент — триггер. Предмет — истинная причина. Работа только с инцидентом даёт лишь отсрочку.
+        </p>
       </div>
 
-      {/* Strategy tabs */}
-      <div className="grid grid-cols-4 gap-1.5">
-        {STRATEGIES.map((s) => {
-          const act = active === s.id;
-          const I = s.icon;
+      {/* Селектор 4 стратегий */}
+      <div className="grid grid-cols-4 gap-2 sm:gap-3">
+        {STRATEGIES.map((strat) => {
+          const act = active === strat.id;
+          const Icon = strat.icon;
           return (
             <button
-              key={s.id}
-              onClick={() => setActive(s.id)}
-              className={`p-2.5 rounded-xl border text-center transition-all ${
+              key={strat.id}
+              onClick={() => setActive(strat.id)}
+              className={`relative overflow-hidden p-2 sm:p-3 rounded-2xl border text-center transition-all ${
                 act
                   ? "bg-primary text-primary-foreground border-primary shadow-lg"
                   : "bg-card border-border hover:border-primary/40"
               }`}
             >
-              <I size={16} className="mx-auto mb-1" />
-              <div className="font-extrabold text-lg leading-none">{s.id}</div>
-              <div className={`text-[8px] leading-tight mt-0.5 ${act ? "opacity-90" : "text-muted-foreground"}`}>
-                {s.labelShort}
+              <div className={`w-8 h-8 sm:w-10 sm:h-10 rounded-xl mx-auto mb-1.5 grid place-items-center ${act ? "bg-white/20 text-white" : `bg-gradient-to-br ${strat.tone} text-white`}`}>
+                <Icon size={18} />
               </div>
+              <div className={`text-[10px] sm:text-xs font-bold leading-tight ${act ? "opacity-95" : "text-muted-foreground"}`}>
+                {strat.n}
+              </div>
+              <div className={`text-[8px] sm:text-[10px] font-bold leading-tight ${act ? "" : "text-foreground"}`}>
+                {strat.short}
+              </div>
+              {act && (
+                <div className="absolute top-2 right-2 w-1.5 h-1.5 rounded-full bg-white/90" />
+              )}
             </button>
           );
         })}
       </div>
 
-      {/* Active strategy */}
-      <div className={`relative overflow-hidden rounded-2xl border p-5 bg-gradient-to-br ${strat.accent}`}>
-        <strat.icon size={200} className="absolute -right-10 -top-10 opacity-[0.04] pointer-events-none" strokeWidth={1} />
-
-        <div className="relative flex items-center gap-4 mb-4">
-          <div className={`w-16 h-16 rounded-2xl bg-gradient-to-br ${strat.gradientFrom} ${strat.gradientTo} text-white grid place-items-center shadow-lg shrink-0`}>
-            <strat.icon size={28} />
+      {/* Активная стратегия */}
+      <div className={`relative overflow-hidden rounded-2xl border p-5 bg-gradient-to-br ${s.accent}`}>
+        <I size={180} strokeWidth={1} className="absolute -right-6 -top-6 text-foreground/[0.05] pointer-events-none" />
+        <div className="relative flex items-center gap-4 rounded-2xl bg-card shadow-xl ring-2 ring-white/40 p-4">
+          <div className={`w-14 h-14 sm:w-16 sm:h-16 rounded-2xl shrink-0 grid place-items-center bg-gradient-to-br ${s.tone} text-white`}>
+            <I size={28} />
           </div>
-          <div>
-            <div className={`text-[10px] uppercase tracking-widest font-bold ${strat.labelColor}`}>{strat.label}</div>
-            <div className="text-lg font-bold text-foreground mt-0.5">{strat.subtitle}</div>
+          <div className="min-w-0">
+            <div className="text-xs uppercase tracking-wide opacity-80 font-semibold">Стратегия {s.n}</div>
+            <h3 className="text-lg sm:text-[clamp(22px,5vw,34px)] font-extrabold tracking-tight leading-tight">{s.title}</h3>
           </div>
         </div>
 
-        <p className="relative text-sm text-foreground/75 mb-4 leading-relaxed">{strat.desc}</p>
-
-        <div className="relative grid sm:grid-cols-2 gap-3">
-          {strat.blocks.map((b, i) => (
-            <QuestionCard key={i} head={b.head} icon={b.icon} tone={b.tone} questions={b.questions} />
-          ))}
+        <div className="relative mt-4 bg-card rounded-2xl border border-border p-4">
+          <p className="text-sm text-foreground/90 leading-relaxed">{s.desc}</p>
         </div>
+
+        {s.blocks.map((block, idx) => (
+          <div key={idx} className="relative mt-3 bg-card rounded-2xl border border-border p-4">
+            <div className="flex items-center gap-2 mb-3">
+              <div className={`w-8 h-8 rounded-lg bg-gradient-to-br ${block.tone} text-white grid place-items-center`}>
+                <block.icon size={16} />
+              </div>
+              <div className="text-[11px] font-bold uppercase tracking-wider text-foreground/80">{block.title}</div>
+            </div>
+            <ul className="space-y-2">
+              {block.questions.map((q, i) => (
+                <li key={i} className="flex items-start gap-2 text-sm">
+                  <ChevronRight size={14} className="text-primary mt-0.5 shrink-0" />
+                  <span className="text-foreground/90">{q}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        ))}
       </div>
 
-      {/* Overview */}
+      {/* Обзорный список */}
       <div className="bg-card rounded-2xl border border-border p-5">
-        <div className="flex items-center gap-2 mb-4">
-          <AlertOctagon size={20} className="text-primary shrink-0" />
-          <h3 className="font-semibold">4 базовые стратегии</h3>
-        </div>
-        <div className="space-y-2">
-          {STRATEGIES.map((s) => {
-            const I = s.icon;
+        <div className="text-[11px] font-bold uppercase tracking-wider text-foreground/70 mb-3">4 стратегии разрешения конфликтов</div>
+        <div className="grid grid-cols-1 gap-2">
+          {STRATEGIES.map((strat) => {
+            const act = active === strat.id;
+            const Icon = strat.icon;
             return (
               <button
-                key={s.id}
-                onClick={() => setActive(s.id)}
-                className={`w-full flex items-center gap-3 p-3 rounded-xl border text-left transition-all ${
-                  active === s.id
-                    ? "border-primary/50 bg-primary/10"
-                    : "border-border hover:border-primary/30 bg-secondary/40"
+                key={strat.id}
+                onClick={() => setActive(strat.id)}
+                className={`flex items-center gap-3 p-3 rounded-xl border text-left transition-all ${
+                  act
+                    ? "bg-primary text-primary-foreground border-primary"
+                    : "bg-background border-border hover:border-primary/40"
                 }`}
               >
-                <div className={`w-8 h-8 rounded-lg bg-gradient-to-br ${s.gradientFrom} ${s.gradientTo} text-white grid place-items-center shrink-0`}>
-                  <I size={16} />
+                <div className={`w-8 h-8 rounded-lg grid place-items-center text-white shrink-0 ${act ? "bg-white/20" : `bg-gradient-to-br ${strat.tone}`}`}>
+                  <Icon size={16} />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <div className="font-semibold text-sm">{s.label}</div>
-                  <div className="text-xs text-muted-foreground truncate">{s.subtitle}</div>
+                  <div className={`text-sm font-bold ${act ? "" : "text-foreground"}`}>
+                    {strat.n}. {strat.short}
+                  </div>
                 </div>
-                <ArrowRight size={14} className={active === s.id ? "text-primary" : "text-muted-foreground"} />
+                <ChevronRight size={16} className={`shrink-0 ${act ? "text-primary-foreground/80" : "text-muted-foreground"}`} />
               </button>
             );
           })}
         </div>
       </div>
 
-      {/* Troublemakers */}
+      {/* 5 типов сложных собеседников по Брамсону */}
       <div className="bg-card rounded-2xl border border-border p-5">
-        <div className="flex items-center gap-2 mb-3">
-          <HandMetal size={20} className="text-primary shrink-0" />
-          <h3 className="font-semibold">5 типов сложных собеседников</h3>
-          <span className="ml-auto text-[10px] text-muted-foreground bg-secondary px-2 py-0.5 rounded-full">по Брамсону</span>
-        </div>
-        <div className="grid grid-cols-1 gap-2">
-          {TROUBLEMAKERS.map((t, i) => {
-            const I = t.icon;
+        <div className="text-[11px] font-bold uppercase tracking-wider text-foreground/70 mb-3">5 типов сложных собеседников по Брамсону</div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          {DIFFICULT_TYPES.map((t, i) => {
+            const Icon = t.icon;
             return (
-              <div key={i} className="flex items-center gap-3 p-2.5 rounded-xl border border-border bg-secondary/30">
-                <div className={`w-8 h-8 rounded-lg bg-gradient-to-br ${t.color} text-white grid place-items-center shrink-0`}>
-                  <I size={16} />
+              <div key={i} className="flex items-start gap-3 p-3 rounded-xl border border-border bg-background">
+                <div className={`w-10 h-10 rounded-xl shrink-0 grid place-items-center bg-gradient-to-br ${t.tone} text-white`}>
+                  <Icon size={18} />
                 </div>
-                <div>
-                  <div className="font-semibold text-sm">{t.label}</div>
-                  <div className="text-xs text-muted-foreground">{t.sub}</div>
+                <div className="min-w-0">
+                  <div className="text-sm font-bold text-foreground">{t.title}</div>
+                  <div className="text-xs text-muted-foreground mt-0.5">{t.note}</div>
                 </div>
               </div>
             );
@@ -286,12 +312,12 @@ function Conflicts() {
         </div>
       </div>
 
-      {/* Tip */}
-      <div className="rounded-2xl border border-primary/30 bg-primary/10 p-4 flex items-start gap-3">
-        <HelpCircle size={20} className="text-primary mt-0.5 shrink-0" />
+      {/* Tip block */}
+      <div className="rounded-2xl border border-primary/30 bg-primary/10 p-5 flex items-start gap-3">
+        <AlertOctagon size={20} className="text-primary mt-0.5 shrink-0" />
         <div>
-          <div className="text-xs uppercase tracking-wide text-primary font-bold mb-1">Ключевая идея</div>
-          <div className="text-sm font-medium">
+          <div className="text-xs uppercase tracking-wide text-primary font-bold mb-1">Ключ к разрешению</div>
+          <div className="text-sm font-medium text-foreground/90">
             Ключ к разрешению конфликта — разделить предмет (истинную причину) и инцидент (триггер). Работа только с инцидентом даёт временное облегчение. Настоящее разрешение — только через осознание и проработку предмета конфликта.
           </div>
         </div>
