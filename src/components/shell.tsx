@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
-  Home, Play, BookOpen, Wrench, NotebookPen, Search, ChevronRight, Gem, Moon, Trash2, Plus, Lock, Pencil,
+  Home, Play, BookOpen, Wrench, NotebookPen, Search, ChevronRight, Gem, GraduationCap, Trash2, Plus, Lock, Pencil,
 } from "lucide-react";
 
 export type ShellTab = { id: string; label: string; icon: any };
@@ -108,7 +108,7 @@ export function HomeScreen({
     { label: "Провести сессию", icon: Play, cls: "bg-session text-session-foreground", act: () => onSection("session") },
     { label: "Колесо баланса", icon: Gem, cls: "bg-card text-foreground border border-border", act: () => onOpen("balance") },
     { label: "Модули", icon: BookOpen, cls: "bg-card text-foreground border border-border", act: () => onSection("modules") },
-    { label: "Медитации", icon: Moon, cls: "bg-card text-foreground border border-border", act: () => onOpen("meditations") },
+    { label: "Тест", icon: GraduationCap, cls: "bg-card text-foreground border border-border", act: () => onOpen("quiz") },
   ];
 
   return (
