@@ -287,6 +287,16 @@ const TIMER_STORAGE_KEY = "coach-space-session-timer";
 function CoachSpace() {
   const [onboarded, setOnboarded] = useState(() => isOnboardingDone());
   const [tab, setTabRaw] = useState<TabId>("home");
+  const headerRef = useRef<HTMLElement>(null);
+  const [headerH, setHeaderH] = useState(0);
+  useEffect(() => {
+    const el = headerRef.current;
+    if (!el) return;
+    const ro = new ResizeObserver(() => setHeaderH(el.offsetHeight));
+    ro.observe(el);
+    setHeaderH(el.offsetHeight);
+    return () => ro.disconnect();
+  }, [onboarded]);
   const [openModule, setOpenModule] = useState<number | null>(null);
   const setTab = useCallback((id: TabId) => {
     setTabRaw(id);
@@ -753,7 +763,7 @@ ${notesRef.current || "—"}
 
   return (
     <div className="min-h-screen bg-background text-foreground">
-      <header className="sticky top-0 z-30 border-b border-border bg-card">
+      <header ref={headerRef} className="fixed top-0 inset-x-0 z-30 border-b border-border bg-card">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-[calc(env(safe-area-inset-top,0px)+0.5rem)] pb-3 flex items-center justify-between gap-4">
           <div className="flex items-center gap-3 min-w-0">
             <div className="w-11 h-11 rounded-xl bg-primary text-primary-foreground grid place-items-center font-bold shrink-0">CS</div>
@@ -802,6 +812,7 @@ ${notesRef.current || "—"}
           })()}
         </div>
       </header>
+      <div aria-hidden style={{ height: headerH }} />
 
       <div className="max-w-7xl mx-auto md:flex md:gap-6 md:px-6">
         {/* iPad+ sidebar nav */}
