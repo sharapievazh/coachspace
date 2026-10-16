@@ -31,7 +31,7 @@ const RED_FLAGS = [
 function Ethics() {
   return (
     <div className="space-y-8 max-w-full overflow-hidden">
-      <SectionHead title="Этика коуча" subtitle="Кодекс профессиональной практики — стандарты ICF и ICU" />
+      <SectionHead title="Этика коуча" subtitle="Кодекс профессиональной практики — профессиональные стандарты" />
 
       <div className="grid sm:grid-cols-2 gap-3">
         {PRINCIPLES.map((p) => {
