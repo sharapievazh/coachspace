@@ -265,7 +265,7 @@ const MODULES: ModuleInfo[] = (() => {
 
 const ALL_TABS: ShellTab[] = NAV.filter((e): e is Extract<NavEntry, { type: "tab" }> => e.type === "tab").map((e) => ({ id: e.id, label: e.label, icon: e.icon }));
 const byId = (id: string) => ALL_TABS.find((t) => t.id === id)!;
-const FEATURED_TOOLS = ["balance", "meditations", "grow", "nlu", "spiral", "smart"].map(byId);
+const FEATURED_TOOLS = ["balance", "meditations", "quiz", "grow", "nlu", "spiral", "smart"].map(byId);
 const OTHER_TOOLS = (() => {
   const i = NAV.findIndex((e) => e.type === "section" && e.label === "ИНСТРУМЕНТЫ");
   return NAV.slice(i + 1).filter((e) => e.type === "tab").map((e: any) => byId(e.id)).filter((t) => !FEATURED_TOOLS.includes(t));
