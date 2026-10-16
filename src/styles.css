@@ -19,6 +19,8 @@
  */
 
 @theme inline {
+  --color-session: var(--session);
+  --color-session-foreground: var(--session-foreground);
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
@@ -100,6 +102,8 @@
   --popover-foreground: #1c1c1e;
   --primary: #a489f3;
   --primary-foreground: #ffffff;
+  --session: oklch(0.56 0.1 190);
+  --session-foreground: oklch(0.99 0 0);
   --secondary: #f5f3fd; /* light purple tint */
   --secondary-foreground: #a489f3;
   --muted: #f2f2f7;
@@ -136,6 +140,8 @@
   --popover-foreground: #f2f2f7;
   --primary: #a489f3;
   --primary-foreground: #ffffff;
+  --session: oklch(0.56 0.1 190);
+  --session-foreground: oklch(0.99 0 0);
   --secondary: #2c2c2e;
   --secondary-foreground: #f2f2f7;
   --muted: #2c2c2e;
