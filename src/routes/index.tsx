@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Onboarding, { isOnboardingDone } from "@/components/onboarding";
+import { BottomBar, HomeScreen, ModulesScreen, ToolsScreen, NotesScreen, LAST_TAB_KEY, VISITED_KEY, loadVisited, type ModuleInfo, type Section, type ShellTab } from "@/components/shell";
 import {
   Play, Pause, Target, Heart, Triangle, Layers,
   Timer,
@@ -11,6 +12,7 @@ import {
   Map as MapIcon, Repeat, Box, Network, Lightbulb, Clock, Puzzle, KeyRound,
   Fingerprint, ShieldCheck, UserCheck, Rainbow, ScanSearch,
   UtensilsCrossed, ListChecks, Moon, Dna,
+  Home as HomeIcon, Wrench, NotebookPen, ChevronDown,
 } from "lucide-react";
 
 
@@ -169,7 +171,7 @@ function ExportModal({ text, onClose }: { text: string; onClose: () => void }) {
   );
 }
 
-type TabId = "session" | "quiz" | "grow" | "models" | "competencies" | "rapport" | "merrill" | "ethics" | "supervision" | "balance" | "strategy" | "habits" | "team-coaching" | "cube" | "teambuilding" | "brainstorm" | "senge" | "kotter" | "soar" | "sos" | "conflict-med" | "tr-tech" | "timeline" | "parts" | "tr-beliefs" | "tr-ta" | "metaprograms" | "values" | "psychk" | "decart" | "swot" | "smart" | "potential" | "erickson" | "osvk" | "nlu" | "burger" | "rules" | "tr-sessions" | "meditations" | "spiral";
+type TabId = "home" | "modules" | "tools" | "notes" | "session" | "quiz" | "grow" | "models" | "competencies" | "rapport" | "merrill" | "ethics" | "supervision" | "balance" | "strategy" | "habits" | "team-coaching" | "cube" | "teambuilding" | "brainstorm" | "senge" | "kotter" | "soar" | "sos" | "conflict-med" | "tr-tech" | "timeline" | "parts" | "tr-beliefs" | "tr-ta" | "metaprograms" | "values" | "psychk" | "decart" | "swot" | "smart" | "potential" | "erickson" | "osvk" | "nlu" | "burger" | "rules" | "tr-sessions" | "meditations" | "spiral";
 
 type NavEntry =
   | { type: "tab"; id: TabId; label: string; icon: any }
@@ -240,12 +242,63 @@ const NAV: NavEntry[] = [
   { type: "tab",     id: "rules",         label: "8 Правил ОСВК",           icon: ListChecks },
 ];
 
+const MODULE_META: { title: string; desc: string; color: string }[] = [
+  { title: "Базовые модели коучинга", desc: "GROW, SCORE, SOAR, компетенции, раппорт, этика", color: "oklch(0.6 0.15 290)" },
+  { title: "Индивидуальный коучинг", desc: "Супервизия, колесо жизни, стратегия, привычки", color: "oklch(0.6 0.12 190)" },
+  { title: "Командный коучинг", desc: "Командная работа, «Кубик», командообразование", color: "oklch(0.62 0.15 250)" },
+  { title: "Системный коучинг", desc: "Сенге, Коттер, Карпман, конфликты и медиация", color: "oklch(0.65 0.15 60)" },
+  { title: "Трансформационный коучинг", desc: "Линия времени, части, убеждения, медитации", color: "oklch(0.45 0.08 160)" },
+  { title: "Спиральная динамика", desc: "Уровни спирали, бирюзовые компании, ценности", color: "oklch(0.6 0.16 20)" },
+  { title: "Будет добавлен", desc: "Скоро", color: "oklch(0.7 0 0)" },
+  { title: "Будет добавлен", desc: "Скоро", color: "oklch(0.7 0 0)" },
+];
+
+const MODULES: ModuleInfo[] = (() => {
+  const groups: ShellTab[][] = [];
+  let cur: ShellTab[] | null = null;
+  for (const e of NAV) {
+    if (e.type === "section") { cur = e.label.startsWith("МОДУЛЬ") ? [] : null; if (cur) groups.push(cur); }
+    else if (cur) cur.push({ id: e.id, label: e.label, icon: e.icon });
+  }
+  return MODULE_META.map((m, i) => ({ n: i + 1, ...m, items: groups[i] ?? [] }));
+})();
+
+const ALL_TABS: ShellTab[] = NAV.filter((e): e is Extract<NavEntry, { type: "tab" }> => e.type === "tab").map((e) => ({ id: e.id, label: e.label, icon: e.icon }));
+const byId = (id: string) => ALL_TABS.find((t) => t.id === id)!;
+const FEATURED_TOOLS = ["balance", "meditations", "grow", "nlu", "spiral", "smart"].map(byId);
+const OTHER_TOOLS = (() => {
+  const i = NAV.findIndex((e) => e.type === "section" && e.label === "ИНСТРУМЕНТЫ");
+  return NAV.slice(i + 1).filter((e) => e.type === "tab").map((e: any) => byId(e.id)).filter((t) => !FEATURED_TOOLS.includes(t));
+})();
+const TOOL_IDS = new Set<string>([...FEATURED_TOOLS, ...OTHER_TOOLS].map((t) => t.id));
+const SCREEN_LABEL: Record<string, { label: string; icon: any }> = {
+  home: { label: "Главная", icon: HomeIcon }, modules: { label: "Модули", icon: BookOpen },
+  tools: { label: "Инструменты", icon: Wrench }, notes: { label: "Заметки", icon: NotebookPen },
+};
+function sectionOf(tab: TabId): Section {
+  if (tab === "home" || tab === "session" || tab === "modules" || tab === "tools" || tab === "notes") return tab;
+  if (TOOL_IDS.has(tab)) return "tools";
+  return "modules";
+}
+
 
 const TIMER_STORAGE_KEY = "coach-space-session-timer";
 
 function CoachSpace() {
   const [onboarded, setOnboarded] = useState(() => isOnboardingDone());
-  const [tab, setTab] = useState<TabId>("session");
+  const [tab, setTabRaw] = useState<TabId>("home");
+  const [openModule, setOpenModule] = useState<number | null>(null);
+  const setTab = useCallback((id: TabId) => {
+    setTabRaw(id);
+    if (typeof window !== "undefined") {
+      window.scrollTo(0, 0);
+      if (!SCREEN_LABEL[id] && id !== "session") {
+        localStorage.setItem(LAST_TAB_KEY, id);
+        const v = loadVisited();
+        if (!v.includes(id)) localStorage.setItem(VISITED_KEY, JSON.stringify([...v, id]));
+      }
+    }
+  }, []);
 
   // Preload all lazy tab chunks after first render so tapping a tab never
   // blocks the JS thread with a cold dynamic import parse.
@@ -311,7 +364,6 @@ function CoachSpace() {
   const coachNameRef = useRef("");
   const topicRef = useRef("");
   const notesRef = useRef("");
-  const [menuOpen, setMenuOpen] = useState(false);
   const audioCtxRef = useRef<any>(null);
   const wakeLockRef = useRef<any>(null);
   const alertPlayedRef = useRef(false);
@@ -735,99 +787,75 @@ ${notesRef.current || "—"}
             </button>
           </div>
         </div>
-        {/* Mobile header bottom row: active tab name + hamburger */}
-        <div className="md:hidden max-w-7xl mx-auto px-4 pb-3 flex items-center justify-between gap-3">
-          {/* Active tab label */}
+        {/* Mobile header bottom row: active screen name */}
+        <div className="md:hidden max-w-7xl mx-auto px-4 pb-3 flex items-center gap-2 min-w-0">
           {(() => {
-            const active = NAV.find((e) => e.type === "tab" && e.id === tab) as Extract<NavEntry, { type: "tab" }> | undefined;
+            const active = SCREEN_LABEL[tab] ?? ALL_TABS.find((t) => t.id === tab);
             if (!active) return null;
             const Icon = active.icon;
             return (
-              <div className="flex items-center gap-2 min-w-0">
+              <>
                 <Icon size={16} className="text-primary shrink-0" />
                 <span className="text-sm font-semibold text-foreground truncate">{active.label}</span>
-              </div>
+              </>
             );
           })()}
-          {/* Hamburger button */}
-          <button
-            onClick={() => setMenuOpen((v) => !v)}
-            className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-secondary hover:bg-muted transition-colors text-foreground shrink-0"
-            aria-label="Меню"
-          >
-            <span className="flex flex-col gap-[4px]">
-              <span className="block w-4 h-[2px] bg-current rounded" />
-              <span className="block w-4 h-[2px] bg-current rounded" />
-              <span className="block w-4 h-[2px] bg-current rounded" />
-            </span>
-            <span className="text-xs font-medium">Меню</span>
-          </button>
         </div>
-
       </header>
-
-      {/* Mobile dropdown menu overlay */}
-      {menuOpen && (
-        <div className="md:hidden fixed inset-0 z-40" onClick={() => setMenuOpen(false)}>
-          <div className="absolute top-0 left-0 right-0 bg-card border-b border-border shadow-xl pt-[env(safe-area-inset-top)]" onClick={(e) => e.stopPropagation()}>
-            <div className="flex items-center justify-between px-4 py-3 border-b border-border">
-              <span className="font-semibold text-foreground">Разделы</span>
-              <button onClick={() => setMenuOpen(false)} className="w-9 h-9 rounded-full bg-secondary flex items-center justify-center text-muted-foreground">✕</button>
-            </div>
-            <nav className="flex flex-col py-2 max-h-[70vh] overflow-y-auto">
-              {NAV.map((entry, i) =>
-                entry.type === "section" ? (
-                  <div key={i} className="px-4 pt-3 pb-1 text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60">
-                    {entry.label}
-                  </div>
-                ) : (
-                  <button
-                    key={entry.id}
-                    onClick={() => { setTab(entry.id); setMenuOpen(false); }}
-                    className={`flex items-center gap-3 px-4 py-3 text-sm text-left transition-colors ${
-                      tab === entry.id ? "bg-primary/10 text-primary font-semibold" : "text-foreground hover:bg-secondary"
-                    }`}
-                  >
-                    <entry.icon size={18} className="shrink-0" />
-                    <span>{entry.label}</span>
-                    {tab === entry.id && <span className="ml-auto w-1.5 h-1.5 rounded-full bg-primary" />}
-                  </button>
-                )
-              )}
-            </nav>
-          </div>
-        </div>
-      )}
 
       <div className="max-w-7xl mx-auto md:flex md:gap-6 md:px-6">
         {/* iPad+ sidebar nav */}
         <aside className="hidden md:block md:w-56 lg:w-64 shrink-0 py-6 self-start sticky top-6">
           <nav className="flex flex-col gap-0.5">
-            {NAV.map((entry, i) =>
-              entry.type === "section" ? (
-                <div key={i} className="px-3 pt-4 pb-1 text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60">
-                  {entry.label}
-                </div>
-              ) : (
-                <button
-                  key={entry.id}
-                  onClick={() => setTab(entry.id)}
-                  className={`flex items-center gap-3 px-3 min-h-10 text-sm rounded-lg text-left transition-colors ${
-                    tab === entry.id
-                      ? "bg-primary text-primary-foreground"
-                      : "text-muted-foreground hover:bg-secondary"
-                  }`}
-                >
-                  <entry.icon size={17} className="shrink-0" />
-                  <span className="truncate">{entry.label}</span>
+            {(() => {
+              const item = (id: TabId, label: string, Icon: any, extra = "") => (
+                <button key={id} onClick={() => setTab(id)}
+                  className={`flex items-center gap-3 px-3 min-h-10 text-sm rounded-lg text-left transition-colors ${extra} ${tab === id ? (id === "session" ? "bg-session text-session-foreground" : "bg-primary text-primary-foreground") : "text-muted-foreground hover:bg-secondary"}`}>
+                  <Icon size={17} className="shrink-0" />
+                  <span className="truncate">{label}</span>
                 </button>
-              )
-            )}
+              );
+              const head = (l: string) => <div className="px-3 pt-4 pb-1 text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60">{l}</div>;
+              return (
+                <>
+                  {head("Главное")}
+                  {item("home", "Главная", HomeIcon)}
+                  {item("session", "Провести сессию", Play, tab === "session" ? "font-semibold" : "font-semibold text-session bg-session/10")}
+                  {head("Мои инструменты")}
+                  {item("balance", "Колесо баланса", Gem)}
+                  {item("meditations", "Медитации", Moon)}
+                  {item("tools", "Все инструменты", Wrench)}
+                  {head("Модули")}
+                  {MODULES.map((m) => {
+                    const containsActive = m.items.some((i) => i.id === tab);
+                    const isOpen = openModule === m.n || (openModule === null && containsActive);
+                    return (
+                      <div key={m.n}>
+                        <button disabled={!m.items.length} onClick={() => setOpenModule(isOpen ? -1 : m.n)}
+                          className={`w-full flex items-center gap-2 px-3 min-h-10 text-sm rounded-lg text-left hover:bg-secondary disabled:opacity-50 ${containsActive ? "text-foreground font-medium" : "text-muted-foreground"}`}>
+                          <span className="w-1 h-5 rounded-full shrink-0" style={{ background: m.color }} />
+                          <span className="truncate flex-1">{m.n} · {m.title}</span>
+                          {m.items.length > 0 && <ChevronDown size={14} className={`shrink-0 transition ${isOpen ? "" : "-rotate-90"}`} />}
+                        </button>
+                        {isOpen && <div className="pl-3 flex flex-col gap-0.5">{m.items.map((i) => item(i.id as TabId, i.label, i.icon))}</div>}
+                      </div>
+                    );
+                  })}
+                  {head("Личное")}
+                  {item("notes", "Заметки", NotebookPen)}
+                  {item("quiz", "Тест / Квиз", ClipboardCheck)}
+                </>
+              );
+            })()}
           </nav>
         </aside>
 
-        <main className="flex-1 min-w-0 px-4 sm:px-6 md:px-0 py-6">
+        <main className="flex-1 min-w-0 px-4 sm:px-6 md:px-0 pt-6 pb-32 md:pb-6">
           <Suspense fallback={<div className="py-10 text-center text-sm text-muted-foreground">Загрузка…</div>}>
+            {tab === "home" && <HomeScreen modules={MODULES} allTabs={ALL_TABS} onOpen={(id) => setTab(id as TabId)} onSection={(x) => setTab(x)} sessionPreview={{ client: clientNameRef.current, topic: topicRef.current, notes: notesRef.current }} />}
+            {tab === "modules" && <ModulesScreen modules={MODULES} onOpen={(id) => setTab(id as TabId)} />}
+            {tab === "tools" && <ToolsScreen featured={FEATURED_TOOLS} others={OTHER_TOOLS} onOpen={(id) => setTab(id as TabId)} />}
+            {tab === "notes" && <NotesScreen getSessionText={() => [clientNameRef.current && `Клиент: ${clientNameRef.current}`, topicRef.current && `Тема: ${topicRef.current}`, notesRef.current].filter(Boolean).join("\n")} />}
             {tab === "session" && <SessionPanelLazy duration={duration} setDuration={changeDuration} remaining={remaining} running={running} setRunning={handleSetRunning} reset={resetTimer} mmss={mmss} clientNameRef={clientNameRef} coachNameRef={coachNameRef} topicRef={topicRef} notesRef={notesRef} exportSession={exportSession} testSound={testSound} />}
             {tab === "grow" && <GrowLazy />}
             {tab === "models" && <ModelsLazy />}
@@ -876,6 +904,8 @@ ${notesRef.current || "—"}
 
 
       </div>
+
+      <BottomBar active={sectionOf(tab)} onSelect={(x) => setTab(x)} />
 
       {/* Export modal */}
       {exportText && (
