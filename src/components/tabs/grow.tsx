@@ -464,7 +464,7 @@ function Grow() {
           <HelpCircle size={20} className="text-primary shrink-0" />
           <div>
             <h3 className="font-semibold">5 типов коучинговых вопросов</h3>
-            <p className="text-xs text-muted-foreground mt-0.5">Арсенал профессионального коуча — ICU Модуль 1</p>
+            <p className="text-xs text-muted-foreground mt-0.5">Арсенал профессионального коуча — Модуль 1</p>
           </div>
         </div>
         <div className="space-y-3">

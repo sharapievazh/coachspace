@@ -126,7 +126,7 @@ function Competencies() {
             tab === "icu" ? "bg-primary text-primary-foreground shadow" : "text-muted-foreground hover:bg-background/40"
           }`}
         >
-          5 Компетенций<br className="sm:hidden" /><span className="opacity-80"> ICU</span>
+          5 Компетенций<br className="sm:hidden" /><span className="opacity-80"> коуча</span>
         </button>
       </div>
 

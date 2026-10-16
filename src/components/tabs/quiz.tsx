@@ -62,7 +62,7 @@ function Quiz() {
   if (!current && !done) {
     return (
       <div className="space-y-6">
-        <SectionHead title="Тест" subtitle="Подготовка к экзамену ICU" />
+        <SectionHead title="Тест" subtitle="Подготовка к экзамену" />
         <div className="rounded-2xl border border-border bg-card p-5 text-sm text-muted-foreground">
           Банк вопросов пока пуст.
         </div>
@@ -72,7 +72,7 @@ function Quiz() {
 
   return (
     <div className="space-y-6 max-w-full overflow-hidden">
-      <SectionHead title="Тест" subtitle={`Подготовка к экзамену ICU · ${QUESTIONS.length} вопросов в базе`} />
+      <SectionHead title="Тест" subtitle={`Подготовка к экзамену · ${QUESTIONS.length} вопросов в базе`} />
 
       {/* Режимы */}
       <div className="flex items-center gap-2 rounded-xl bg-secondary p-1">
