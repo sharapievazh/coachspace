@@ -195,7 +195,7 @@
     -moz-osx-font-smoothing: grayscale;
     text-rendering: optimizeLegibility;
     min-height: 100%;
-    overflow-x: hidden;
+    overflow-x: clip;
   }
 
   body {
