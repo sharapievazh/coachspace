@@ -10,7 +10,7 @@ import {
   Waves, Brain, Split, Rocket, ClipboardCheck,
   Map as MapIcon, Repeat, Box, Network, Lightbulb, Clock, Puzzle, KeyRound,
   Fingerprint, ShieldCheck, UserCheck, Rainbow, ScanSearch,
-  UtensilsCrossed, ListChecks, Moon,
+  UtensilsCrossed, ListChecks, Moon, Dna,
 } from "lucide-react";
 
 
@@ -54,6 +54,7 @@ const NluLazy = lazy(() => import("@/components/tabs/nlu"));
 const BurgerLazy = lazy(() => import("@/components/tabs/burger"));
 const RulesLazy = lazy(() => import("@/components/tabs/rules"));
 const MeditationsLazy = lazy(() => import("@/components/tabs/meditations"));
+const SpiralLazy = lazy(() => import("@/components/tabs/spiral"));
 
 
 
@@ -168,7 +169,7 @@ function ExportModal({ text, onClose }: { text: string; onClose: () => void }) {
   );
 }
 
-type TabId = "session" | "quiz" | "grow" | "models" | "competencies" | "rapport" | "merrill" | "ethics" | "supervision" | "balance" | "strategy" | "habits" | "team-coaching" | "cube" | "teambuilding" | "brainstorm" | "senge" | "kotter" | "soar" | "sos" | "conflict-med" | "tr-tech" | "timeline" | "parts" | "tr-beliefs" | "tr-ta" | "metaprograms" | "values" | "psychk" | "decart" | "swot" | "smart" | "potential" | "erickson" | "osvk" | "nlu" | "burger" | "rules" | "tr-sessions" | "meditations";
+type TabId = "session" | "quiz" | "grow" | "models" | "competencies" | "rapport" | "merrill" | "ethics" | "supervision" | "balance" | "strategy" | "habits" | "team-coaching" | "cube" | "teambuilding" | "brainstorm" | "senge" | "kotter" | "soar" | "sos" | "conflict-med" | "tr-tech" | "timeline" | "parts" | "tr-beliefs" | "tr-ta" | "metaprograms" | "values" | "psychk" | "decart" | "swot" | "smart" | "potential" | "erickson" | "osvk" | "nlu" | "burger" | "rules" | "tr-sessions" | "meditations" | "spiral";
 
 type NavEntry =
   | { type: "tab"; id: TabId; label: string; icon: any }
@@ -225,6 +226,8 @@ const NAV: NavEntry[] = [
   { type: "tab",     id: "psychk",        label: "PSYCH-K / Lab-профиль",   icon: KeyRound },
   { type: "tab",     id: "tr-sessions",   label: "Сессии трансформации",    icon: Sparkles },
   { type: "tab",     id: "meditations",   label: "Медитации",               icon: Moon },
+  { type: "section", label: "МОДУЛЬ 6 · СПИРАЛЬНАЯ ДИНАМИКА" },
+  { type: "tab",     id: "spiral",        label: "Спиральная динамика",     icon: Dna },
   { type: "section", label: "ИНСТРУМЕНТЫ" },
   { type: "tab",     id: "decart",        label: "Квадрат Декарта",         icon: Grid2x2 },
   { type: "tab",     id: "swot",          label: "SWOT",                    icon: Layers },
@@ -290,6 +293,7 @@ function CoachSpace() {
       import("@/components/tabs/burger");
       import("@/components/tabs/rules");
       import("@/components/tabs/meditations");
+      import("@/components/tabs/spiral");
 
     }, 800);
     return () => clearTimeout(t);
@@ -865,6 +869,7 @@ ${notesRef.current || "—"}
             {tab === "potential" && <PotentialLazy />}
             {tab === "quiz" && <QuizLazy />}
             {tab === "meditations" && <MeditationsLazy />}
+            {tab === "spiral" && <SpiralLazy />}
 
           </Suspense>
         </main>
