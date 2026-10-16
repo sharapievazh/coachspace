@@ -364,7 +364,6 @@ function CoachSpace() {
   const coachNameRef = useRef("");
   const topicRef = useRef("");
   const notesRef = useRef("");
-  const [menuOpen, setMenuOpen] = useState(false);
   const audioCtxRef = useRef<any>(null);
   const wakeLockRef = useRef<any>(null);
   const alertPlayedRef = useRef(false);
