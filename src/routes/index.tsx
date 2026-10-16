@@ -753,8 +753,8 @@ ${notesRef.current || "—"}
 
   return (
     <div className="min-h-screen bg-background text-foreground">
-      <header className="border-b border-border bg-card">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-[env(safe-area-inset-top)] pb-4 flex items-center justify-between gap-4">
+      <header className="sticky top-0 z-30 border-b border-border bg-card">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-[calc(env(safe-area-inset-top,0px)+0.5rem)] pb-3 flex items-center justify-between gap-4">
           <div className="flex items-center gap-3 min-w-0">
             <div className="w-11 h-11 rounded-xl bg-primary text-primary-foreground grid place-items-center font-bold shrink-0">CS</div>
             <div className="min-w-0">
@@ -805,7 +805,7 @@ ${notesRef.current || "—"}
 
       <div className="max-w-7xl mx-auto md:flex md:gap-6 md:px-6">
         {/* iPad+ sidebar nav */}
-        <aside className="hidden md:block md:w-56 lg:w-64 shrink-0 py-6 self-start sticky top-6">
+        <aside className="hidden md:block md:w-56 lg:w-64 shrink-0 py-6 self-start sticky top-24 max-h-[calc(100vh-7rem)] overflow-y-auto">
           <nav className="flex flex-col gap-0.5">
             {(() => {
               const item = (id: TabId, label: string, Icon: any, extra = "") => (
@@ -850,7 +850,7 @@ ${notesRef.current || "—"}
           </nav>
         </aside>
 
-        <main className="flex-1 min-w-0 px-4 sm:px-6 md:px-0 pt-6 pb-32 md:pb-6">
+        <main className="flex-1 min-w-0 px-4 sm:px-6 md:px-0 pt-6 pb-[calc(6.5rem+env(safe-area-inset-bottom,0px))] md:pb-6">
           <Suspense fallback={<div className="py-10 text-center text-sm text-muted-foreground">Загрузка…</div>}>
             {tab === "home" && <HomeScreen modules={MODULES} allTabs={ALL_TABS} onOpen={(id) => setTab(id as TabId)} onSection={(x) => setTab(x)} sessionPreview={{ client: clientNameRef.current, topic: topicRef.current, notes: notesRef.current }} />}
             {tab === "modules" && <ModulesScreen modules={MODULES} onOpen={(id) => setTab(id as TabId)} />}
