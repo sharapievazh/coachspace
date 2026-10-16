@@ -1,8 +1,8 @@
 import React, { useState } from "react";
 import {
-  ArrowRight, Check, Copy, Crown, Dna, Flame, Gem, Globe, Handshake,
-  Heart, KeyRound, Layers, ListChecks, Quote, RefreshCcw, Scale,
-  Shield, Sparkles, Star, Target, Users, Zap,
+  ArrowRight, Check, Dna, Flame, Gem, Globe,
+  Heart, KeyRound, Layers, Quote, Scale,
+  Sparkles, Target, Users, Zap,
 } from "lucide-react";
 
 /* ---------- shared bits ---------- */
