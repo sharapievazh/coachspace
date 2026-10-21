@@ -295,7 +295,8 @@ function sectionOf(tab: TabId): Section {
 const TIMER_STORAGE_KEY = "coach-space-session-timer";
 
 function CoachSpace() {
-  const [onboarded, setOnboarded] = useState(() => isOnboardingDone());
+  const [onboarded, setOnboarded] = useState(false);
+  useEffect(() => setOnboarded(isOnboardingDone()), []);
   const [tab, setTabRaw] = useState<TabId>("home");
   const headerRef = useRef<HTMLElement>(null);
   const [history, setHistory] = useState<NavigationFrame<TabId>[]>([]);

@@ -144,7 +144,7 @@ export function HomeScreen({
         <h3 className="text-xs font-bold uppercase tracking-[0.08em] text-muted-foreground mb-2">Быстрый доступ</h3>
         <div className="grid grid-cols-3 gap-3">
           {quick.map((q) => (
-            <Button variant="ghost" key={q.label} onClick={q.act} className={`rounded-2xl px-1.5 py-3 h-[94px] w-full gap-2 flex flex-col justify-center text-center whitespace-normal shadow-sm active:scale-[0.97] transition-transform motion-reduce:transition-none [&_svg]:size-5 ${q.cls}`}>
+            <Button variant="ghost" key={q.label} onClick={q.act} className={`rounded-[16px] px-1.5 py-3 h-[94px] w-full gap-2 flex flex-col justify-center text-center whitespace-normal shadow-sm active:scale-[0.97] transition-transform motion-reduce:transition-none [&_svg]:size-5 ${q.cls}`}>
               <q.icon size={20} />
               <span className="text-[12px] leading-4 font-semibold min-h-8 flex items-center justify-center">{q.label}</span>
             </Button>
