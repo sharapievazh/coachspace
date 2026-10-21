@@ -1,7 +1,9 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
-  Home, Play, BookOpen, Wrench, NotebookPen, Search, ChevronRight, Gem, GraduationCap, Trash2, Plus, Lock, Pencil,
+  Home, Play, BookOpen, Wrench, NotebookPen, Search, ChevronRight, Gem, GraduationCap, Trash2, Plus, Lock, Pencil, Target, Moon, PieChart,
 } from "lucide-react";
+
+import { Button } from "@/components/ui/button";
 
 export type ShellTab = { id: string; label: string; icon: any };
 export type ModuleInfo = { n: number; title: string; desc: string; color: string; items: ShellTab[] };
@@ -29,6 +31,9 @@ const QUOTES = [
   "Доверие и безопасность — основа любого изменения.",
   "Цель сессии рождается у клиента, а не у коуча.",
   "Любопытство коуча — лучший инструмент осознанности клиента.",
+  "Маленький шаг, выбранный клиентом, может стать началом большого изменения.",
+  "Пауза даёт пространство для новых смыслов.",
+  "Осознанность начинается с честного внимания к себе.",
 ];
 
 /* ---------------- Bottom tab bar (mobile) ---------------- */
@@ -49,19 +54,19 @@ export function BottomBar({ active, onSelect }: { active: Section; onSelect: (s:
           const on = active === it.id;
           if (it.id === "session") {
             return (
-              <button key={it.id} onClick={() => onSelect(it.id)} className="flex flex-col items-center justify-center py-1.5" aria-label="Провести сессию">
+              <Button variant="ghost" key={it.id} onClick={() => onSelect(it.id)} className="h-auto rounded-none px-0 gap-0 flex flex-col items-center justify-center py-1.5 hover:bg-transparent" aria-label="Провести сессию">
                 <span className={`-mt-6 w-14 h-14 rounded-full grid place-items-center bg-session text-session-foreground shadow-lg border-4 border-card ${on ? "ring-2 ring-session" : ""}`}>
-                  <Play size={24} fill="currentColor" />
+                  <Play size={20} fill="currentColor" />
                 </span>
                 <span className={`text-[10px] mt-0.5 font-semibold ${on ? "text-session" : "text-muted-foreground"}`}>{it.label}</span>
-              </button>
+              </Button>
             );
           }
           return (
-            <button key={it.id} onClick={() => onSelect(it.id)} className={`flex flex-col items-center justify-center gap-0.5 py-2 min-h-14 ${on ? "text-primary" : "text-muted-foreground"}`}>
-              <it.icon size={22} strokeWidth={on ? 2.4 : 1.8} />
+            <Button variant="ghost" key={it.id} onClick={() => onSelect(it.id)} aria-current={on ? "page" : undefined} className={`h-auto rounded-none px-0 hover:bg-transparent flex flex-col items-center justify-center gap-0.5 py-2 min-h-14 [&_svg]:size-5 ${on ? "text-session" : "text-muted-foreground"}`}>
+              <it.icon size={20} strokeWidth={on ? 2.4 : 1.8} />
               <span className={`text-[10px] ${on ? "font-semibold" : ""}`}>{it.label}</span>
-            </button>
+            </Button>
           );
         })}
       </div>
@@ -79,6 +84,7 @@ export function HomeScreen({
   const [name, setName] = useState("");
   const [editing, setEditing] = useState(false);
   const [notes, setNotes] = useState<Note[]>([]);
+  const [visited, setVisited] = useState<string[]>([]);
   const [lastTab, setLastTab] = useState<string | null>(null);
   const [now, setNow] = useState<Date | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -87,6 +93,7 @@ export function HomeScreen({
     setName(localStorage.getItem(NAME_KEY) || "");
     setNotes(loadNotes().slice(0, 3));
     setLastTab(localStorage.getItem(LAST_TAB_KEY));
+    setVisited(loadVisited());
     setNow(new Date());
   }, []);
 
@@ -104,15 +111,19 @@ export function HomeScreen({
     setEditing(false);
   };
 
+  const progress = lastModule?.items.length ? Math.round(lastModule.items.filter((item) => visited.includes(item.id)).length / lastModule.items.length * 100) : 0;
+
   const quick = [
     { label: "Провести сессию", icon: Play, cls: "bg-session text-session-foreground", act: () => onSection("session") },
-    { label: "Колесо баланса", icon: Gem, cls: "bg-card text-foreground border border-border", act: () => onOpen("balance") },
+    { label: "GROW", icon: Target, cls: "bg-card text-foreground border border-border", act: () => onOpen("grow") },
+    { label: "Медитации", icon: Moon, cls: "bg-card text-foreground border border-border", act: () => onOpen("meditations") },
     { label: "Модули", icon: BookOpen, cls: "bg-card text-foreground border border-border", act: () => onSection("modules") },
     { label: "Тест", icon: GraduationCap, cls: "bg-card text-foreground border border-border", act: () => onOpen("quiz") },
+    { label: "Колесо баланса", icon: PieChart, cls: "bg-card text-foreground border border-border", act: () => onOpen("balance") },
   ];
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-6">
       <div className="rounded-3xl p-5 bg-gradient-to-br from-primary/20 via-accent to-session/15 border border-border shadow-sm">
         <p className="text-xs text-muted-foreground capitalize">{dateStr}</p>
         {editing ? (
@@ -130,39 +141,41 @@ export function HomeScreen({
       </div>
 
       <div>
-        <h3 className="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-2">Быстрый доступ</h3>
-        <div className="grid grid-cols-2 gap-3">
+        <h3 className="text-xs font-bold uppercase tracking-[0.08em] text-muted-foreground mb-2">Быстрый доступ</h3>
+        <div className="grid grid-cols-3 gap-3">
           {quick.map((q) => (
-            <button key={q.label} onClick={q.act} className={`rounded-2xl p-4 min-h-24 flex flex-col justify-between items-start text-left shadow-sm active:scale-[0.98] transition ${q.cls}`}>
-              <q.icon size={24} />
-              <span className="text-sm font-semibold">{q.label}</span>
-            </button>
+            <Button variant="ghost" key={q.label} onClick={q.act} className={`rounded-[16px] px-1.5 py-3 h-[94px] w-full gap-2 flex flex-col justify-center text-center whitespace-normal shadow-sm active:scale-[0.97] transition-transform motion-reduce:transition-none [&_svg]:size-5 ${q.cls}`}>
+              <q.icon size={20} />
+              <span className="text-[12px] leading-4 font-semibold min-h-8 flex items-center justify-center">{q.label}</span>
+            </Button>
           ))}
         </div>
       </div>
 
       {(sessionPreview.client || sessionPreview.topic || sessionPreview.notes) && (
         <button onClick={() => onSection("session")} className="w-full text-left rounded-2xl border border-session/40 bg-session/10 p-4">
-          <p className="text-xs font-bold uppercase tracking-widest text-session">Текущая сессия</p>
+          <p className="text-xs font-bold uppercase tracking-[0.08em] text-session">Текущая сессия</p>
           <p className="mt-1 font-semibold">{sessionPreview.client || "Клиент"}{sessionPreview.topic ? ` · ${sessionPreview.topic}` : ""}</p>
           {sessionPreview.notes && <p className="text-sm text-muted-foreground line-clamp-2 mt-1">{sessionPreview.notes}</p>}
         </button>
       )}
 
       {last && (
-        <button onClick={() => onOpen(last.id)} className="w-full flex items-center gap-3 rounded-2xl border border-border bg-card p-4 text-left shadow-sm">
+        <Button variant="ghost" onClick={() => onOpen(last.id)} className="w-full h-auto whitespace-normal flex items-center gap-3 rounded-2xl border border-primary/20 bg-primary/10 p-4 text-left shadow-sm active:scale-[0.97] transition-transform motion-reduce:transition-none [&_svg]:size-5">
           <span className="w-10 h-10 rounded-xl bg-primary/10 text-primary grid place-items-center shrink-0"><last.icon size={20} /></span>
           <span className="min-w-0 flex-1">
-            <span className="block text-xs text-muted-foreground">Продолжить{lastModule ? ` · Модуль ${lastModule.n}` : ""}</span>
-            <span className="block font-semibold truncate">{last.label}</span>
+            <span className="block text-[12px] text-muted-foreground">Продолжить{lastModule ? ` · Модуль ${lastModule.n} · ${progress}%` : ""}</span>
+            {lastModule && <span className="block text-sm font-medium leading-snug mt-1">{lastModule.title}</span>}
+            <span className="block text-sm text-foreground mt-1">{last.label}</span>
+            {lastModule && <span role="progressbar" aria-label="Просмотренные темы модуля" aria-valuenow={progress} aria-valuemin={0} aria-valuemax={100} className="block mt-3 h-1.5 rounded-full bg-primary/15 overflow-hidden"><span className="block h-full bg-primary rounded-full" style={{ width: `${progress}%` }} /></span>}
           </span>
-          <ChevronRight size={18} className="text-muted-foreground" />
-        </button>
+          <ChevronRight size={20} className="text-muted-foreground" />
+        </Button>
       )}
 
       <div>
         <div className="flex items-center justify-between mb-2">
-          <h3 className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Последние заметки</h3>
+          <h3 className="text-xs font-bold uppercase tracking-[0.08em] text-muted-foreground">Последние заметки</h3>
           <button onClick={() => onSection("notes")} className="text-xs text-primary font-medium">Все</button>
         </div>
         {notes.length === 0 ? (
@@ -183,9 +196,10 @@ export function HomeScreen({
 }
 
 /* ---------------- Modules ---------------- */
-export function ModulesScreen({ modules, onOpen }: { modules: ModuleInfo[]; onOpen: (id: string) => void }) {
+export function ModulesScreen({ modules, onOpen, expanded, onExpanded }: { modules: ModuleInfo[]; onOpen: (id: string) => void; expanded: number | null; onExpanded: (n: number | null) => void }) {
   const [q, setQ] = useState("");
-  const [open, setOpen] = useState<number | null>(null);
+  const open = expanded;
+  const setOpen = onExpanded;
   const [visited, setVisited] = useState<string[]>([]);
   useEffect(() => setVisited(loadVisited()), []);
   const query = q.trim().toLowerCase();
@@ -220,7 +234,7 @@ export function ModulesScreen({ modules, onOpen }: { modules: ModuleInfo[]; onOp
                     <p className="font-semibold leading-tight">{m.title}</p>
                     <p className="text-xs text-muted-foreground mt-1">{m.desc}</p>
                   </div>
-                  {locked ? <Lock size={16} className="text-muted-foreground" /> : <ChevronRight size={18} className={`text-muted-foreground transition ${isOpen ? "rotate-90" : ""}`} />}
+                  {locked ? <Lock size={16} className="text-muted-foreground" /> : <ChevronRight size={20} className={`text-muted-foreground transition ${isOpen ? "rotate-90" : ""}`} />}
                 </div>
                 {!locked && (
                   <div className="mt-3 flex items-center gap-2">
@@ -235,7 +249,7 @@ export function ModulesScreen({ modules, onOpen }: { modules: ModuleInfo[]; onOp
                 <div className="border-t border-border">
                   {m.shown.map((i) => (
                     <button key={i.id} onClick={() => onOpen(i.id)} className="w-full flex items-center gap-3 px-5 py-3 text-sm text-left hover:bg-secondary">
-                      <i.icon size={17} style={{ color: m.color }} className="shrink-0" />
+                      <i.icon size={20} style={{ color: m.color }} className="shrink-0" />
                       <span className="flex-1">{i.label}</span>
                       {visited.includes(i.id) && <span className="w-1.5 h-1.5 rounded-full" style={{ background: m.color }} />}
                     </button>
@@ -253,25 +267,25 @@ export function ModulesScreen({ modules, onOpen }: { modules: ModuleInfo[]; onOp
 /* ---------------- Tools ---------------- */
 export function ToolsScreen({ featured, others, onOpen }: { featured: ShellTab[]; others: ShellTab[]; onOpen: (id: string) => void }) {
   return (
-    <div className="space-y-5">
+    <div className="space-y-6">
       <div>
         <h2 className="text-2xl font-semibold tracking-tight">Инструменты</h2>
         <p className="text-sm text-muted-foreground">Быстрый доступ к рабочим инструментам коуча</p>
       </div>
       <div className="grid grid-cols-2 gap-3">
         {featured.map((t) => (
-          <button key={t.id} onClick={() => onOpen(t.id)} className="rounded-2xl border border-border bg-card p-4 min-h-24 flex flex-col justify-between items-start text-left shadow-sm active:scale-[0.98] transition">
+          <button key={t.id} onClick={() => onOpen(t.id)} className="rounded-2xl border border-border bg-card p-4 min-h-24 flex flex-col justify-between items-start text-left shadow-sm active:scale-[0.97] transition">
             <span className="w-10 h-10 rounded-xl bg-primary/10 text-primary grid place-items-center"><t.icon size={20} /></span>
             <span className="text-sm font-semibold mt-2">{t.label}</span>
           </button>
         ))}
       </div>
       <div>
-        <h3 className="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-2">Другие инструменты</h3>
+        <h3 className="text-xs font-bold uppercase tracking-[0.08em] text-muted-foreground mb-2">Другие инструменты</h3>
         <div className="rounded-2xl border border-border bg-card divide-y divide-border overflow-hidden">
           {others.map((t) => (
             <button key={t.id} onClick={() => onOpen(t.id)} className="w-full flex items-center gap-3 px-4 py-3 text-sm text-left hover:bg-secondary">
-              <t.icon size={17} className="text-primary shrink-0" />
+              <t.icon size={20} className="text-primary shrink-0" />
               <span className="flex-1">{t.label}</span>
               <ChevronRight size={16} className="text-muted-foreground" />
             </button>
