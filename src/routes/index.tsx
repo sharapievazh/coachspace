@@ -1,5 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Button } from "@/components/ui/button";
+import { pushNavigation, popNavigation, type NavigationFrame } from "@/lib/navigation-history";
 import Onboarding, { isOnboardingDone } from "@/components/onboarding";
 import { BottomBar, HomeScreen, ModulesScreen, ToolsScreen, NotesScreen, LAST_TAB_KEY, VISITED_KEY, loadVisited, type ModuleInfo, type Section, type ShellTab } from "@/components/shell";
 import {
@@ -12,7 +14,7 @@ import {
   Map as MapIcon, Repeat, Box, Network, Lightbulb, Clock, Puzzle, KeyRound,
   Fingerprint, ShieldCheck, UserCheck, Rainbow, ScanSearch,
   UtensilsCrossed, ListChecks, Moon, Dna,
-  Home as HomeIcon, Wrench, NotebookPen, ChevronDown,
+  Home as HomeIcon, Wrench, NotebookPen, ChevronDown, ChevronLeft,
 } from "lucide-react";
 
 
@@ -61,6 +63,14 @@ const SpiralLazy = lazy(() => import("@/components/tabs/spiral"));
 
 
 export const Route = createFileRoute("/")({
+  head: () => ({ meta: [
+    { title: "Coach Space — рабочее пространство коуча" },
+    { name: "description", content: "Модули коучинга, инструменты для сессий, медитации и тест для самостоятельной практики." },
+    { property: "og:title", content: "Coach Space — рабочее пространство коуча" },
+    { property: "og:description", content: "Практика коучинга: учебные модули, рабочие инструменты, медитации и тест." },
+    { property: "og:type", content: "website" },
+    { name: "twitter:card", content: "summary_large_image" },
+  ] }),
   component: CoachSpace,
 });
 
@@ -288,6 +298,8 @@ function CoachSpace() {
   const [onboarded, setOnboarded] = useState(() => isOnboardingDone());
   const [tab, setTabRaw] = useState<TabId>("home");
   const headerRef = useRef<HTMLElement>(null);
+  const [history, setHistory] = useState<NavigationFrame<TabId>[]>([]);
+  const [moduleOverviewOpen, setModuleOverviewOpen] = useState<number | null>(null);
   const [headerH, setHeaderH] = useState(0);
   useEffect(() => {
     const el = headerRef.current;
@@ -299,6 +311,7 @@ function CoachSpace() {
   }, [onboarded]);
   const [openModule, setOpenModule] = useState<number | null>(null);
   const setTab = useCallback((id: TabId) => {
+    setHistory((frames) => pushNavigation(frames, tab, id, window.scrollY));
     setTabRaw(id);
     if (typeof window !== "undefined") {
       window.scrollTo(0, 0);
@@ -308,7 +321,20 @@ function CoachSpace() {
         if (!v.includes(id)) localStorage.setItem(VISITED_KEY, JSON.stringify([...v, id]));
       }
     }
-  }, []);
+  }, [tab]);
+  const goBack = () => {
+    const result = popNavigation(history);
+    if (!result.previous) return;
+    setHistory(result.history);
+    setTabRaw(result.previous.tab);
+    const scroll = result.previous.scroll;
+    requestAnimationFrame(() => requestAnimationFrame(() => window.scrollTo(0, scroll)));
+  };
+  const parentTab = history.at(-1)?.tab;
+  const parentLabel = parentTab ? (SCREEN_LABEL[parentTab]?.label ?? (parentTab === "session" ? "Сессия" : ALL_TABS.find((item) => item.id === parentTab)?.label)) : undefined;
+  const activeModule = MODULES.find((module) => module.items.some((item) => item.id === tab));
+  const title = SCREEN_LABEL[tab]?.label ?? (tab === "session" ? "Сессия" : parentTab === "modules" ? activeModule?.title : undefined) ?? ({ grow: "GROW", balance: "Колесо баланса", quiz: "Тест" } as Record<string, string>)[tab] ?? ALL_TABS.find((item) => item.id === tab)?.label;
+  const activeSection = tab === "session" ? "session" : !SCREEN_LABEL[tab] && parentTab && SCREEN_LABEL[parentTab] ? parentTab as Section : sectionOf(tab);
 
   // Preload all lazy tab chunks after first render so tapping a tab never
   // blocks the JS thread with a cold dynamic import parse.
@@ -797,19 +823,12 @@ ${notesRef.current || "—"}
             </button>
           </div>
         </div>
-        {/* Mobile header bottom row: active screen name */}
-        <div className="md:hidden max-w-7xl mx-auto px-4 pb-3 flex items-center gap-2 min-w-0">
-          {(() => {
-            const active = SCREEN_LABEL[tab] ?? ALL_TABS.find((t) => t.id === tab);
-            if (!active) return null;
-            const Icon = active.icon;
-            return (
-              <>
-                <Icon size={16} className="text-primary shrink-0" />
-                <span className="text-sm font-semibold text-foreground truncate">{active.label}</span>
-              </>
-            );
-          })()}
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 pb-3 grid grid-cols-[5.5rem_minmax(0,1fr)_5.5rem] items-center gap-1 min-w-0">
+          {tab !== "home" && parentLabel ? <Button variant="ghost" onClick={goBack} aria-label={`Назад: ${parentLabel}`} className="h-auto min-h-11 px-0 justify-start gap-0.5 text-session whitespace-normal text-[12px] leading-4 [&_svg]:size-5">
+            <ChevronLeft size={20} /><span className="min-w-0 break-words">{parentLabel}</span>
+          </Button> : <span />}
+          <span className="text-[14px] md:text-base font-medium text-center leading-5 min-w-0 break-words">{title}</span>
+          <span aria-hidden />
         </div>
       </header>
       <div aria-hidden style={{ height: headerH }} />
@@ -864,7 +883,7 @@ ${notesRef.current || "—"}
         <main className="flex-1 min-w-0 px-4 sm:px-6 md:px-0 pt-6 pb-[calc(6.5rem+env(safe-area-inset-bottom,0px))] md:pb-6">
           <Suspense fallback={<div className="py-10 text-center text-sm text-muted-foreground">Загрузка…</div>}>
             {tab === "home" && <HomeScreen modules={MODULES} allTabs={ALL_TABS} onOpen={(id) => setTab(id as TabId)} onSection={(x) => setTab(x)} sessionPreview={{ client: clientNameRef.current, topic: topicRef.current, notes: notesRef.current }} />}
-            {tab === "modules" && <ModulesScreen modules={MODULES} onOpen={(id) => setTab(id as TabId)} />}
+            {tab === "modules" && <ModulesScreen modules={MODULES} expanded={moduleOverviewOpen} onExpanded={setModuleOverviewOpen} onOpen={(id) => setTab(id as TabId)} />}
             {tab === "tools" && <ToolsScreen featured={FEATURED_TOOLS} others={OTHER_TOOLS} onOpen={(id) => setTab(id as TabId)} />}
             {tab === "notes" && <NotesScreen getSessionText={() => [clientNameRef.current && `Клиент: ${clientNameRef.current}`, topicRef.current && `Тема: ${topicRef.current}`, notesRef.current].filter(Boolean).join("\n")} />}
             {tab === "session" && <SessionPanelLazy duration={duration} setDuration={changeDuration} remaining={remaining} running={running} setRunning={handleSetRunning} reset={resetTimer} mmss={mmss} clientNameRef={clientNameRef} coachNameRef={coachNameRef} topicRef={topicRef} notesRef={notesRef} exportSession={exportSession} testSound={testSound} />}
@@ -916,7 +935,7 @@ ${notesRef.current || "—"}
 
       </div>
 
-      <BottomBar active={sectionOf(tab)} onSelect={(x) => setTab(x)} />
+      <BottomBar active={activeSection} onSelect={(x) => setTab(x)} />
 
       {/* Export modal */}
       {exportText && (
