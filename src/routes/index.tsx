@@ -1,6 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Button } from "@/components/ui/button";
+import { pushNavigation, popNavigation, type NavigationFrame } from "@/lib/navigation-history";
 import Onboarding, { isOnboardingDone } from "@/components/onboarding";
+import { BottomBar, HomeScreen, ModulesScreen, ToolsScreen, NotesScreen, LAST_TAB_KEY, VISITED_KEY, loadVisited, type ModuleInfo, type Section, type ShellTab } from "@/components/shell";
 import {
   Play, Pause, Target, Heart, Triangle, Layers,
   Timer,
@@ -10,7 +13,8 @@ import {
   Waves, Brain, Split, Rocket, ClipboardCheck,
   Map as MapIcon, Repeat, Box, Network, Lightbulb, Clock, Puzzle, KeyRound,
   Fingerprint, ShieldCheck, UserCheck, Rainbow, ScanSearch,
-  UtensilsCrossed, ListChecks, Moon,
+  UtensilsCrossed, ListChecks, Moon, Dna,
+  Home as HomeIcon, Wrench, NotebookPen, ChevronDown, ChevronLeft,
 } from "lucide-react";
 
 
@@ -54,10 +58,19 @@ const NluLazy = lazy(() => import("@/components/tabs/nlu"));
 const BurgerLazy = lazy(() => import("@/components/tabs/burger"));
 const RulesLazy = lazy(() => import("@/components/tabs/rules"));
 const MeditationsLazy = lazy(() => import("@/components/tabs/meditations"));
+const SpiralLazy = lazy(() => import("@/components/tabs/spiral"));
 
 
 
 export const Route = createFileRoute("/")({
+  head: () => ({ meta: [
+    { title: "Coach Space — рабочее пространство коуча" },
+    { name: "description", content: "Модули коучинга, инструменты для сессий, медитации и тест для самостоятельной практики." },
+    { property: "og:title", content: "Coach Space — рабочее пространство коуча" },
+    { property: "og:description", content: "Практика коучинга: учебные модули, рабочие инструменты, медитации и тест." },
+    { property: "og:type", content: "website" },
+    { name: "twitter:card", content: "summary_large_image" },
+  ] }),
   component: CoachSpace,
 });
 
@@ -168,7 +181,7 @@ function ExportModal({ text, onClose }: { text: string; onClose: () => void }) {
   );
 }
 
-type TabId = "session" | "quiz" | "grow" | "models" | "competencies" | "rapport" | "merrill" | "ethics" | "supervision" | "balance" | "strategy" | "habits" | "team-coaching" | "cube" | "teambuilding" | "brainstorm" | "senge" | "kotter" | "soar" | "sos" | "conflict-med" | "tr-tech" | "timeline" | "parts" | "tr-beliefs" | "tr-ta" | "metaprograms" | "values" | "psychk" | "decart" | "swot" | "smart" | "potential" | "erickson" | "osvk" | "nlu" | "burger" | "rules" | "tr-sessions" | "meditations";
+type TabId = "home" | "modules" | "tools" | "notes" | "session" | "quiz" | "grow" | "models" | "competencies" | "rapport" | "merrill" | "ethics" | "supervision" | "balance" | "strategy" | "habits" | "team-coaching" | "cube" | "teambuilding" | "brainstorm" | "senge" | "kotter" | "soar" | "sos" | "conflict-med" | "tr-tech" | "timeline" | "parts" | "tr-beliefs" | "tr-ta" | "metaprograms" | "values" | "psychk" | "decart" | "swot" | "smart" | "potential" | "erickson" | "osvk" | "nlu" | "burger" | "rules" | "tr-sessions" | "meditations" | "spiral";
 
 type NavEntry =
   | { type: "tab"; id: TabId; label: string; icon: any }
@@ -191,14 +204,14 @@ const NAV: NavEntry[] = [
   { type: "section", label: "ДЕЙСТВИЕ" },
   { type: "tab",     id: "session",       label: "Вести Сессию",            icon: Sparkles },
   { type: "tab",     id: "quiz",          label: "Тест",                    icon: ClipboardCheck },
-  { type: "section", label: "МОДУЛЬ 1 · БАЗОВЫЕ МОДЕЛИ" },
+  { type: "section", label: "МОДУЛЬ 1 · БАЗОВЫЕ МОДЕЛИ КОУЧИНГА" },
   { type: "tab",     id: "grow",          label: "GROW (макро + микро)",    icon: Target },
   { type: "tab",     id: "models",        label: "SCORE · SOAR · ABC",      icon: Compass },
   { type: "tab",     id: "competencies",  label: "Компетенции коуча",       icon: GraduationCap },
   { type: "tab",     id: "rapport",       label: "Раппорт и взаимодействие", icon: Heart },
   { type: "tab",     id: "merrill",       label: "Типология MERRILL",       icon: Fingerprint },
   { type: "tab",     id: "ethics",        label: "Этика коуча",             icon: ShieldCheck },
-  { type: "section", label: "МОДУЛЬ 2 · ИНДИВИДУАЛЬНЫЙ КОУЧИНГ" },
+  { type: "section", label: "МОДУЛЬ 2 · СУПЕРВИЗИЯ ИНДИВИДУАЛЬНОГО КОУЧИНГА" },
   { type: "tab",     id: "supervision",   label: "Супервизия",              icon: UserCheck },
   { type: "tab",     id: "balance",       label: "Колесо жизни",            icon: Gem },
   { type: "tab",     id: "strategy",      label: "Стратегический коучинг",  icon: MapIcon },
@@ -208,13 +221,13 @@ const NAV: NavEntry[] = [
   { type: "tab",     id: "cube",          label: "Коучинг-тренинг «Кубик»", icon: Box },
   { type: "tab",     id: "teambuilding",  label: "Командообразование",      icon: Network },
   { type: "tab",     id: "brainstorm",    label: "Брейнсторминг",           icon: Lightbulb },
-  { type: "section", label: "МОДУЛЬ 4 · СИСТЕМНЫЙ КОУЧИНГ" },
+  { type: "section", label: "МОДУЛЬ 4 · СУПЕРВИЗИЯ КОМАНДНОГО КОУЧИНГА" },
   { type: "tab",     id: "senge",         label: "Модель Сенге",            icon: BookOpen },
   { type: "tab",     id: "kotter",        label: "Модель Коттера",          icon: TrendingUp },
   { type: "tab",     id: "soar",          label: "SOAR (системный)",        icon: Workflow },
   { type: "tab",     id: "sos",           label: "SOS Карпман",             icon: AlertTriangle },
   { type: "tab",     id: "conflict-med",  label: "Конфликты / Медиация",    icon: Scale },
-  { type: "section", label: "МОДУЛЬ 5 · ТРАНСФОРМАЦИЯ" },
+  { type: "section", label: "МОДУЛЬ 5 · ТРАНСФОРМАЦИОННЫЙ КОУЧИНГ" },
   { type: "tab",     id: "tr-tech",       label: "Трансформационный коучинг", icon: Waves },
   { type: "tab",     id: "timeline",      label: "Линия времени",           icon: Clock },
   { type: "tab",     id: "parts",         label: "Части личности",          icon: Puzzle },
@@ -225,6 +238,8 @@ const NAV: NavEntry[] = [
   { type: "tab",     id: "psychk",        label: "PSYCH-K / Lab-профиль",   icon: KeyRound },
   { type: "tab",     id: "tr-sessions",   label: "Сессии трансформации",    icon: Sparkles },
   { type: "tab",     id: "meditations",   label: "Медитации",               icon: Moon },
+  { type: "section", label: "МОДУЛЬ 6 · СПИРАЛЬНАЯ ДИНАМИКА" },
+  { type: "tab",     id: "spiral",        label: "Спиральная динамика",     icon: Dna },
   { type: "section", label: "ИНСТРУМЕНТЫ" },
   { type: "tab",     id: "decart",        label: "Квадрат Декарта",         icon: Grid2x2 },
   { type: "tab",     id: "swot",          label: "SWOT",                    icon: Layers },
@@ -237,12 +252,90 @@ const NAV: NavEntry[] = [
   { type: "tab",     id: "rules",         label: "8 Правил ОСВК",           icon: ListChecks },
 ];
 
+const MODULE_META: { title: string; desc: string; color: string }[] = [
+  { title: "Базовые модели коучинга", desc: "GROW, SCORE, SOAR, компетенции, раппорт, этика", color: "oklch(0.6 0.15 290)" },
+  { title: "Супервизия индивидуального коучинга", desc: "Супервизия, колесо жизни, стратегия, привычки", color: "oklch(0.6 0.12 190)" },
+  { title: "Командный коучинг", desc: "Командная работа, «Кубик», командообразование", color: "oklch(0.62 0.15 250)" },
+  { title: "Супервизия командного коучинга", desc: "Сенге, Коттер, Карпман, конфликты и медиация", color: "oklch(0.65 0.15 60)" },
+  { title: "Трансформационный коучинг", desc: "Линия времени, части, убеждения, медитации", color: "oklch(0.45 0.08 160)" },
+  { title: "Спиральная динамика", desc: "Уровни спирали, бирюзовые компании, ценности", color: "oklch(0.6 0.16 20)" },
+  { title: "Будет добавлен", desc: "Скоро", color: "oklch(0.7 0 0)" },
+  { title: "Будет добавлен", desc: "Скоро", color: "oklch(0.7 0 0)" },
+];
+
+const MODULES: ModuleInfo[] = (() => {
+  const groups: ShellTab[][] = [];
+  let cur: ShellTab[] | null = null;
+  for (const e of NAV) {
+    if (e.type === "section") { cur = e.label.startsWith("МОДУЛЬ") ? [] : null; if (cur) groups.push(cur); }
+    else if (cur) cur.push({ id: e.id, label: e.label, icon: e.icon });
+  }
+  return MODULE_META.map((m, i) => ({ n: i + 1, ...m, items: groups[i] ?? [] }));
+})();
+
+const ALL_TABS: ShellTab[] = NAV.filter((e): e is Extract<NavEntry, { type: "tab" }> => e.type === "tab").map((e) => ({ id: e.id, label: e.label, icon: e.icon }));
+const byId = (id: string) => ALL_TABS.find((t) => t.id === id)!;
+const FEATURED_TOOLS = ["balance", "meditations", "quiz", "grow", "nlu", "spiral", "smart"].map(byId);
+const OTHER_TOOLS = (() => {
+  const i = NAV.findIndex((e) => e.type === "section" && e.label === "ИНСТРУМЕНТЫ");
+  return NAV.slice(i + 1).filter((e) => e.type === "tab").map((e: any) => byId(e.id)).filter((t) => !FEATURED_TOOLS.includes(t));
+})();
+const TOOL_IDS = new Set<string>([...FEATURED_TOOLS, ...OTHER_TOOLS].map((t) => t.id));
+const SCREEN_LABEL: Record<string, { label: string; icon: any }> = {
+  home: { label: "Главная", icon: HomeIcon }, modules: { label: "Модули", icon: BookOpen },
+  tools: { label: "Инструменты", icon: Wrench }, notes: { label: "Заметки", icon: NotebookPen },
+};
+function sectionOf(tab: TabId): Section {
+  if (tab === "home" || tab === "session" || tab === "modules" || tab === "tools" || tab === "notes") return tab;
+  if (TOOL_IDS.has(tab)) return "tools";
+  return "modules";
+}
+
 
 const TIMER_STORAGE_KEY = "coach-space-session-timer";
 
 function CoachSpace() {
-  const [onboarded, setOnboarded] = useState(() => isOnboardingDone());
-  const [tab, setTab] = useState<TabId>("session");
+  const [onboarded, setOnboarded] = useState(false);
+  useEffect(() => setOnboarded(isOnboardingDone()), []);
+  const [tab, setTabRaw] = useState<TabId>("home");
+  const headerRef = useRef<HTMLElement>(null);
+  const [history, setHistory] = useState<NavigationFrame<TabId>[]>([]);
+  const [moduleOverviewOpen, setModuleOverviewOpen] = useState<number | null>(null);
+  const [headerH, setHeaderH] = useState(0);
+  useEffect(() => {
+    const el = headerRef.current;
+    if (!el) return;
+    const ro = new ResizeObserver(() => setHeaderH(el.offsetHeight));
+    ro.observe(el);
+    setHeaderH(el.offsetHeight);
+    return () => ro.disconnect();
+  }, [onboarded]);
+  const [openModule, setOpenModule] = useState<number | null>(null);
+  const setTab = useCallback((id: TabId) => {
+    setHistory((frames) => pushNavigation(frames, tab, id, window.scrollY));
+    setTabRaw(id);
+    if (typeof window !== "undefined") {
+      window.scrollTo(0, 0);
+      if (!SCREEN_LABEL[id] && id !== "session") {
+        localStorage.setItem(LAST_TAB_KEY, id);
+        const v = loadVisited();
+        if (!v.includes(id)) localStorage.setItem(VISITED_KEY, JSON.stringify([...v, id]));
+      }
+    }
+  }, [tab]);
+  const goBack = () => {
+    const result = popNavigation(history);
+    if (!result.previous) return;
+    setHistory(result.history);
+    setTabRaw(result.previous.tab);
+    const scroll = result.previous.scroll;
+    requestAnimationFrame(() => requestAnimationFrame(() => window.scrollTo(0, scroll)));
+  };
+  const parentTab = history.at(-1)?.tab;
+  const parentLabel = parentTab ? (SCREEN_LABEL[parentTab]?.label ?? (parentTab === "session" ? "Сессия" : ALL_TABS.find((item) => item.id === parentTab)?.label)) : undefined;
+  const activeModule = MODULES.find((module) => module.items.some((item) => item.id === tab));
+  const title = SCREEN_LABEL[tab]?.label ?? (tab === "session" ? "Сессия" : parentTab === "modules" ? activeModule?.title : undefined) ?? ({ grow: "GROW", balance: "Колесо баланса", quiz: "Тест" } as Record<string, string>)[tab] ?? ALL_TABS.find((item) => item.id === tab)?.label;
+  const activeSection = tab === "session" ? "session" : !SCREEN_LABEL[tab] && parentTab && SCREEN_LABEL[parentTab] ? parentTab as Section : sectionOf(tab);
 
   // Preload all lazy tab chunks after first render so tapping a tab never
   // blocks the JS thread with a cold dynamic import parse.
@@ -290,6 +383,7 @@ function CoachSpace() {
       import("@/components/tabs/burger");
       import("@/components/tabs/rules");
       import("@/components/tabs/meditations");
+      import("@/components/tabs/spiral");
 
     }, 800);
     return () => clearTimeout(t);
@@ -307,7 +401,6 @@ function CoachSpace() {
   const coachNameRef = useRef("");
   const topicRef = useRef("");
   const notesRef = useRef("");
-  const [menuOpen, setMenuOpen] = useState(false);
   const audioCtxRef = useRef<any>(null);
   const wakeLockRef = useRef<any>(null);
   const alertPlayedRef = useRef(false);
@@ -697,8 +790,8 @@ ${notesRef.current || "—"}
 
   return (
     <div className="min-h-screen bg-background text-foreground">
-      <header className="border-b border-border bg-card">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-[env(safe-area-inset-top)] pb-4 flex items-center justify-between gap-4">
+      <header ref={headerRef} className="fixed top-0 inset-x-0 z-30 border-b border-border bg-card">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-[calc(env(safe-area-inset-top,0px)+0.5rem)] pb-3 flex items-center justify-between gap-4">
           <div className="flex items-center gap-3 min-w-0">
             <div className="w-11 h-11 rounded-xl bg-primary text-primary-foreground grid place-items-center font-bold shrink-0">CS</div>
             <div className="min-w-0">
@@ -731,99 +824,69 @@ ${notesRef.current || "—"}
             </button>
           </div>
         </div>
-        {/* Mobile header bottom row: active tab name + hamburger */}
-        <div className="md:hidden max-w-7xl mx-auto px-4 pb-3 flex items-center justify-between gap-3">
-          {/* Active tab label */}
-          {(() => {
-            const active = NAV.find((e) => e.type === "tab" && e.id === tab) as Extract<NavEntry, { type: "tab" }> | undefined;
-            if (!active) return null;
-            const Icon = active.icon;
-            return (
-              <div className="flex items-center gap-2 min-w-0">
-                <Icon size={16} className="text-primary shrink-0" />
-                <span className="text-sm font-semibold text-foreground truncate">{active.label}</span>
-              </div>
-            );
-          })()}
-          {/* Hamburger button */}
-          <button
-            onClick={() => setMenuOpen((v) => !v)}
-            className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-secondary hover:bg-muted transition-colors text-foreground shrink-0"
-            aria-label="Меню"
-          >
-            <span className="flex flex-col gap-[4px]">
-              <span className="block w-4 h-[2px] bg-current rounded" />
-              <span className="block w-4 h-[2px] bg-current rounded" />
-              <span className="block w-4 h-[2px] bg-current rounded" />
-            </span>
-            <span className="text-xs font-medium">Меню</span>
-          </button>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 pb-3 grid grid-cols-[5.5rem_minmax(0,1fr)_5.5rem] items-center gap-1 min-w-0">
+          {tab !== "home" && parentLabel ? <Button variant="ghost" onClick={goBack} aria-label={`Назад: ${parentLabel}`} className="h-auto min-h-11 px-0 justify-start gap-0.5 text-session whitespace-normal text-[12px] leading-4 [&_svg]:size-5">
+            <ChevronLeft size={20} /><span className="min-w-0 break-words">{parentLabel}</span>
+          </Button> : <span />}
+          <span className="text-[14px] md:text-base font-medium text-center leading-5 min-w-0 break-words">{title}</span>
+          <span aria-hidden />
         </div>
-
       </header>
-
-      {/* Mobile dropdown menu overlay */}
-      {menuOpen && (
-        <div className="md:hidden fixed inset-0 z-40" onClick={() => setMenuOpen(false)}>
-          <div className="absolute top-0 left-0 right-0 bg-card border-b border-border shadow-xl pt-[env(safe-area-inset-top)]" onClick={(e) => e.stopPropagation()}>
-            <div className="flex items-center justify-between px-4 py-3 border-b border-border">
-              <span className="font-semibold text-foreground">Разделы</span>
-              <button onClick={() => setMenuOpen(false)} className="w-9 h-9 rounded-full bg-secondary flex items-center justify-center text-muted-foreground">✕</button>
-            </div>
-            <nav className="flex flex-col py-2 max-h-[70vh] overflow-y-auto">
-              {NAV.map((entry, i) =>
-                entry.type === "section" ? (
-                  <div key={i} className="px-4 pt-3 pb-1 text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60">
-                    {entry.label}
-                  </div>
-                ) : (
-                  <button
-                    key={entry.id}
-                    onClick={() => { setTab(entry.id); setMenuOpen(false); }}
-                    className={`flex items-center gap-3 px-4 py-3 text-sm text-left transition-colors ${
-                      tab === entry.id ? "bg-primary/10 text-primary font-semibold" : "text-foreground hover:bg-secondary"
-                    }`}
-                  >
-                    <entry.icon size={18} className="shrink-0" />
-                    <span>{entry.label}</span>
-                    {tab === entry.id && <span className="ml-auto w-1.5 h-1.5 rounded-full bg-primary" />}
-                  </button>
-                )
-              )}
-            </nav>
-          </div>
-        </div>
-      )}
+      <div aria-hidden style={{ height: headerH }} />
 
       <div className="max-w-7xl mx-auto md:flex md:gap-6 md:px-6">
         {/* iPad+ sidebar nav */}
-        <aside className="hidden md:block md:w-56 lg:w-64 shrink-0 py-6 self-start sticky top-6">
+        <aside className="hidden md:block md:w-56 lg:w-64 shrink-0 py-6 self-start sticky top-24 max-h-[calc(100vh-7rem)] overflow-y-auto">
           <nav className="flex flex-col gap-0.5">
-            {NAV.map((entry, i) =>
-              entry.type === "section" ? (
-                <div key={i} className="px-3 pt-4 pb-1 text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60">
-                  {entry.label}
-                </div>
-              ) : (
-                <button
-                  key={entry.id}
-                  onClick={() => setTab(entry.id)}
-                  className={`flex items-center gap-3 px-3 min-h-10 text-sm rounded-lg text-left transition-colors ${
-                    tab === entry.id
-                      ? "bg-primary text-primary-foreground"
-                      : "text-muted-foreground hover:bg-secondary"
-                  }`}
-                >
-                  <entry.icon size={17} className="shrink-0" />
-                  <span className="truncate">{entry.label}</span>
+            {(() => {
+              const item = (id: TabId, label: string, Icon: any, extra = "") => (
+                <button key={id} onClick={() => setTab(id)}
+                  className={`flex items-center gap-3 px-3 min-h-10 text-sm rounded-lg text-left transition-colors ${extra} ${tab === id ? (id === "session" ? "bg-session text-session-foreground" : "bg-primary text-primary-foreground") : "text-muted-foreground hover:bg-secondary"}`}>
+                  <Icon size={17} className="shrink-0" />
+                  <span className="truncate">{label}</span>
                 </button>
-              )
-            )}
+              );
+              const head = (l: string) => <div className="px-3 pt-4 pb-1 text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60">{l}</div>;
+              return (
+                <>
+                  {head("Главное")}
+                  {item("home", "Главная", HomeIcon)}
+                  {item("session", "Провести сессию", Play, tab === "session" ? "font-semibold" : "font-semibold text-session bg-session/10")}
+                  {head("Мои инструменты")}
+                  {item("balance", "Колесо баланса", Gem)}
+                  {item("meditations", "Медитации", Moon)}
+                  {item("tools", "Все инструменты", Wrench)}
+                  {head("Модули")}
+                  {MODULES.map((m) => {
+                    const containsActive = m.items.some((i) => i.id === tab);
+                    const isOpen = openModule === m.n || (openModule === null && containsActive);
+                    return (
+                      <div key={m.n}>
+                        <button disabled={!m.items.length} onClick={() => setOpenModule(isOpen ? -1 : m.n)}
+                          className={`w-full flex items-center gap-2 px-3 min-h-10 text-sm rounded-lg text-left hover:bg-secondary disabled:opacity-50 ${containsActive ? "text-foreground font-medium" : "text-muted-foreground"}`}>
+                          <span className="w-1 h-5 rounded-full shrink-0" style={{ background: m.color }} />
+                          <span className="truncate flex-1">{m.n} · {m.title}</span>
+                          {m.items.length > 0 && <ChevronDown size={14} className={`shrink-0 transition ${isOpen ? "" : "-rotate-90"}`} />}
+                        </button>
+                        {isOpen && <div className="pl-3 flex flex-col gap-0.5">{m.items.map((i) => item(i.id as TabId, i.label, i.icon))}</div>}
+                      </div>
+                    );
+                  })}
+                  {head("Личное")}
+                  {item("notes", "Заметки", NotebookPen)}
+                  {item("quiz", "Тест / Квиз", ClipboardCheck)}
+                </>
+              );
+            })()}
           </nav>
         </aside>
 
-        <main className="flex-1 min-w-0 px-4 sm:px-6 md:px-0 py-6">
+        <main className="flex-1 min-w-0 px-4 sm:px-6 md:px-0 pt-6 pb-[calc(6.5rem+env(safe-area-inset-bottom,0px))] md:pb-6">
           <Suspense fallback={<div className="py-10 text-center text-sm text-muted-foreground">Загрузка…</div>}>
+            {tab === "home" && <HomeScreen modules={MODULES} allTabs={ALL_TABS} onOpen={(id) => setTab(id as TabId)} onSection={(x) => setTab(x)} sessionPreview={{ client: clientNameRef.current, topic: topicRef.current, notes: notesRef.current }} />}
+            {tab === "modules" && <ModulesScreen modules={MODULES} expanded={moduleOverviewOpen} onExpanded={setModuleOverviewOpen} onOpen={(id) => setTab(id as TabId)} />}
+            {tab === "tools" && <ToolsScreen featured={FEATURED_TOOLS} others={OTHER_TOOLS} onOpen={(id) => setTab(id as TabId)} />}
+            {tab === "notes" && <NotesScreen getSessionText={() => [clientNameRef.current && `Клиент: ${clientNameRef.current}`, topicRef.current && `Тема: ${topicRef.current}`, notesRef.current].filter(Boolean).join("\n")} />}
             {tab === "session" && <SessionPanelLazy duration={duration} setDuration={changeDuration} remaining={remaining} running={running} setRunning={handleSetRunning} reset={resetTimer} mmss={mmss} clientNameRef={clientNameRef} coachNameRef={coachNameRef} topicRef={topicRef} notesRef={notesRef} exportSession={exportSession} testSound={testSound} />}
             {tab === "grow" && <GrowLazy />}
             {tab === "models" && <ModelsLazy />}
@@ -865,12 +928,15 @@ ${notesRef.current || "—"}
             {tab === "potential" && <PotentialLazy />}
             {tab === "quiz" && <QuizLazy />}
             {tab === "meditations" && <MeditationsLazy />}
+            {tab === "spiral" && <SpiralLazy />}
 
           </Suspense>
         </main>
 
 
       </div>
+
+      <BottomBar active={activeSection} onSelect={(x) => setTab(x)} />
 
       {/* Export modal */}
       {exportText && (
