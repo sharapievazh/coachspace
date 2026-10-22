@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
-  Home, Play, BookOpen, Wrench, NotebookPen, Search, ChevronRight, Gem, GraduationCap, Trash2, Plus, Lock, Pencil, Target, Moon, PieChart,
+  Home, Play, BookOpen, Wrench, NotebookPen, Search, ChevronRight, Gem, GraduationCap, Trash2, Plus, Lock, Pencil, Target, Moon, PieChart, MessageSquarePlus, BookA, Timer, Circle,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -43,25 +43,14 @@ export function BottomBar({ active, onSelect }: { active: Section; onSelect: (s:
   const items: { id: Section; label: string; icon: any }[] = [
     { id: "home", label: "Главная", icon: Home },
     { id: "modules", label: "Модули", icon: BookOpen },
-    { id: "session", label: "Сессия", icon: Play },
     { id: "tools", label: "Инструменты", icon: Wrench },
     { id: "notes", label: "Заметки", icon: NotebookPen },
   ];
   return (
     <nav className="md:hidden fixed bottom-0 inset-x-0 z-30 border-t border-border bg-card/95 backdrop-blur pb-[env(safe-area-inset-bottom)]">
-      <div className="grid grid-cols-5">
+      <div className="grid grid-cols-4">
         {items.map((it) => {
           const on = active === it.id;
-          if (it.id === "session") {
-            return (
-              <Button variant="ghost" key={it.id} onClick={() => onSelect(it.id)} className="h-auto rounded-none px-0 gap-0 flex flex-col items-center justify-center py-1.5 hover:bg-transparent" aria-label="Провести сессию">
-                <span className={`-mt-6 w-14 h-14 rounded-full grid place-items-center bg-session text-session-foreground shadow-lg border-4 border-card ${on ? "ring-2 ring-session" : ""}`}>
-                  <Play size={20} fill="currentColor" />
-                </span>
-                <span className={`text-[10px] mt-0.5 font-semibold ${on ? "text-session" : "text-muted-foreground"}`}>{it.label}</span>
-              </Button>
-            );
-          }
           return (
             <Button variant="ghost" key={it.id} onClick={() => onSelect(it.id)} aria-current={on ? "page" : undefined} className={`h-auto rounded-none px-0 hover:bg-transparent flex flex-col items-center justify-center gap-0.5 py-2 min-h-14 [&_svg]:size-5 ${on ? "text-session" : "text-muted-foreground"}`}>
               <it.icon size={20} strokeWidth={on ? 2.4 : 1.8} />
@@ -120,10 +109,12 @@ export function HomeScreen({
     { label: "Модули", icon: BookOpen, cls: "bg-card text-foreground border border-border", act: () => onSection("modules") },
     { label: "Тест", icon: GraduationCap, cls: "bg-card text-foreground border border-border", act: () => onOpen("quiz") },
     { label: "Колесо баланса", icon: PieChart, cls: "bg-card text-foreground border border-border", act: () => onOpen("balance") },
+    { label: "Гамбургер", icon: MessageSquarePlus, cls: "bg-feedback-positive/10 text-foreground border border-feedback-positive/50", act: () => onOpen("hamburger") },
+    { label: "Глоссарий", icon: BookA, cls: "bg-card text-foreground border border-border", act: () => onOpen("glossary") },
   ];
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       <div className="rounded-3xl p-5 bg-gradient-to-br from-primary/20 via-accent to-session/15 border border-border shadow-sm">
         <p className="text-xs text-muted-foreground capitalize">{dateStr}</p>
         {editing ? (
@@ -133,7 +124,7 @@ export function HomeScreen({
           </div>
         ) : (
           <button onClick={() => setEditing(true)} className="mt-1 flex items-center gap-2 text-left">
-            <h2 className="text-2xl font-semibold tracking-tight">{greet}{name ? `, ${name}!` : "!"}</h2>
+            <h2 className="text-[26px] font-semibold">{greet}{name ? `, ${name}!` : "!"}</h2>
             <Pencil size={14} className="text-muted-foreground shrink-0" />
           </button>
         )}
@@ -146,7 +137,7 @@ export function HomeScreen({
           {quick.map((q) => (
             <Button variant="ghost" key={q.label} onClick={q.act} className={`rounded-[16px] px-1.5 py-3 h-[94px] w-full gap-2 flex flex-col justify-center text-center whitespace-normal shadow-sm active:scale-[0.97] transition-transform motion-reduce:transition-none [&_svg]:size-5 ${q.cls}`}>
               <q.icon size={20} />
-              <span className="text-[12px] leading-4 font-semibold min-h-8 flex items-center justify-center">{q.label}</span>
+              <span className="text-[13px] leading-4 font-bold min-h-8 flex items-center justify-center">{q.label}</span>
             </Button>
           ))}
         </div>
@@ -179,7 +170,7 @@ export function HomeScreen({
           <button onClick={() => onSection("notes")} className="text-xs text-primary font-medium">Все</button>
         </div>
         {notes.length === 0 ? (
-          <p className="text-sm text-muted-foreground rounded-2xl border border-dashed border-border p-4">Заметок пока нет.</p>
+          <p className="text-sm text-muted-foreground rounded-2xl bg-muted p-4">Ваши заметки появятся здесь</p>
         ) : (
           <div className="space-y-2">
             {notes.map((n) => (
@@ -234,6 +225,7 @@ export function ModulesScreen({ modules, onOpen, expanded, onExpanded }: { modul
                     <p className="font-semibold leading-tight">{m.title}</p>
                     <p className="text-xs text-muted-foreground mt-1">{m.desc}</p>
                   </div>
+                  <Circle size={14} aria-label="Прогресс модуля" className="text-muted-foreground/50 shrink-0 mt-0.5" />
                   {locked ? <Lock size={16} className="text-muted-foreground" /> : <ChevronRight size={20} className={`text-muted-foreground transition ${isOpen ? "rotate-90" : ""}`} />}
                 </div>
                 {!locked && (
@@ -297,7 +289,7 @@ export function ToolsScreen({ featured, others, onOpen }: { featured: ShellTab[]
 }
 
 /* ---------------- Notes ---------------- */
-export function NotesScreen({ getSessionText }: { getSessionText: () => string }) {
+export function NotesScreen({ getSessionText, onSession, timer }: { getSessionText: () => string; onSession: () => void; timer: string }) {
   const [notes, setNotes] = useState<Note[]>([]);
   const [filter, setFilter] = useState<"all" | "session" | "personal">("all");
   const ref = useRef<HTMLTextAreaElement>(null);
@@ -318,6 +310,7 @@ export function NotesScreen({ getSessionText }: { getSessionText: () => string }
         <h2 className="text-2xl font-semibold tracking-tight">Заметки</h2>
         <p className="text-sm text-muted-foreground">Заметки сессий и личные записи</p>
       </div>
+      <Button variant="outline" onClick={onSession} className="w-full h-auto py-4 justify-start gap-3 text-session whitespace-normal"><Timer /><span className="flex-1 text-left font-semibold">Таймер сессии</span><span className="font-mono tabular-nums">{timer}</span><ChevronRight /></Button>
       <div className="rounded-2xl border border-border bg-card p-3 shadow-sm space-y-2">
         <textarea ref={ref} rows={4} placeholder="Новая заметка…" className="w-full resize-none bg-transparent outline-none text-base leading-relaxed" />
         <div className="flex flex-wrap gap-2 justify-end">
@@ -341,7 +334,7 @@ export function NotesScreen({ getSessionText }: { getSessionText: () => string }
       ) : (
         <div className="space-y-2">
           {shown.map((n) => (
-            <div key={n.id} className="rounded-2xl border border-border bg-card p-4 shadow-sm">
+            <div key={n.id} id={`note-${n.id}`} className="note-anchor rounded-2xl border border-border bg-card p-4 shadow-sm">
               <div className="flex items-center justify-between gap-2">
                 <p className="text-[11px] text-muted-foreground">{new Date(n.date).toLocaleString("ru-RU", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })} · {n.kind === "session" ? "Сессия" : "Личное"}</p>
                 <button onClick={() => remove(n.id)} aria-label="Удалить" className="w-8 h-8 grid place-items-center rounded-lg text-muted-foreground hover:bg-secondary"><Trash2 size={15} /></button>
