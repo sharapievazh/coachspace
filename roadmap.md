@@ -1,5 +1,6 @@
-# Navigation polish
-- [x] Six compact home shortcuts and continuation progress.
-- [x] In-app back history and centered page titles.
-- [x] Teal active bottom tabs and consistent tap/spacing polish.
-- [x] Verify navigation on phone and desktop without changing learning content.
+# Home tools and search
+- [ ] Add hamburger feedback inputs, copy and save to existing notes.
+- [ ] Add exact glossary and alphabet navigation.
+- [ ] Add grouped global search with direct navigation and dismissal.
+- [ ] Use four bottom tabs, expose session timer from Notes and polish home/modules.
+- [ ] Verify workflows and preserved learning content.
