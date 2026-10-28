@@ -9,12 +9,22 @@ function formatTime(sec: number) {
   return `${m}:${s.toString().padStart(2, "0")}`;
 }
 
+const SPEEDS = [1, 1.25, 1.5, 2] as const;
+type Speed = typeof SPEEDS[number];
+
 function PlayerCard({ podcast }: { podcast: Podcast }) {
   const audioRef = useRef<HTMLAudioElement>(null);
   const [playing, setPlaying] = useState(false);
   const [current, setCurrent] = useState(0);
   const [duration, setDuration] = useState(0);
   const [loading, setLoading] = useState(false);
+  const [speed, setSpeed] = useState<Speed>(1);
+
+  const cycleSpeed = () => {
+    const next = SPEEDS[(SPEEDS.indexOf(speed) + 1) % SPEEDS.length];
+    setSpeed(next);
+    if (audioRef.current) audioRef.current.playbackRate = next;
+  };
 
   const toggle = async () => {
     const audio = audioRef.current;
@@ -133,6 +143,13 @@ function PlayerCard({ podcast }: { podcast: Podcast }) {
           className="w-10 h-10 grid place-items-center rounded-full bg-background text-foreground hover:bg-secondary transition-colors"
         >
           <FastForward size={18} />
+        </button>
+        <button
+          onClick={cycleSpeed}
+          className="w-10 h-10 grid place-items-center rounded-full bg-background text-foreground hover:bg-secondary transition-colors text-xs font-bold tabular-nums"
+          title="Скорость воспроизведения"
+        >
+          {speed}x
         </button>
       </div>
     </div>
