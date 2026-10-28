@@ -19,6 +19,8 @@
  */
 
 @theme inline {
+  --color-feedback-positive: var(--feedback-positive);
+  --color-feedback-neutral: var(--feedback-neutral);
   --color-session: var(--session);
   --color-session-foreground: var(--session-foreground);
   --radius-sm: calc(var(--radius) - 4px);
@@ -93,6 +95,8 @@
 }
 
 :root {
+  --feedback-positive: oklch(0.65 0.14 80);
+  --feedback-neutral: oklch(0.6 0.14 250);
   --radius: 1rem; /* 16px iOS standard */
   --background: #f2f2f7;
   --foreground: #1c1c1e;
@@ -132,6 +136,8 @@
 }
 
 .dark {
+  --feedback-positive: oklch(0.8 0.14 80);
+  --feedback-neutral: oklch(0.75 0.12 250);
   --background: #000000;
   --foreground: #f2f2f7;
   --card: #1c1c1e;
@@ -272,6 +278,10 @@
   font-weight: 500;
   text-transform: uppercase;
   letter-spacing: 0.5px;
+}
+
+.glossary-anchor, .note-anchor {
+  scroll-margin-top: calc(var(--app-header-height, 150px) + 16px);
 }
 
 @utility card-ios {

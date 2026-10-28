@@ -1,9 +1,13 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
+import GlobalSearch from "@/components/global-search";
+import { GLOSSARY } from "@/lib/glossary-data";
+import { SEARCH_SECTIONS } from "@/lib/search-sections";
+import { type SearchEntry } from "@/lib/content-search";
 import { pushNavigation, popNavigation, type NavigationFrame } from "@/lib/navigation-history";
 import Onboarding, { isOnboardingDone } from "@/components/onboarding";
-import { BottomBar, HomeScreen, ModulesScreen, ToolsScreen, NotesScreen, LAST_TAB_KEY, VISITED_KEY, loadVisited, type ModuleInfo, type Section, type ShellTab } from "@/components/shell";
+import { BottomBar, HomeScreen, ModulesScreen, ToolsScreen, NotesScreen, LAST_TAB_KEY, VISITED_KEY, loadVisited, loadNotes, type ModuleInfo, type Section, type ShellTab } from "@/components/shell";
 import {
   Play, Pause, Target, Heart, Triangle, Layers,
   Timer,
@@ -14,7 +18,7 @@ import {
   Map as MapIcon, Repeat, Box, Network, Lightbulb, Clock, Puzzle, KeyRound,
   Fingerprint, ShieldCheck, UserCheck, Rainbow, ScanSearch,
   UtensilsCrossed, ListChecks, Moon, Dna,
-  Home as HomeIcon, Wrench, NotebookPen, ChevronDown, ChevronLeft,
+  Home as HomeIcon, Wrench, NotebookPen, ChevronDown, ChevronLeft, Search, BookA, MessageSquarePlus,
 } from "lucide-react";
 
 
@@ -59,6 +63,8 @@ const BurgerLazy = lazy(() => import("@/components/tabs/burger"));
 const RulesLazy = lazy(() => import("@/components/tabs/rules"));
 const MeditationsLazy = lazy(() => import("@/components/tabs/meditations"));
 const SpiralLazy = lazy(() => import("@/components/tabs/spiral"));
+const GlossaryLazy = lazy(() => import("@/components/tabs/glossary"));
+const HamburgerFeedbackLazy = lazy(() => import("@/components/tabs/hamburger-feedback"));
 
 
 
@@ -181,7 +187,7 @@ function ExportModal({ text, onClose }: { text: string; onClose: () => void }) {
   );
 }
 
-type TabId = "home" | "modules" | "tools" | "notes" | "session" | "quiz" | "grow" | "models" | "competencies" | "rapport" | "merrill" | "ethics" | "supervision" | "balance" | "strategy" | "habits" | "team-coaching" | "cube" | "teambuilding" | "brainstorm" | "senge" | "kotter" | "soar" | "sos" | "conflict-med" | "tr-tech" | "timeline" | "parts" | "tr-beliefs" | "tr-ta" | "metaprograms" | "values" | "psychk" | "decart" | "swot" | "smart" | "potential" | "erickson" | "osvk" | "nlu" | "burger" | "rules" | "tr-sessions" | "meditations" | "spiral";
+type TabId = "home" | "modules" | "tools" | "notes" | "session" | "quiz" | "grow" | "models" | "competencies" | "rapport" | "merrill" | "ethics" | "supervision" | "balance" | "strategy" | "habits" | "team-coaching" | "cube" | "teambuilding" | "brainstorm" | "senge" | "kotter" | "soar" | "sos" | "conflict-med" | "tr-tech" | "timeline" | "parts" | "tr-beliefs" | "tr-ta" | "metaprograms" | "values" | "psychk" | "decart" | "swot" | "smart" | "potential" | "erickson" | "osvk" | "nlu" | "burger" | "rules" | "tr-sessions" | "meditations" | "spiral" | "glossary" | "hamburger";
 
 type NavEntry =
   | { type: "tab"; id: TabId; label: string; icon: any }
@@ -202,7 +208,6 @@ const buildSmartParagraph = (d: SmartData) => {
 
 const NAV: NavEntry[] = [
   { type: "section", label: "ДЕЙСТВИЕ" },
-  { type: "tab",     id: "session",       label: "Вести Сессию",            icon: Sparkles },
   { type: "tab",     id: "quiz",          label: "Тест",                    icon: ClipboardCheck },
   { type: "section", label: "МОДУЛЬ 1 · БАЗОВЫЕ МОДЕЛИ КОУЧИНГА" },
   { type: "tab",     id: "grow",          label: "GROW (макро + микро)",    icon: Target },
@@ -241,6 +246,8 @@ const NAV: NavEntry[] = [
   { type: "section", label: "МОДУЛЬ 6 · СПИРАЛЬНАЯ ДИНАМИКА" },
   { type: "tab",     id: "spiral",        label: "Спиральная динамика",     icon: Dna },
   { type: "section", label: "ИНСТРУМЕНТЫ" },
+  { type: "tab", id: "hamburger", label: "Гамбургер", icon: MessageSquarePlus },
+  { type: "tab", id: "glossary", label: "Глоссарий", icon: BookA },
   { type: "tab",     id: "decart",        label: "Квадрат Декарта",         icon: Grid2x2 },
   { type: "tab",     id: "swot",          label: "SWOT",                    icon: Layers },
   { type: "tab",     id: "smart",         label: "SMART-цель",              icon: CheckCircle2 },
@@ -274,8 +281,12 @@ const MODULES: ModuleInfo[] = (() => {
 })();
 
 const ALL_TABS: ShellTab[] = NAV.filter((e): e is Extract<NavEntry, { type: "tab" }> => e.type === "tab").map((e) => ({ id: e.id, label: e.label, icon: e.icon }));
-const byId = (id: string) => ALL_TABS.find((t) => t.id === id)!;
-const FEATURED_TOOLS = ["balance", "meditations", "quiz", "grow", "nlu", "spiral", "smart"].map(byId);
+const byId = (id: string) => {
+  const item = ALL_TABS.find((t) => t.id === id);
+  if (!item) throw new Error(`Unknown tool: ${id}`);
+  return item;
+};
+const FEATURED_TOOLS = ["balance", "meditations", "quiz", "grow", "nlu", "spiral", "smart", "hamburger", "glossary"].map(byId);
 const OTHER_TOOLS = (() => {
   const i = NAV.findIndex((e) => e.type === "section" && e.label === "ИНСТРУМЕНТЫ");
   return NAV.slice(i + 1).filter((e) => e.type === "tab").map((e: any) => byId(e.id)).filter((t) => !FEATURED_TOOLS.includes(t));
@@ -286,7 +297,8 @@ const SCREEN_LABEL: Record<string, { label: string; icon: any }> = {
   tools: { label: "Инструменты", icon: Wrench }, notes: { label: "Заметки", icon: NotebookPen },
 };
 function sectionOf(tab: TabId): Section {
-  if (tab === "home" || tab === "session" || tab === "modules" || tab === "tools" || tab === "notes") return tab;
+  if (tab === "session") return "notes";
+  if (tab === "home" || tab === "modules" || tab === "tools" || tab === "notes") return tab;
   if (TOOL_IDS.has(tab)) return "tools";
   return "modules";
 }
@@ -298,6 +310,38 @@ function CoachSpace() {
   const [onboarded, setOnboarded] = useState(false);
   useEffect(() => setOnboarded(isOnboardingDone()), []);
   const [tab, setTabRaw] = useState<TabId>("home");
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [searchNotes, setSearchNotes] = useState<SearchEntry[]>([]);
+  const [searchTarget, setSearchTarget] = useState<{ anchor?: string; label?: string } | null>(null);
+  const closeSearch = useCallback(() => setSearchOpen(false), []);
+  const openSearch = () => {
+    setSearchNotes(loadNotes().map(note => ({ id: `note-${note.id}`, category: "Заметки", title: note.text.split("\n")[0], excerpt: note.text, tab: "notes", anchor: `note-${note.id}` })));
+    setSearchOpen(true);
+  };
+  const searchEntries = useMemo<SearchEntry[]>(() => [
+    ...MODULES.filter(module => module.n <= 6).flatMap(module => [
+      { id: `module-${module.n}`, category: "Модули" as const, title: `Модуль ${module.n} · ${module.title}`, excerpt: module.desc, tab: "modules", module: module.n },
+      ...module.items.map(item => ({ id: `module-tab-${item.id}`, category: "Модули" as const, title: item.label, excerpt: `Модуль ${module.n} · ${module.title}`, tab: item.id })),
+    ]),
+    ...[...FEATURED_TOOLS, ...OTHER_TOOLS].map(item => ({ id: `tool-${item.id}`, category: "Инструменты" as const, title: item.id === "balance" ? "Колесо баланса" : item.label, excerpt: "Рабочий инструмент коуча", tab: item.id })),
+    ...SEARCH_SECTIONS.map((item, index) => ({ id: `section-${index}`, category: "Модули" as const, ...item, anchor: `subtab:${item.title}` })),
+    ...GLOSSARY.map(term => ({ id: term.id, category: "Глоссарий" as const, title: term.term, excerpt: term.definition, tab: "glossary", anchor: term.id })),
+    ...searchNotes,
+  ], [searchNotes]);
+  useEffect(() => {
+    if (!searchTarget) return;
+    const navigateTarget = () => {
+      const element = searchTarget.anchor ? document.getElementById(searchTarget.anchor) : Array.from(document.querySelectorAll<HTMLButtonElement>("main button")).find(button => button.textContent?.trim() === searchTarget.label);
+      if (!element) return false;
+      if (searchTarget.label) element.click();
+      else element.scrollIntoView({ behavior: "instant", block: "start" });
+      setSearchTarget(null);
+      return true;
+    };
+    const observer = new MutationObserver(() => { if (navigateTarget()) observer.disconnect(); });
+    const frame = requestAnimationFrame(() => { if (!navigateTarget()) observer.observe(document.body, { childList: true, subtree: true }); });
+    return () => { cancelAnimationFrame(frame); observer.disconnect(); };
+  }, [tab, searchTarget]);
   const headerRef = useRef<HTMLElement>(null);
   const [history, setHistory] = useState<NavigationFrame<TabId>[]>([]);
   const [moduleOverviewOpen, setModuleOverviewOpen] = useState<number | null>(null);
@@ -305,7 +349,7 @@ function CoachSpace() {
   useEffect(() => {
     const el = headerRef.current;
     if (!el) return;
-    const ro = new ResizeObserver(() => setHeaderH(el.offsetHeight));
+    const ro = new ResizeObserver(() => { setHeaderH(el.offsetHeight); document.documentElement.style.setProperty("--app-header-height", `${el.offsetHeight}px`); });
     ro.observe(el);
     setHeaderH(el.offsetHeight);
     return () => ro.disconnect();
@@ -335,7 +379,7 @@ function CoachSpace() {
   const parentLabel = parentTab ? (SCREEN_LABEL[parentTab]?.label ?? (parentTab === "session" ? "Сессия" : ALL_TABS.find((item) => item.id === parentTab)?.label)) : undefined;
   const activeModule = MODULES.find((module) => module.items.some((item) => item.id === tab));
   const title = SCREEN_LABEL[tab]?.label ?? (tab === "session" ? "Сессия" : parentTab === "modules" ? activeModule?.title : undefined) ?? ({ grow: "GROW", balance: "Колесо баланса", quiz: "Тест" } as Record<string, string>)[tab] ?? ALL_TABS.find((item) => item.id === tab)?.label;
-  const activeSection = tab === "session" ? "session" : !SCREEN_LABEL[tab] && parentTab && SCREEN_LABEL[parentTab] ? parentTab as Section : sectionOf(tab);
+  const activeSection = tab === "session" ? "notes" : !SCREEN_LABEL[tab] && parentTab && SCREEN_LABEL[parentTab] ? parentTab as Section : sectionOf(tab);
 
   // Preload all lazy tab chunks after first render so tapping a tab never
   // blocks the JS thread with a cold dynamic import parse.
@@ -829,7 +873,7 @@ ${notesRef.current || "—"}
             <ChevronLeft size={20} /><span className="min-w-0 break-words">{parentLabel}</span>
           </Button> : <span />}
           <span className="text-[14px] md:text-base font-medium text-center leading-5 min-w-0 break-words">{title}</span>
-          <span aria-hidden />
+          <Button variant="ghost" size="icon" onClick={openSearch} aria-label="Открыть поиск" title="Поиск" className="justify-self-end text-session"><Search /></Button>
         </div>
       </header>
       <div aria-hidden style={{ height: headerH }} />
@@ -851,7 +895,6 @@ ${notesRef.current || "—"}
                 <>
                   {head("Главное")}
                   {item("home", "Главная", HomeIcon)}
-                  {item("session", "Провести сессию", Play, tab === "session" ? "font-semibold" : "font-semibold text-session bg-session/10")}
                   {head("Мои инструменты")}
                   {item("balance", "Колесо баланса", Gem)}
                   {item("meditations", "Медитации", Moon)}
@@ -886,7 +929,9 @@ ${notesRef.current || "—"}
             {tab === "home" && <HomeScreen modules={MODULES} allTabs={ALL_TABS} onOpen={(id) => setTab(id as TabId)} onSection={(x) => setTab(x)} sessionPreview={{ client: clientNameRef.current, topic: topicRef.current, notes: notesRef.current }} />}
             {tab === "modules" && <ModulesScreen modules={MODULES} expanded={moduleOverviewOpen} onExpanded={setModuleOverviewOpen} onOpen={(id) => setTab(id as TabId)} />}
             {tab === "tools" && <ToolsScreen featured={FEATURED_TOOLS} others={OTHER_TOOLS} onOpen={(id) => setTab(id as TabId)} />}
-            {tab === "notes" && <NotesScreen getSessionText={() => [clientNameRef.current && `Клиент: ${clientNameRef.current}`, topicRef.current && `Тема: ${topicRef.current}`, notesRef.current].filter(Boolean).join("\n")} />}
+            {tab === "notes" && <NotesScreen onSession={() => setTab("session")} timer={mmss} getSessionText={() => [clientNameRef.current && `Клиент: ${clientNameRef.current}`, topicRef.current && `Тема: ${topicRef.current}`, notesRef.current].filter(Boolean).join("\n")} />}
+            {tab === "glossary" && <GlossaryLazy />}
+            {tab === "hamburger" && <HamburgerFeedbackLazy />}
             {tab === "session" && <SessionPanelLazy duration={duration} setDuration={changeDuration} remaining={remaining} running={running} setRunning={handleSetRunning} reset={resetTimer} mmss={mmss} clientNameRef={clientNameRef} coachNameRef={coachNameRef} topicRef={topicRef} notesRef={notesRef} exportSession={exportSession} testSound={testSound} />}
             {tab === "grow" && <GrowLazy />}
             {tab === "models" && <ModelsLazy />}
@@ -937,6 +982,12 @@ ${notesRef.current || "—"}
       </div>
 
       <BottomBar active={activeSection} onSelect={(x) => setTab(x)} />
+      {searchOpen && <GlobalSearch entries={searchEntries} onClose={closeSearch} onSelect={entry => {
+        closeSearch();
+        if (entry.module) setModuleOverviewOpen(entry.module);
+        setTab(entry.tab as TabId);
+        if (entry.anchor) setSearchTarget(entry.anchor.startsWith("subtab:") ? { label: entry.anchor.slice(7) } : { anchor: entry.anchor });
+      }} />}
 
       {/* Export modal */}
       {exportText && (
