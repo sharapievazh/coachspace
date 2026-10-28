@@ -167,39 +167,19 @@ export function HomeScreen({
       )}
 
       {PODCASTS.length > 0 && (
-        <div>
-          <div className="flex items-center justify-between mb-2">
-            <h3 className="text-xs font-bold uppercase tracking-[0.08em] text-muted-foreground">Подкасты</h3>
-            <button onClick={() => onOpen("podcasts")} className="text-xs text-primary font-medium">Все</button>
-          </div>
-          <div className="space-y-2">
-            {PODCASTS.slice(0, 2).map((p) => (
-              <button
-                key={p.id}
-                onClick={() => onOpen("podcasts")}
-                className="w-full text-left rounded-2xl border p-4 flex items-center gap-3 active:scale-[0.98] transition-transform shadow-sm"
-                style={{ borderColor: p.color + "30", background: p.color + "0d" }}
-              >
-                <span
-                  className="shrink-0 w-11 h-11 rounded-xl grid place-items-center text-xl"
-                  style={{ background: p.color + "22" }}
-                >
-                  {p.emoji}
-                </span>
-                <span className="min-w-0 flex-1">
-                  <span className="block text-sm font-semibold leading-snug line-clamp-1">{p.title}</span>
-                  <span className="block text-xs text-muted-foreground mt-0.5">{p.duration}</span>
-                </span>
-                <span
-                  className="shrink-0 w-9 h-9 rounded-full grid place-items-center"
-                  style={{ background: p.color }}
-                >
-                  <Headphones size={16} className="text-white" />
-                </span>
-              </button>
-            ))}
-          </div>
-        </div>
+        <button
+          onClick={() => onOpen("podcasts")}
+          className="w-full text-left rounded-2xl border border-border bg-card p-4 flex items-center gap-3 shadow-sm active:scale-[0.97] transition-transform"
+        >
+          <span className="w-10 h-10 rounded-xl bg-primary/10 text-primary grid place-items-center shrink-0">
+            <Headphones size={20} />
+          </span>
+          <span className="min-w-0 flex-1">
+            <span className="block text-xs text-muted-foreground">Раздел</span>
+            <span className="block text-sm font-semibold mt-0.5">Подкасты · {PODCASTS.length} выпусков</span>
+          </span>
+          <ChevronRight size={20} className="text-muted-foreground shrink-0" />
+        </button>
       )}
 
       <div>
