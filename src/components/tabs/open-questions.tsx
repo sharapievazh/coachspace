@@ -11,7 +11,7 @@ function shuffle<T>(arr: T[]): T[] {
   return a;
 }
 
-export default function OpenQuestions() {
+export default function OpenQuestions({ hideHeader }: { hideHeader?: boolean } = {}) {
   const [topicId, setTopicId] = useState(0);
   const [index, setIndex] = useState(0);
   const [userAnswer, setUserAnswer] = useState("");
@@ -65,10 +65,8 @@ export default function OpenQuestions() {
     <div className="space-y-5">
       <div className="flex items-start justify-between gap-3">
         <div>
-          <h2 className="text-2xl font-semibold tracking-tight">Открытые вопросы</h2>
-          <p className="text-sm text-muted-foreground mt-0.5">
-            Напишите ответ, затем сравните с эталоном
-          </p>
+          {!hideHeader && <h2 className="text-2xl font-semibold tracking-tight">Открытые вопросы</h2>}
+          <p className="text-sm text-muted-foreground mt-0.5">Напишите ответ, затем сравните с эталоном</p>
         </div>
         <button
           onClick={handleShuffle}

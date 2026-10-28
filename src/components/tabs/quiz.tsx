@@ -1,10 +1,11 @@
 import { useMemo, useState } from "react";
-import { CheckCircle2, ClipboardCheck, RotateCcw, XCircle, GraduationCap, Award } from "lucide-react";
+import { CheckCircle2, ClipboardCheck, RotateCcw, XCircle, GraduationCap, Award, BookOpen } from "lucide-react";
 import { SectionHead } from "./_shared";
 import { QUESTIONS, TOPICS, type Question } from "@/lib/quiz-questions";
+import OpenQuestions from "./open-questions";
 
 const SESSION_SIZE = 20;
-type Mode = "study" | "exam";
+type Mode = "study" | "exam" | "open";
 
 function shuffle<T>(arr: T[]): T[] {
   const a = [...arr];
@@ -79,6 +80,7 @@ function Quiz() {
         {([
           { k: "study", label: "Учёба", icon: GraduationCap },
           { k: "exam", label: "Экзамен", icon: Award },
+          { k: "open", label: "Открытые", icon: BookOpen },
         ] as const).map((m) => {
           const MI = m.icon;
           const active = mode === m.k;
@@ -86,20 +88,25 @@ function Quiz() {
             <button
               key={m.k}
               onClick={() => restart(m.k)}
-              className={`flex-1 inline-flex items-center justify-center gap-2 rounded-lg px-3 py-2 min-h-10 text-sm font-medium transition ${
+              className={`flex-1 inline-flex items-center justify-center gap-1.5 rounded-lg px-2 py-2 min-h-10 text-xs font-medium transition ${
                 active ? "bg-card shadow-sm text-foreground" : "text-muted-foreground"
               }`}
             >
-              <MI size={16} /> {m.label}
+              <MI size={15} /> {m.label}
             </button>
           );
         })}
       </div>
-      <p className="-mt-3 text-xs text-muted-foreground">
-        {mode === "study" ? "Объяснения появляются сразу после ответа." : "Объяснения показываются только в конце теста."}
-      </p>
+      {mode !== "open" && (
+        <p className="-mt-3 text-xs text-muted-foreground">
+          {mode === "study" ? "Объяснения появляются сразу после ответа." : "Объяснения показываются только в конце теста."}
+        </p>
+      )}
 
-      {!done && current ? (
+      {/* Открытые вопросы */}
+      {mode === "open" && <OpenQuestions hideHeader />}
+
+      {mode !== "open" && !done && current ? (
         <>
           {/* Шапка прогресса */}
           <div className="rounded-2xl border border-border bg-card p-4">
@@ -180,7 +187,7 @@ function Quiz() {
             </button>
           )}
         </>
-      ) : (
+      ) : mode !== "open" ? (
         <>
           {/* Итоги */}
           <div className="rounded-2xl border border-primary/30 bg-gradient-to-br from-primary/20 via-emerald-500/10 to-violet-500/15 p-6 text-center">
@@ -224,7 +231,7 @@ function Quiz() {
           </div>
           <div className="text-xs text-muted-foreground">Отвечено вопросов: {answeredCount} / {total}</div>
         </>
-      )}
+      ) : null}
     </div>
   );
 }
