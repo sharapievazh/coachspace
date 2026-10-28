@@ -65,6 +65,7 @@ const MeditationsLazy = lazy(() => import("@/components/tabs/meditations"));
 const SpiralLazy = lazy(() => import("@/components/tabs/spiral"));
 const GlossaryLazy = lazy(() => import("@/components/tabs/glossary"));
 const HamburgerFeedbackLazy = lazy(() => import("@/components/tabs/hamburger-feedback"));
+const CoachingQuestionsLazy = lazy(() => import("@/components/tabs/coaching-questions"));
 
 
 
@@ -187,7 +188,7 @@ function ExportModal({ text, onClose }: { text: string; onClose: () => void }) {
   );
 }
 
-type TabId = "home" | "modules" | "tools" | "notes" | "session" | "quiz" | "grow" | "models" | "competencies" | "rapport" | "merrill" | "ethics" | "supervision" | "balance" | "strategy" | "habits" | "team-coaching" | "cube" | "teambuilding" | "brainstorm" | "senge" | "kotter" | "soar" | "sos" | "conflict-med" | "tr-tech" | "timeline" | "parts" | "tr-beliefs" | "tr-ta" | "metaprograms" | "values" | "psychk" | "decart" | "swot" | "smart" | "potential" | "erickson" | "osvk" | "nlu" | "burger" | "rules" | "tr-sessions" | "meditations" | "spiral" | "glossary" | "hamburger";
+type TabId = "home" | "modules" | "tools" | "notes" | "session" | "quiz" | "grow" | "models" | "competencies" | "rapport" | "merrill" | "ethics" | "supervision" | "balance" | "strategy" | "habits" | "team-coaching" | "cube" | "teambuilding" | "brainstorm" | "senge" | "kotter" | "soar" | "sos" | "conflict-med" | "tr-tech" | "timeline" | "parts" | "tr-beliefs" | "tr-ta" | "metaprograms" | "values" | "psychk" | "decart" | "swot" | "smart" | "potential" | "erickson" | "osvk" | "nlu" | "burger" | "rules" | "tr-sessions" | "meditations" | "spiral" | "glossary" | "hamburger" | "questions";
 
 type NavEntry =
   | { type: "tab"; id: TabId; label: string; icon: any }
@@ -248,6 +249,7 @@ const NAV: NavEntry[] = [
   { type: "section", label: "ИНСТРУМЕНТЫ" },
   { type: "tab", id: "hamburger", label: "Гамбургер", icon: MessageSquarePlus },
   { type: "tab", id: "glossary", label: "Глоссарий", icon: BookA },
+  { type: "tab", id: "questions", label: "Коучинговые вопросы", icon: MessageSquare },
   { type: "tab",     id: "decart",        label: "Квадрат Декарта",         icon: Grid2x2 },
   { type: "tab",     id: "swot",          label: "SWOT",                    icon: Layers },
   { type: "tab",     id: "smart",         label: "SMART-цель",              icon: CheckCircle2 },
@@ -286,7 +288,7 @@ const byId = (id: string) => {
   if (!item) throw new Error(`Unknown tool: ${id}`);
   return item;
 };
-const FEATURED_TOOLS = ["balance", "meditations", "quiz", "grow", "nlu", "spiral", "smart", "hamburger", "glossary"].map(byId);
+const FEATURED_TOOLS = ["balance", "meditations", "quiz", "grow", "nlu", "spiral", "questions", "hamburger", "glossary"].map(byId);
 const OTHER_TOOLS = (() => {
   const i = NAV.findIndex((e) => e.type === "section" && e.label === "ИНСТРУМЕНТЫ");
   return NAV.slice(i + 1).filter((e) => e.type === "tab").map((e: any) => byId(e.id)).filter((t) => !FEATURED_TOOLS.includes(t));
@@ -428,6 +430,7 @@ function CoachSpace() {
       import("@/components/tabs/rules");
       import("@/components/tabs/meditations");
       import("@/components/tabs/spiral");
+      import("@/components/tabs/coaching-questions");
 
     }, 800);
     return () => clearTimeout(t);
@@ -974,6 +977,7 @@ ${notesRef.current || "—"}
             {tab === "quiz" && <QuizLazy />}
             {tab === "meditations" && <MeditationsLazy />}
             {tab === "spiral" && <SpiralLazy />}
+            {tab === "questions" && <CoachingQuestionsLazy />}
 
           </Suspense>
         </main>

@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
-  Home, Play, BookOpen, Wrench, NotebookPen, Search, ChevronRight, Gem, GraduationCap, Trash2, Plus, Lock, Pencil, Target, Moon, PieChart, MessageSquarePlus, BookA, Timer, Circle,
+  Home, Play, BookOpen, Wrench, NotebookPen, Search, ChevronRight, Gem, GraduationCap, Trash2, Plus, Lock, Pencil, Target, Moon, PieChart, MessageSquarePlus, BookA, Timer, Circle, MessageCircleQuestion,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -111,6 +111,7 @@ export function HomeScreen({
     { label: "Колесо баланса", icon: PieChart, cls: "bg-card text-foreground border border-border", act: () => onOpen("balance") },
     { label: "Гамбургер", icon: MessageSquarePlus, cls: "bg-feedback-positive/10 text-foreground border border-feedback-positive/50", act: () => onOpen("hamburger") },
     { label: "Глоссарий", icon: BookA, cls: "bg-card text-foreground border border-border", act: () => onOpen("glossary") },
+    { label: "Вопросы", icon: MessageCircleQuestion, cls: "bg-primary/10 text-foreground border border-primary/30", act: () => onOpen("questions") },
   ];
 
   return (
