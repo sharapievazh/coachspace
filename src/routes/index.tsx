@@ -66,6 +66,7 @@ const SpiralLazy = lazy(() => import("@/components/tabs/spiral"));
 const GlossaryLazy = lazy(() => import("@/components/tabs/glossary"));
 const HamburgerFeedbackLazy = lazy(() => import("@/components/tabs/hamburger-feedback"));
 const CoachingQuestionsLazy = lazy(() => import("@/components/tabs/coaching-questions"));
+const OpenQuestionsLazy = lazy(() => import("@/components/tabs/open-questions"));
 
 
 
@@ -188,7 +189,7 @@ function ExportModal({ text, onClose }: { text: string; onClose: () => void }) {
   );
 }
 
-type TabId = "home" | "modules" | "tools" | "notes" | "session" | "quiz" | "grow" | "models" | "competencies" | "rapport" | "merrill" | "ethics" | "supervision" | "balance" | "strategy" | "habits" | "team-coaching" | "cube" | "teambuilding" | "brainstorm" | "senge" | "kotter" | "soar" | "sos" | "conflict-med" | "tr-tech" | "timeline" | "parts" | "tr-beliefs" | "tr-ta" | "metaprograms" | "values" | "psychk" | "decart" | "swot" | "smart" | "potential" | "erickson" | "osvk" | "nlu" | "burger" | "rules" | "tr-sessions" | "meditations" | "spiral" | "glossary" | "hamburger" | "questions";
+type TabId = "home" | "modules" | "tools" | "notes" | "session" | "quiz" | "grow" | "models" | "competencies" | "rapport" | "merrill" | "ethics" | "supervision" | "balance" | "strategy" | "habits" | "team-coaching" | "cube" | "teambuilding" | "brainstorm" | "senge" | "kotter" | "soar" | "sos" | "conflict-med" | "tr-tech" | "timeline" | "parts" | "tr-beliefs" | "tr-ta" | "metaprograms" | "values" | "psychk" | "decart" | "swot" | "smart" | "potential" | "erickson" | "osvk" | "nlu" | "burger" | "rules" | "tr-sessions" | "meditations" | "spiral" | "glossary" | "hamburger" | "questions" | "open-questions";
 
 type NavEntry =
   | { type: "tab"; id: TabId; label: string; icon: any }
@@ -250,6 +251,7 @@ const NAV: NavEntry[] = [
   { type: "tab", id: "hamburger", label: "Гамбургер", icon: MessageSquarePlus },
   { type: "tab", id: "glossary", label: "Глоссарий", icon: BookA },
   { type: "tab", id: "questions", label: "Коучинговые вопросы", icon: MessageSquarePlus },
+  { type: "tab", id: "open-questions", label: "Открытые вопросы", icon: ClipboardCheck },
   { type: "tab",     id: "decart",        label: "Квадрат Декарта",         icon: Grid2x2 },
   { type: "tab",     id: "swot",          label: "SWOT",                    icon: Layers },
   { type: "tab",     id: "smart",         label: "SMART-цель",              icon: CheckCircle2 },
@@ -431,6 +433,7 @@ function CoachSpace() {
       import("@/components/tabs/meditations");
       import("@/components/tabs/spiral");
       import("@/components/tabs/coaching-questions");
+      import("@/components/tabs/open-questions");
 
     }, 800);
     return () => clearTimeout(t);
@@ -978,6 +981,7 @@ ${notesRef.current || "—"}
             {tab === "meditations" && <MeditationsLazy />}
             {tab === "spiral" && <SpiralLazy />}
             {tab === "questions" && <CoachingQuestionsLazy />}
+            {tab === "open-questions" && <OpenQuestionsLazy />}
 
           </Suspense>
         </main>
