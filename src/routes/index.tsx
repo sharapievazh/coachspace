@@ -18,7 +18,7 @@ import {
   Map as MapIcon, Repeat, Box, Network, Lightbulb, Clock, Puzzle, KeyRound,
   Fingerprint, ShieldCheck, UserCheck, Rainbow, ScanSearch,
   UtensilsCrossed, ListChecks, Moon, Dna,
-  Home as HomeIcon, Wrench, NotebookPen, ChevronDown, ChevronLeft, Search, BookA, MessageSquarePlus,
+  Home as HomeIcon, Wrench, NotebookPen, ChevronDown, ChevronLeft, Search, BookA, MessageSquarePlus, Headphones,
 } from "lucide-react";
 
 
@@ -67,6 +67,7 @@ const GlossaryLazy = lazy(() => import("@/components/tabs/glossary"));
 const HamburgerFeedbackLazy = lazy(() => import("@/components/tabs/hamburger-feedback"));
 const CoachingQuestionsLazy = lazy(() => import("@/components/tabs/coaching-questions"));
 const OpenQuestionsLazy = lazy(() => import("@/components/tabs/open-questions"));
+const PodcastsLazy = lazy(() => import("@/components/tabs/podcasts"));
 
 
 
@@ -189,7 +190,7 @@ function ExportModal({ text, onClose }: { text: string; onClose: () => void }) {
   );
 }
 
-type TabId = "home" | "modules" | "tools" | "notes" | "session" | "quiz" | "grow" | "models" | "competencies" | "rapport" | "merrill" | "ethics" | "supervision" | "balance" | "strategy" | "habits" | "team-coaching" | "cube" | "teambuilding" | "brainstorm" | "senge" | "kotter" | "soar" | "sos" | "conflict-med" | "tr-tech" | "timeline" | "parts" | "tr-beliefs" | "tr-ta" | "metaprograms" | "values" | "psychk" | "decart" | "swot" | "smart" | "potential" | "erickson" | "osvk" | "nlu" | "burger" | "rules" | "tr-sessions" | "meditations" | "spiral" | "glossary" | "hamburger" | "questions" | "open-questions";
+type TabId = "home" | "modules" | "tools" | "notes" | "session" | "quiz" | "grow" | "models" | "competencies" | "rapport" | "merrill" | "ethics" | "supervision" | "balance" | "strategy" | "habits" | "team-coaching" | "cube" | "teambuilding" | "brainstorm" | "senge" | "kotter" | "soar" | "sos" | "conflict-med" | "tr-tech" | "timeline" | "parts" | "tr-beliefs" | "tr-ta" | "metaprograms" | "values" | "psychk" | "decart" | "swot" | "smart" | "potential" | "erickson" | "osvk" | "nlu" | "burger" | "rules" | "tr-sessions" | "meditations" | "spiral" | "glossary" | "hamburger" | "questions" | "open-questions" | "podcasts";
 
 type NavEntry =
   | { type: "tab"; id: TabId; label: string; icon: any }
@@ -252,6 +253,7 @@ const NAV: NavEntry[] = [
   { type: "tab", id: "glossary", label: "Глоссарий", icon: BookA },
   { type: "tab", id: "questions", label: "Коучинговые вопросы", icon: MessageSquarePlus },
   { type: "tab", id: "open-questions", label: "Открытые вопросы", icon: ClipboardCheck },
+  { type: "tab", id: "podcasts", label: "Подкасты", icon: Headphones },
   { type: "tab",     id: "decart",        label: "Квадрат Декарта",         icon: Grid2x2 },
   { type: "tab",     id: "swot",          label: "SWOT",                    icon: Layers },
   { type: "tab",     id: "smart",         label: "SMART-цель",              icon: CheckCircle2 },
@@ -982,6 +984,7 @@ ${notesRef.current || "—"}
             {tab === "spiral" && <SpiralLazy />}
             {tab === "questions" && <CoachingQuestionsLazy />}
             {tab === "open-questions" && <OpenQuestionsLazy />}
+            {tab === "podcasts" && <PodcastsLazy />}
 
           </Suspense>
         </main>
