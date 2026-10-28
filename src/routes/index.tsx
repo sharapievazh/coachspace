@@ -249,7 +249,7 @@ const NAV: NavEntry[] = [
   { type: "section", label: "ИНСТРУМЕНТЫ" },
   { type: "tab", id: "hamburger", label: "Гамбургер", icon: MessageSquarePlus },
   { type: "tab", id: "glossary", label: "Глоссарий", icon: BookA },
-  { type: "tab", id: "questions", label: "Коучинговые вопросы", icon: MessageSquare },
+  { type: "tab", id: "questions", label: "Коучинговые вопросы", icon: MessageSquarePlus },
   { type: "tab",     id: "decart",        label: "Квадрат Декарта",         icon: Grid2x2 },
   { type: "tab",     id: "swot",          label: "SWOT",                    icon: Layers },
   { type: "tab",     id: "smart",         label: "SMART-цель",              icon: CheckCircle2 },
