@@ -83,29 +83,30 @@ export default function Onboarding({ onFinish }: { onFinish: () => void }) {
 
       {/* ── Экран 1: Приветствие ── */}
       {step === "welcome" && (
-        <div className="w-full max-w-sm flex flex-col gap-4">
-          <div className="bg-card rounded-2xl border border-border p-5 space-y-3">
-            {[
-              { icon: "🎯", text: "Инструменты GROW, SMART, SWOT, 6 шляп и другие" },
-              { icon: "⏱", text: "Умный таймер и блокнот прямо во время сессии" },
-              { icon: "🌸", text: "Mind Map, Колесо баланса, Пирамида Дилтса" },
-              { icon: "📋", text: "Маркер Супервизии для анализа своей работы" },
-            ].map((f) => (
-              <div key={f.icon} className="flex items-center gap-3">
-                <span className="text-xl shrink-0 w-7 text-center">{f.icon}</span>
-                <span className="text-sm text-foreground/85 leading-snug">{f.text}</span>
-              </div>
-            ))}
+        <div className="w-full max-w-sm flex flex-col items-center gap-6 text-center">
+          <div className="space-y-2">
+            <p className="text-lg text-muted-foreground leading-relaxed">
+              Всё, что нужно для работы коуча —
+            </p>
+            <p className="text-2xl font-bold text-foreground leading-snug">
+              в одном месте, всегда под рукой.
+            </p>
           </div>
 
-          <button onClick={() => setStep("form")}
-            className="w-full py-4 rounded-2xl bg-primary text-primary-foreground text-base font-bold hover:opacity-90 shadow-lg shadow-primary/25 transition-opacity">
-            Начать →
-          </button>
-          <button onClick={skip}
-            className="text-sm text-muted-foreground hover:text-foreground text-center py-2">
-            Пропустить
-          </button>
+          <p className="text-sm text-muted-foreground max-w-[260px] leading-relaxed">
+            Инструменты, модули, заметки и подкасты. Готово к каждой сессии.
+          </p>
+
+          <div className="w-full flex flex-col gap-3 mt-2">
+            <button onClick={() => setStep("form")}
+              className="w-full py-4 rounded-2xl bg-primary text-primary-foreground text-base font-bold hover:opacity-90 shadow-lg shadow-primary/25 transition-opacity">
+              Начать →
+            </button>
+            <button onClick={skip}
+              className="text-sm text-muted-foreground hover:text-foreground text-center py-2">
+              Пропустить
+            </button>
+          </div>
         </div>
       )}
 

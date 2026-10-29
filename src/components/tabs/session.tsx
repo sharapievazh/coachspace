@@ -895,7 +895,7 @@ function SixHatsTool({ onExport }: { onExport: (text: string) => void }) {
 }
 
 // ─── Главный компонент ────────────────────────────────────────────────────────
-type Tab = "notes" | "scale" | "balance" | "dilts" | "matrix" | "mindmap" | "grow" | "hats";
+type Tab = "notes" | "scale" | "balance" | "dilts" | "matrix" | "mindmap" | "grow";
 
 const TABS: { id: Tab; label: string; icon: React.ReactNode }[] = [
   { id: "notes",   label: "Заметки",    icon: <FileText size={13}/> },
@@ -905,7 +905,6 @@ const TABS: { id: Tab; label: string; icon: React.ReactNode }[] = [
   { id: "matrix",  label: "Матрица",    icon: <LayoutGrid size={13}/> },
   { id: "mindmap", label: "Mind Map",   icon: <GitBranch size={13}/> },
   { id: "grow",    label: "GROW",       icon: <Target size={13}/> },
-  { id: "hats",    label: "6 шляп",     icon: <span className="text-[11px]">🎩</span> },
 ];
 
 // ─── Маркер Супервизии (интерактивный) ───────────────────────────────────────
@@ -1188,7 +1187,6 @@ function SessionPanel(p: Props) {
           <div className={activeTab === "matrix"  ? "" : "hidden"}><EisenhowerTool onExport={appendToNotes} /></div>
           <div className={activeTab === "mindmap" ? "" : "hidden"}><ToolErrorBoundary><MindMapTool onExport={appendToNotes} /></ToolErrorBoundary></div>
           <div className={activeTab === "grow"    ? "" : "hidden"}><GrowTool       onExport={appendToNotes} /></div>
-          <div className={activeTab === "hats"    ? "" : "hidden"}><SixHatsTool    onExport={appendToNotes} /></div>
         </div>
       </section>
 
