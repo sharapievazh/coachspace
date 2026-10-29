@@ -93,6 +93,11 @@ function PlayerCard({ podcast }: { podcast: Podcast }) {
           {podcast.emoji}
         </div>
         <div className="min-w-0">
+          {podcast.category === "session-demo" && (
+            <span className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-full mb-1" style={{ background: podcast.color + "22", color: podcast.color }}>
+              🎬 Пример сессии
+            </span>
+          )}
           <h3 className="font-semibold text-sm leading-snug">{podcast.title}</h3>
           <p className="text-xs text-muted-foreground mt-0.5 leading-relaxed">{podcast.description}</p>
         </div>
