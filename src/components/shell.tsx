@@ -145,6 +145,22 @@ export function HomeScreen({
         </div>
       </div>
 
+      {PODCASTS.length > 0 && (
+        <button
+          onClick={() => onOpen("podcasts")}
+          className="w-full text-left rounded-2xl border border-border bg-card p-4 flex items-center gap-3 shadow-sm active:scale-[0.97] transition-transform"
+        >
+          <span className="w-10 h-10 rounded-xl bg-primary/10 text-primary grid place-items-center shrink-0">
+            <Headphones size={20} />
+          </span>
+          <span className="min-w-0 flex-1">
+            <span className="block text-xs text-muted-foreground">Раздел</span>
+            <span className="block text-sm font-semibold mt-0.5">Подкасты · {PODCASTS.length} выпусков</span>
+          </span>
+          <ChevronRight size={20} className="text-muted-foreground shrink-0" />
+        </button>
+      )}
+
       {(sessionPreview.client || sessionPreview.topic || sessionPreview.notes) && (
         <button onClick={() => onSection("session")} className="w-full text-left rounded-2xl border border-session/40 bg-session/10 p-4">
           <p className="text-xs font-bold uppercase tracking-[0.08em] text-session">Текущая сессия</p>
@@ -164,22 +180,6 @@ export function HomeScreen({
           </span>
           <ChevronRight size={20} className="text-muted-foreground" />
         </Button>
-      )}
-
-      {PODCASTS.length > 0 && (
-        <button
-          onClick={() => onOpen("podcasts")}
-          className="w-full text-left rounded-2xl border border-border bg-card p-4 flex items-center gap-3 shadow-sm active:scale-[0.97] transition-transform"
-        >
-          <span className="w-10 h-10 rounded-xl bg-primary/10 text-primary grid place-items-center shrink-0">
-            <Headphones size={20} />
-          </span>
-          <span className="min-w-0 flex-1">
-            <span className="block text-xs text-muted-foreground">Раздел</span>
-            <span className="block text-sm font-semibold mt-0.5">Подкасты · {PODCASTS.length} выпусков</span>
-          </span>
-          <ChevronRight size={20} className="text-muted-foreground shrink-0" />
-        </button>
       )}
 
       <div>
