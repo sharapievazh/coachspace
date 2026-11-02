@@ -3,6 +3,12 @@ import { Lightbulb, Share2 } from "lucide-react";
 import { BalanceRadar } from "@/components/coach/CoachVisuals";
 import { SectionHead, BALANCE_AREAS } from "./_shared";
 
+declare global {
+  interface Window {
+    __coachSpaceKeyboardActive?: boolean;
+  }
+}
+
 const BALANCE_COLORS = ["#10b981", "#f43f5e", "#f97316", "#3b82f6", "#d97706", "#ef4444", "#a855f7", "#0ea5e9"];
 
 function RadarWithTooltip({ scores, compareValues }: { scores: Record<number, number>; compareValues?: number[] }) {
