@@ -476,11 +476,6 @@ export default function CoachSpaceMobile() {
     return `${m}:${s}`;
   }, [remaining]);
 
-  // Stable ref so SessionPanel can read current mmss without triggering re-renders.
-  // Updated synchronously during render so it's always fresh when the interval reads it.
-  const mmssRef = useRef(mmss);
-  mmssRef.current = mmss;
-
   const exportSession = useCallback(() => {
     const balanceLines = BALANCE_AREAS.map(
       (a) => `  ${a.n}. ${a.name}: ${balanceScores[a.n] ?? 5}/10`
@@ -599,7 +594,7 @@ ${notesRef.current || "—"}
 
         <main className="flex-1 min-w-0 px-4 sm:px-6 md:px-0 py-6">
           <Suspense fallback={<div className="py-10 text-center text-sm text-muted-foreground">Загрузка…</div>}>
-            {tab === "session" && <SessionPanelLazy duration={duration} setDuration={changeDuration} running={running} setRunning={handleSetRunning} reset={resetTimer} mmssRef={mmssRef} clientNameRef={clientNameRef} topicRef={topicRef} notesRef={notesRef} exportSession={exportSession} testSound={testSound} />}
+            {tab === "session" && <SessionPanelLazy duration={duration} setDuration={changeDuration} running={running} setRunning={handleSetRunning} reset={resetTimer} mmss={mmss} clientNameRef={clientNameRef} topicRef={topicRef} notesRef={notesRef} exportSession={exportSession} testSound={testSound} />}
             {tab === "grow" && <GrowLazy />}
             {tab === "soar" && <SoarLazy />}
             {tab === "score" && <ScoreLazy />}
