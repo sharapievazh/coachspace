@@ -19,6 +19,7 @@ import {
   Fingerprint, ShieldCheck, UserCheck, Rainbow, ScanSearch,
   UtensilsCrossed, ListChecks, Moon, Dna,
   Home as HomeIcon, Wrench, NotebookPen, ChevronDown, ChevronLeft, Search, BookA, MessageSquarePlus, Headphones,
+  Wand2, Eye, Image as ImageIcon,
 } from "lucide-react";
 
 
@@ -68,6 +69,9 @@ const HamburgerFeedbackLazy = lazy(() => import("@/components/tabs/hamburger-fee
 const CoachingQuestionsLazy = lazy(() => import("@/components/tabs/coaching-questions"));
 const OpenQuestionsLazy = lazy(() => import("@/components/tabs/open-questions"));
 const PodcastsLazy = lazy(() => import("@/components/tabs/podcasts"));
+const MetaphorsLazy = lazy(() => import("@/components/tabs/metaphors"));
+const SymboldramaLazy = lazy(() => import("@/components/tabs/symboldrama"));
+const CAKLazy = lazy(() => import("@/components/tabs/cak"));
 
 
 
@@ -190,7 +194,7 @@ function ExportModal({ text, onClose }: { text: string; onClose: () => void }) {
   );
 }
 
-type TabId = "home" | "modules" | "tools" | "notes" | "session" | "quiz" | "grow" | "models" | "competencies" | "rapport" | "merrill" | "ethics" | "supervision" | "balance" | "strategy" | "habits" | "team-coaching" | "cube" | "teambuilding" | "brainstorm" | "senge" | "kotter" | "soar" | "sos" | "conflict-med" | "tr-tech" | "timeline" | "parts" | "tr-beliefs" | "tr-ta" | "metaprograms" | "values" | "psychk" | "decart" | "swot" | "smart" | "potential" | "erickson" | "osvk" | "nlu" | "burger" | "rules" | "tr-sessions" | "meditations" | "spiral" | "glossary" | "hamburger" | "questions" | "open-questions" | "podcasts";
+type TabId = "home" | "modules" | "tools" | "notes" | "session" | "quiz" | "grow" | "models" | "competencies" | "rapport" | "merrill" | "ethics" | "supervision" | "balance" | "strategy" | "habits" | "team-coaching" | "cube" | "teambuilding" | "brainstorm" | "senge" | "kotter" | "soar" | "sos" | "conflict-med" | "tr-tech" | "timeline" | "parts" | "tr-beliefs" | "tr-ta" | "metaprograms" | "values" | "psychk" | "decart" | "swot" | "smart" | "potential" | "erickson" | "osvk" | "nlu" | "burger" | "rules" | "tr-sessions" | "meditations" | "spiral" | "glossary" | "hamburger" | "questions" | "open-questions" | "podcasts" | "metaphors" | "symboldrama" | "cak";
 
 type NavEntry =
   | { type: "tab"; id: TabId; label: string; icon: any }
@@ -248,6 +252,10 @@ const NAV: NavEntry[] = [
   { type: "tab",     id: "meditations",   label: "Медитации",               icon: Moon },
   { type: "section", label: "МОДУЛЬ 6 · СПИРАЛЬНАЯ ДИНАМИКА" },
   { type: "tab",     id: "spiral",        label: "Спиральная динамика",     icon: Dna },
+  { type: "section", label: "МОДУЛЬ 7 · МЕТАФОРЫ И СИМВОЛДРАМА" },
+  { type: "tab",     id: "metaphors",     label: "Метафоры в коучинге",     icon: Wand2 },
+  { type: "tab",     id: "symboldrama",   label: "Символдрама",             icon: Eye },
+  { type: "tab",     id: "cak",           label: "Коучинговые карты (КАК)", icon: ImageIcon },
   { type: "section", label: "ИНСТРУМЕНТЫ" },
   { type: "tab", id: "hamburger", label: "Гамбургер", icon: MessageSquarePlus },
   { type: "tab", id: "glossary", label: "Глоссарий", icon: BookA },
@@ -272,7 +280,7 @@ const MODULE_META: { title: string; desc: string; color: string }[] = [
   { title: "Супервизия командного коучинга", desc: "Сенге, Коттер, Карпман, конфликты и медиация", color: "oklch(0.65 0.15 60)" },
   { title: "Трансформационный коучинг", desc: "Линия времени, части, убеждения, медитации", color: "oklch(0.45 0.08 160)" },
   { title: "Спиральная динамика", desc: "Уровни спирали, бирюзовые компании, ценности", color: "oklch(0.6 0.16 20)" },
-  { title: "Будет добавлен", desc: "Скоро", color: "oklch(0.7 0 0)" },
+  { title: "Метафоры и Символдрама", desc: "Метафоры, символдрама, коучинговые ассоциативные карты", color: "oklch(0.55 0.18 290)" },
   { title: "Будет добавлен", desc: "Скоро", color: "oklch(0.7 0 0)" },
 ];
 
@@ -372,7 +380,7 @@ function CoachSpace() {
     setSearchOpen(true);
   };
   const searchEntries = useMemo<SearchEntry[]>(() => [
-    ...MODULES.filter(module => module.n <= 6).flatMap(module => [
+    ...MODULES.filter(module => module.n <= 7).flatMap(module => [
       { id: `module-${module.n}`, category: "Модули" as const, title: `Модуль ${module.n} · ${module.title}`, excerpt: module.desc, tab: "modules", module: module.n },
       ...module.items.map(item => ({ id: `module-tab-${item.id}`, category: "Модули" as const, title: item.label, excerpt: `Модуль ${module.n} · ${module.title}`, tab: item.id })),
     ]),
@@ -483,6 +491,9 @@ function CoachSpace() {
       import("@/components/tabs/spiral");
       import("@/components/tabs/coaching-questions");
       import("@/components/tabs/open-questions");
+      import("@/components/tabs/metaphors");
+      import("@/components/tabs/symboldrama");
+      import("@/components/tabs/cak");
 
     }, 800);
     return () => clearTimeout(t);
@@ -1032,6 +1043,9 @@ ${notesRef.current || "—"}
             {tab === "questions" && <CoachingQuestionsLazy />}
             {tab === "open-questions" && <OpenQuestionsLazy />}
             {tab === "podcasts" && <PodcastsLazy />}
+            {tab === "metaphors" && <MetaphorsLazy />}
+            {tab === "symboldrama" && <SymboldramaLazy />}
+            {tab === "cak" && <CAKLazy />}
 
           </Suspense>
         </main>
