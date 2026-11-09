@@ -7,6 +7,7 @@ import { SEARCH_SECTIONS } from "@/lib/search-sections";
 import { type SearchEntry } from "@/lib/content-search";
 import { pushNavigation, popNavigation, type NavigationFrame } from "@/lib/navigation-history";
 import Onboarding, { isOnboardingDone } from "@/components/onboarding";
+import FeatureTour, { isTourDone } from "@/components/feature-tour";
 import { BottomBar, HomeScreen, ModulesScreen, ToolsScreen, NotesScreen, LAST_TAB_KEY, VISITED_KEY, loadVisited, loadNotes, type ModuleInfo, type Section, type ShellTab } from "@/components/shell";
 import {
   Play, Pause, Target, Heart, Triangle, Layers,
@@ -19,7 +20,7 @@ import {
   Fingerprint, ShieldCheck, UserCheck, Rainbow, ScanSearch,
   UtensilsCrossed, ListChecks, Moon, Dna,
   Home as HomeIcon, Wrench, NotebookPen, ChevronDown, ChevronLeft, Search, BookA, MessageSquarePlus, Headphones,
-  Wand2, Eye, Image as ImageIcon,
+  Wand2, Eye, Image as ImageIcon, LayoutGrid,
 } from "lucide-react";
 
 
@@ -72,6 +73,7 @@ const PodcastsLazy = lazy(() => import("@/components/tabs/podcasts"));
 const MetaphorsLazy = lazy(() => import("@/components/tabs/metaphors"));
 const SymboldramaLazy = lazy(() => import("@/components/tabs/symboldrama"));
 const CAKLazy = lazy(() => import("@/components/tabs/cak"));
+const MicromodelsLazy = lazy(() => import("@/components/tabs/micromodels"));
 
 
 
@@ -194,7 +196,7 @@ function ExportModal({ text, onClose }: { text: string; onClose: () => void }) {
   );
 }
 
-type TabId = "home" | "modules" | "tools" | "notes" | "session" | "quiz" | "grow" | "models" | "competencies" | "rapport" | "merrill" | "ethics" | "supervision" | "balance" | "strategy" | "habits" | "team-coaching" | "cube" | "teambuilding" | "brainstorm" | "senge" | "kotter" | "soar" | "sos" | "conflict-med" | "tr-tech" | "timeline" | "parts" | "tr-beliefs" | "tr-ta" | "metaprograms" | "values" | "psychk" | "decart" | "swot" | "smart" | "potential" | "erickson" | "osvk" | "nlu" | "burger" | "rules" | "tr-sessions" | "meditations" | "spiral" | "glossary" | "hamburger" | "questions" | "open-questions" | "podcasts" | "metaphors" | "symboldrama" | "cak";
+type TabId = "home" | "modules" | "tools" | "notes" | "session" | "quiz" | "grow" | "models" | "micromodels" | "competencies" | "rapport" | "merrill" | "ethics" | "supervision" | "balance" | "strategy" | "habits" | "team-coaching" | "cube" | "teambuilding" | "brainstorm" | "senge" | "kotter" | "soar" | "sos" | "conflict-med" | "tr-tech" | "timeline" | "parts" | "tr-beliefs" | "tr-ta" | "metaprograms" | "values" | "psychk" | "decart" | "swot" | "smart" | "potential" | "erickson" | "osvk" | "nlu" | "burger" | "rules" | "tr-sessions" | "meditations" | "spiral" | "glossary" | "hamburger" | "questions" | "open-questions" | "podcasts" | "metaphors" | "symboldrama" | "cak";
 
 type NavEntry =
   | { type: "tab"; id: TabId; label: string; icon: any }
@@ -219,6 +221,7 @@ const NAV: NavEntry[] = [
   { type: "section", label: "МОДУЛЬ 1 · БАЗОВЫЕ МОДЕЛИ КОУЧИНГА" },
   { type: "tab",     id: "grow",          label: "GROW (макро + микро)",    icon: Target },
   { type: "tab",     id: "models",        label: "SCORE · SOAR · ABC",      icon: Compass },
+  { type: "tab",     id: "micromodels",   label: "Микромодели GROW",        icon: LayoutGrid },
   { type: "tab",     id: "competencies",  label: "Компетенции коуча",       icon: GraduationCap },
   { type: "tab",     id: "rapport",       label: "Раппорт и взаимодействие", icon: Heart },
   { type: "tab",     id: "merrill",       label: "Типология MERRILL",       icon: Fingerprint },
@@ -369,7 +372,11 @@ const TIMER_STORAGE_KEY = "coach-space-session-timer";
 
 function CoachSpace() {
   const [onboarded, setOnboarded] = useState(false);
-  useEffect(() => setOnboarded(isOnboardingDone()), []);
+  const [tourDone, setTourDone] = useState(false);
+  useEffect(() => {
+    setOnboarded(isOnboardingDone());
+    setTourDone(isTourDone());
+  }, []);
   const [tab, setTabRaw] = useState<TabId>("home");
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchNotes, setSearchNotes] = useState<SearchEntry[]>([]);
@@ -899,6 +906,8 @@ ${notesRef.current || "—"}
   }
 
   return (
+    <>
+    {!tourDone && <FeatureTour onFinish={() => setTourDone(true)} />}
     <div className="min-h-screen bg-background text-foreground">
       <header ref={headerRef} className="fixed top-0 inset-x-0 z-30 border-b border-border bg-card">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-[calc(env(safe-area-inset-top,0px)+0.5rem)] pb-3 flex items-center justify-between gap-4">
@@ -1046,6 +1055,7 @@ ${notesRef.current || "—"}
             {tab === "metaphors" && <MetaphorsLazy />}
             {tab === "symboldrama" && <SymboldramaLazy />}
             {tab === "cak" && <CAKLazy />}
+            {tab === "micromodels" && <MicromodelsLazy />}
 
           </Suspense>
         </main>
@@ -1096,5 +1106,6 @@ ${notesRef.current || "—"}
         </div>
       )}
     </div>
+    </>
   );
 }

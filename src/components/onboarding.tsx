@@ -18,7 +18,7 @@ export function saveOnboardingDone() {
 }
 
 export function isOnboardingDone(): boolean {
-  try { return !!localStorage.getItem(STORAGE_KEY); } catch { return false; }
+  try { return !!localStorage.getItem(STORAGE_KEY); } catch { return true; }
 }
 
 type Step = "welcome" | "form" | "done";

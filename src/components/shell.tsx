@@ -48,12 +48,12 @@ export function BottomBar({ active, onSelect }: { active: Section; onSelect: (s:
     { id: "notes", label: "Заметки", icon: NotebookPen },
   ];
   return (
-    <nav className="md:hidden fixed bottom-0 inset-x-0 z-30 border-t border-border bg-card/95 backdrop-blur pb-[env(safe-area-inset-bottom)]">
+    <nav data-tour="nav" className="md:hidden fixed bottom-0 inset-x-0 z-30 border-t border-border bg-card/95 backdrop-blur pb-[env(safe-area-inset-bottom)]">
       <div className="grid grid-cols-4">
         {items.map((it) => {
           const on = active === it.id;
           return (
-            <Button variant="ghost" key={it.id} onClick={() => onSelect(it.id)} aria-current={on ? "page" : undefined} className={`h-auto rounded-none px-0 hover:bg-transparent flex flex-col items-center justify-center gap-0.5 py-2 min-h-14 [&_svg]:size-5 ${on ? "text-session" : "text-muted-foreground"}`}>
+            <Button data-tour={`nav-${it.id}`} variant="ghost" key={it.id} onClick={() => onSelect(it.id)} aria-current={on ? "page" : undefined} className={`h-auto rounded-none px-0 hover:bg-transparent flex flex-col items-center justify-center gap-0.5 py-2 min-h-14 [&_svg]:size-5 ${on ? "text-session" : "text-muted-foreground"}`}>
               <it.icon size={20} strokeWidth={on ? 2.4 : 1.8} />
               <span className={`text-[10px] ${on ? "font-semibold" : ""}`}>{it.label}</span>
             </Button>
