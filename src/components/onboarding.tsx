@@ -84,15 +84,6 @@ export default function Onboarding({ onFinish }: { onFinish: () => void }) {
       {/* ── Экран 1: Приветствие ── */}
       {step === "welcome" && (
         <div className="w-full max-w-sm flex flex-col items-center gap-6 text-center">
-          <div className="space-y-2">
-            <p className="text-lg text-muted-foreground leading-relaxed">
-              Всё, что нужно для работы коуча —
-            </p>
-            <p className="text-2xl font-bold text-foreground leading-snug">
-              в одном месте, всегда под рукой.
-            </p>
-          </div>
-
           <p className="text-sm text-muted-foreground max-w-[260px] leading-relaxed">
             Инструменты, техники, модули, заметки и подкасты.
           </p>
