@@ -61,26 +61,6 @@ export const PODCASTS: Podcast[] = [
     color: "#be185d",
     emoji: "💭",
   },
-  {
-    id: "podcast-06",
-    group: "books",
-    title: "Как отключить внутреннего критика под давлением",
-    description: "Практическое применение концепции Голви в стрессовых ситуациях",
-    duration: "~40 мин",
-    file: "/audio/podcast-06.m4a",
-    color: "#8b5cf6",
-    emoji: "🎙️",
-  },
-  {
-    id: "podcast-01",
-    group: "books",
-    title: "Как коучинг помогает победить внутреннего соперника",
-    description: "Большой диалог экспертов по фундаментальным основам коучинга — Голви, Уитмор, стандарты профессии",
-    duration: "~45 мин",
-    file: "/audio/podcast-01.m4a",
-    color: "#6366f1",
-    emoji: "🎙️",
-  },
 
   // 🛠️ Инструменты, модели и психология
   {
@@ -164,16 +144,6 @@ export const PODCASTS: Podcast[] = [
     file: "/audio/podcast-16.m4a",
     color: "#f59e0b",
     emoji: "🌟",
-  },
-  {
-    id: "podcast-05",
-    group: "transform",
-    title: "Как отключить внутреннего критика и переписать убеждения",
-    description: "Техники глубинной трансформации, работа с ценностями и сущностными состояниями",
-    duration: "~22 мин",
-    file: "/audio/podcast-05.m4a",
-    color: "#ec4899",
-    emoji: "🧠",
   },
 
   // 🎙️ Практическая демонстрация
