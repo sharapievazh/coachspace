@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
-  Home, Play, BookOpen, Wrench, NotebookPen, Search, ChevronRight, Gem, GraduationCap, Trash2, Plus, Lock, Pencil, Target, Moon, PieChart, MessageSquarePlus, BookA, Timer, Circle, MessageCircleQuestion, Headphones,
+  Home, Play, BookOpen, Wrench, NotebookPen, Search, ChevronRight, Gem, GraduationCap, Trash2, Plus, Lock, Pencil, Target, Moon, PieChart, MessageSquarePlus, BookA, Timer, Circle, MessageCircleQuestion, Headphones, ListChecks,
 } from "lucide-react";
 import { PODCASTS } from "@/lib/podcasts-data";
 
@@ -104,15 +104,15 @@ export function HomeScreen({
   const progress = lastModule?.items.length ? Math.round(lastModule.items.filter((item) => visited.includes(item.id)).length / lastModule.items.length * 100) : 0;
 
   const quick = [
-    { label: "Провести сессию", icon: Play, cls: "bg-session text-session-foreground", act: () => onSection("session") },
-    { label: "GROW", icon: Target, cls: "bg-card text-foreground border border-border", act: () => onOpen("grow") },
-    { label: "Медитации", icon: Moon, cls: "bg-card text-foreground border border-border", act: () => onOpen("meditations") },
     { label: "Модули", icon: BookOpen, cls: "bg-card text-foreground border border-border", act: () => onSection("modules") },
-    { label: "Тест", icon: GraduationCap, cls: "bg-card text-foreground border border-border", act: () => onOpen("quiz") },
+    { label: "33 техники", icon: ListChecks, cls: "bg-card text-foreground border border-border", act: () => onOpen("techniques") },
+    { label: "Коучинговые вопросы", icon: MessageCircleQuestion, cls: "bg-primary/10 text-foreground border border-primary/30", act: () => onOpen("questions") },
+    { label: "GROW", icon: Target, cls: "bg-card text-foreground border border-border", act: () => onOpen("grow") },
     { label: "Колесо баланса", icon: PieChart, cls: "bg-card text-foreground border border-border", act: () => onOpen("balance") },
-    { label: "Гамбургер", icon: MessageSquarePlus, cls: "bg-feedback-positive/10 text-foreground border border-feedback-positive/50", act: () => onOpen("hamburger") },
     { label: "Глоссарий", icon: BookA, cls: "bg-card text-foreground border border-border", act: () => onOpen("glossary") },
-    { label: "Вопросы", icon: MessageCircleQuestion, cls: "bg-primary/10 text-foreground border border-primary/30", act: () => onOpen("questions") },
+    { label: "Провести сессию", icon: Play, cls: "bg-session text-session-foreground", act: () => onSection("session") },
+    { label: "Тест к экзамену", icon: GraduationCap, cls: "bg-card text-foreground border border-border", act: () => onOpen("quiz") },
+    { label: "Гамбургер", icon: MessageSquarePlus, cls: "bg-feedback-positive/10 text-foreground border border-feedback-positive/50", act: () => onOpen("hamburger") },
   ];
 
   return (
