@@ -74,6 +74,7 @@ const MetaphorsLazy = lazy(() => import("@/components/tabs/metaphors"));
 const SymboldramaLazy = lazy(() => import("@/components/tabs/symboldrama"));
 const CAKLazy = lazy(() => import("@/components/tabs/cak"));
 const MicromodelsLazy = lazy(() => import("@/components/tabs/micromodels"));
+const TechniquesLazy = lazy(() => import("@/components/tabs/techniques"));
 
 
 
@@ -196,7 +197,7 @@ function ExportModal({ text, onClose }: { text: string; onClose: () => void }) {
   );
 }
 
-type TabId = "home" | "modules" | "tools" | "notes" | "session" | "quiz" | "grow" | "models" | "micromodels" | "competencies" | "rapport" | "merrill" | "ethics" | "supervision" | "balance" | "strategy" | "habits" | "team-coaching" | "cube" | "teambuilding" | "brainstorm" | "senge" | "kotter" | "soar" | "sos" | "conflict-med" | "tr-tech" | "timeline" | "parts" | "tr-beliefs" | "tr-ta" | "metaprograms" | "values" | "psychk" | "decart" | "swot" | "smart" | "potential" | "erickson" | "osvk" | "nlu" | "burger" | "rules" | "tr-sessions" | "meditations" | "spiral" | "glossary" | "hamburger" | "questions" | "open-questions" | "podcasts" | "metaphors" | "symboldrama" | "cak";
+type TabId = "home" | "modules" | "tools" | "notes" | "session" | "quiz" | "grow" | "models" | "micromodels" | "techniques" | "competencies" | "rapport" | "merrill" | "ethics" | "supervision" | "balance" | "strategy" | "habits" | "team-coaching" | "cube" | "teambuilding" | "brainstorm" | "senge" | "kotter" | "soar" | "sos" | "conflict-med" | "tr-tech" | "timeline" | "parts" | "tr-beliefs" | "tr-ta" | "metaprograms" | "values" | "psychk" | "decart" | "swot" | "smart" | "potential" | "erickson" | "osvk" | "nlu" | "burger" | "rules" | "tr-sessions" | "meditations" | "spiral" | "glossary" | "hamburger" | "questions" | "open-questions" | "podcasts" | "metaphors" | "symboldrama" | "cak";
 
 type NavEntry =
   | { type: "tab"; id: TabId; label: string; icon: any }
@@ -222,6 +223,7 @@ const NAV: NavEntry[] = [
   { type: "tab",     id: "grow",          label: "GROW (макро + микро)",    icon: Target },
   { type: "tab",     id: "models",        label: "SCORE · SOAR · ABC",      icon: Compass },
   { type: "tab",     id: "micromodels",   label: "Микромодели GROW",        icon: LayoutGrid },
+  { type: "tab",     id: "techniques",    label: "33 техники коучинга",     icon: ListChecks },
   { type: "tab",     id: "competencies",  label: "Компетенции коуча",       icon: GraduationCap },
   { type: "tab",     id: "rapport",       label: "Раппорт и взаимодействие", icon: Heart },
   { type: "tab",     id: "merrill",       label: "Типология MERRILL",       icon: Fingerprint },
@@ -277,7 +279,7 @@ const NAV: NavEntry[] = [
 ];
 
 const MODULE_META: { title: string; desc: string; color: string }[] = [
-  { title: "Базовые модели коучинга", desc: "GROW, SCORE, SOAR, компетенции, раппорт, этика", color: "oklch(0.6 0.15 290)" },
+  { title: "Базовые модели коучинга", desc: "GROW, SCORE, SOAR, 33 техники, компетенции, раппорт, этика", color: "oklch(0.6 0.15 290)" },
   { title: "Супервизия индивидуального коучинга", desc: "Супервизия, колесо жизни, стратегия, привычки", color: "oklch(0.6 0.12 190)" },
   { title: "Командный коучинг", desc: "Командная работа, «Кубик», командообразование", color: "oklch(0.62 0.15 250)" },
   { title: "Супервизия командного коучинга", desc: "Сенге, Коттер, Карпман, конфликты и медиация", color: "oklch(0.65 0.15 60)" },
@@ -1056,6 +1058,7 @@ ${notesRef.current || "—"}
             {tab === "symboldrama" && <SymboldramaLazy />}
             {tab === "cak" && <CAKLazy />}
             {tab === "micromodels" && <MicromodelsLazy />}
+            {tab === "techniques" && <TechniquesLazy />}
 
           </Suspense>
         </main>
