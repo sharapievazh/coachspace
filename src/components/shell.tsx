@@ -107,12 +107,9 @@ export function HomeScreen({
     { label: "Модули", icon: BookOpen, cls: "bg-card text-foreground border border-border", act: () => onSection("modules") },
     { label: "33 техники", icon: ListChecks, cls: "bg-card text-foreground border border-border", act: () => onOpen("techniques") },
     { label: "Коучинговые вопросы", icon: MessageCircleQuestion, cls: "bg-primary/10 text-foreground border border-primary/30", act: () => onOpen("questions") },
-    { label: "GROW", icon: Target, cls: "bg-card text-foreground border border-border", act: () => onOpen("grow") },
-    { label: "Колесо баланса", icon: PieChart, cls: "bg-card text-foreground border border-border", act: () => onOpen("balance") },
-    { label: "Глоссарий", icon: BookA, cls: "bg-card text-foreground border border-border", act: () => onOpen("glossary") },
     { label: "Провести сессию", icon: Play, cls: "bg-session text-session-foreground", act: () => onSection("session") },
     { label: "Тест к экзамену", icon: GraduationCap, cls: "bg-card text-foreground border border-border", act: () => onOpen("quiz") },
-    { label: "Гамбургер", icon: MessageSquarePlus, cls: "bg-feedback-positive/10 text-foreground border border-feedback-positive/50", act: () => onOpen("hamburger") },
+    { label: "Глоссарий", icon: BookA, cls: "bg-card text-foreground border border-border", act: () => onOpen("glossary") },
   ];
 
   return (
@@ -144,6 +141,20 @@ export function HomeScreen({
           ))}
         </div>
       </div>
+
+      <button
+        onClick={() => onSection("tools")}
+        className="w-full text-left rounded-2xl border border-border bg-card p-4 flex items-center gap-3 shadow-sm active:scale-[0.97] transition-transform"
+      >
+        <span className="w-10 h-10 rounded-xl bg-primary/10 text-primary grid place-items-center shrink-0">
+          <Wrench size={20} />
+        </span>
+        <span className="min-w-0 flex-1">
+          <span className="block text-xs text-muted-foreground">Раздел</span>
+          <span className="block text-sm font-semibold mt-0.5">Инструменты</span>
+        </span>
+        <ChevronRight size={20} className="text-muted-foreground shrink-0" />
+      </button>
 
       {PODCASTS.length > 0 && (
         <button
