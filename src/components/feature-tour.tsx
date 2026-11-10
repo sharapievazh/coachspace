@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { X } from "lucide-react";
+import { X, BookOpen, ListChecks, MessageCircleQuestion, Headphones, Wrench } from "lucide-react";
 
 // ─── Storage ─────────────────────────────────────────────────────────────────
 
@@ -18,43 +18,45 @@ type TourStep = {
   title: string;
   desc: string;
   icon: string;
-  arrowDir?: "up" | "down";
+  items?: { icon: React.ElementType; text: string }[];
 };
 
 const STEPS: TourStep[] = [
   {
     selector: null,
-    title: "Быстрый тур",
-    desc: "Покажем, где что находится — займёт меньше минуты.",
-    icon: "🗺️",
+    title: "Добро пожаловать!",
+    desc: "Coach Space — рабочее пространство профессионального коуча. Покажем, что здесь есть.",
+    icon: "👋",
   },
   {
     selector: "[data-tour='nav']",
-    title: "Навигация",
-    desc: "Четыре раздела: Главная, Модули, Инструменты и Заметки. Всё под рукой.",
+    title: "Что есть в приложении",
+    desc: "",
     icon: "🧭",
-    arrowDir: "down",
+    items: [
+      { icon: BookOpen, text: "Модули по обучению коучинга" },
+      { icon: ListChecks, text: "33 техники коучинга" },
+      { icon: MessageCircleQuestion, text: "Коучинговые вопросы и инструменты" },
+      { icon: Headphones, text: "Подкасты — аудиоподкасты в виде разговоров" },
+    ],
   },
   {
     selector: "[data-tour='nav-modules']",
     title: "Учебные модули",
     desc: "7 модулей профессиональной программы — GROW, супервизия, трансформационный коучинг, метафоры.",
     icon: "📚",
-    arrowDir: "down",
   },
   {
     selector: "[data-tour='nav-tools']",
     title: "Инструменты",
-    desc: "Колесо жизни, SMART, SWOT, Декарт и другие — готовы прямо во время сессии с клиентом.",
+    desc: "Колесо жизни, SMART, SWOT, Декарт, 33 техники коучинга и другие — готовы прямо во время сессии с клиентом.",
     icon: "🛠️",
-    arrowDir: "down",
   },
   {
     selector: "[data-tour='nav-notes']",
     title: "Заметки сессии",
     desc: "Записывайте ход сессии и экспортируйте протокол в WhatsApp, Telegram или email.",
     icon: "📝",
-    arrowDir: "down",
   },
   {
     selector: null,
@@ -71,7 +73,6 @@ const PADDING = 10;
 function SpotlightHole({ rect, visible }: { rect: DOMRect; visible: boolean }) {
   return (
     <>
-      {/* Dark overlay — four quadrants around the spotlight */}
       <div
         style={{
           position: "fixed",
@@ -82,16 +83,11 @@ function SpotlightHole({ rect, visible }: { rect: DOMRect; visible: boolean }) {
           pointerEvents: "none",
         }}
       >
-        {/* Top */}
-        <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: Math.max(0, rect.top - PADDING), background: "rgba(0,0,0,0.78)" }} />
-        {/* Bottom */}
-        <div style={{ position: "absolute", left: 0, right: 0, bottom: 0, top: rect.bottom + PADDING, background: "rgba(0,0,0,0.78)" }} />
-        {/* Left */}
-        <div style={{ position: "absolute", top: rect.top - PADDING, left: 0, width: Math.max(0, rect.left - PADDING), height: rect.height + PADDING * 2, background: "rgba(0,0,0,0.78)" }} />
-        {/* Right */}
-        <div style={{ position: "absolute", top: rect.top - PADDING, right: 0, left: rect.right + PADDING, height: rect.height + PADDING * 2, background: "rgba(0,0,0,0.78)" }} />
+        <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: Math.max(0, rect.top - PADDING), background: "rgba(0,0,0,0.6)" }} />
+        <div style={{ position: "absolute", left: 0, right: 0, bottom: 0, top: rect.bottom + PADDING, background: "rgba(0,0,0,0.6)" }} />
+        <div style={{ position: "absolute", top: rect.top - PADDING, left: 0, width: Math.max(0, rect.left - PADDING), height: rect.height + PADDING * 2, background: "rgba(0,0,0,0.6)" }} />
+        <div style={{ position: "absolute", top: rect.top - PADDING, right: 0, left: rect.right + PADDING, height: rect.height + PADDING * 2, background: "rgba(0,0,0,0.6)" }} />
       </div>
-      {/* Glow ring around spotlight */}
       <div
         style={{
           position: "fixed",
@@ -100,8 +96,8 @@ function SpotlightHole({ rect, visible }: { rect: DOMRect; visible: boolean }) {
           width: rect.width + PADDING * 2,
           height: rect.height + PADDING * 2,
           borderRadius: 16,
-          border: "2px solid rgba(255,255,255,0.25)",
-          boxShadow: "0 0 24px rgba(255,255,255,0.08)",
+          border: "2px solid var(--primary)",
+          boxShadow: "0 0 20px var(--primary)",
           zIndex: 50,
           pointerEvents: "none",
           opacity: visible ? 1 : 0,
@@ -129,9 +125,8 @@ function TourCard({
 }) {
   const isFullScreen = !rect;
 
-  // Position: if rect exists and is in lower half → card goes above
   const spaceBelow = rect ? window.innerHeight - (rect.bottom + PADDING + 16) : 0;
-  const goAbove = rect ? spaceBelow < 220 : false;
+  const goAbove = rect ? spaceBelow < 260 : false;
 
   const cardStyle: React.CSSProperties = isFullScreen
     ? {
@@ -170,19 +165,19 @@ function TourCard({
     <div style={cardStyle}>
       <div
         style={{
-          background: "var(--card, #1c1c1e)",
+          background: "var(--card)",
           borderRadius: 24,
-          border: "1px solid rgba(255,255,255,0.12)",
-          boxShadow: "0 24px 64px rgba(0,0,0,0.6), 0 2px 8px rgba(0,0,0,0.3)",
+          border: "1px solid var(--border)",
+          boxShadow: "0 16px 48px rgba(0,0,0,0.25), 0 2px 8px rgba(0,0,0,0.12)",
           overflow: "hidden",
         }}
       >
-        {/* Header gradient strip */}
+        {/* Header */}
         <div style={{
-          background: "linear-gradient(135deg, oklch(0.55 0.18 290), oklch(0.5 0.2 250))",
+          background: "var(--primary)",
           padding: "20px 20px 16px",
         }}>
-          {/* Top row: dots + skip */}
+          {/* Progress dots + close */}
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 14 }}>
             <div style={{ display: "flex", gap: 6 }}>
               {STEPS.map((_, i) => (
@@ -190,7 +185,7 @@ function TourCard({
                   width: i === stepIndex ? 20 : 6,
                   height: 6,
                   borderRadius: 3,
-                  background: i === stepIndex ? "white" : "rgba(255,255,255,0.35)",
+                  background: i === stepIndex ? "var(--primary-foreground)" : "rgba(255,255,255,0.35)",
                   transition: "width 0.3s ease",
                 }} />
               ))}
@@ -202,7 +197,7 @@ function TourCard({
                 background: "rgba(255,255,255,0.2)",
                 border: "none", cursor: "pointer", display: "flex",
                 alignItems: "center", justifyContent: "center",
-                color: "white",
+                color: "var(--primary-foreground)",
               }}
               aria-label="Закрыть тур"
             >
@@ -210,28 +205,51 @@ function TourCard({
             </button>
           </div>
 
-          {/* Emoji */}
-          <div style={{ fontSize: 36, lineHeight: 1, marginBottom: 10 }}>{step.icon}</div>
-          {/* Title */}
-          <div style={{ fontSize: 20, fontWeight: 800, color: "white", letterSpacing: "-0.3px", lineHeight: 1.2 }}>
+          <div style={{ fontSize: 34, lineHeight: 1, marginBottom: 10 }}>{step.icon}</div>
+          <div style={{ fontSize: 20, fontWeight: 800, color: "var(--primary-foreground)", letterSpacing: "-0.3px", lineHeight: 1.2 }}>
             {step.title}
           </div>
         </div>
 
         {/* Body */}
         <div style={{ padding: "16px 20px 20px" }}>
-          <p style={{
-            fontSize: 15,
-            lineHeight: 1.55,
-            color: "var(--muted-foreground, rgba(255,255,255,0.65))",
-            margin: 0,
-            marginBottom: 20,
-          }}>
-            {step.desc}
-          </p>
+          {step.desc && (
+            <p style={{
+              fontSize: 15,
+              lineHeight: 1.55,
+              color: "var(--muted-foreground)",
+              margin: 0,
+              marginBottom: step.items ? 12 : 20,
+            }}>
+              {step.desc}
+            </p>
+          )}
+
+          {step.items && (
+            <div style={{ display: "flex", flexDirection: "column", gap: 10, marginBottom: 20 }}>
+              {step.items.map((item, i) => {
+                const Icon = item.icon;
+                return (
+                  <div key={i} style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                    <span style={{
+                      width: 36, height: 36, borderRadius: 10,
+                      background: "var(--primary)",
+                      display: "flex", alignItems: "center", justifyContent: "center",
+                      flexShrink: 0,
+                      opacity: 0.9,
+                    }}>
+                      <Icon size={18} color="var(--primary-foreground)" />
+                    </span>
+                    <span style={{ fontSize: 14, fontWeight: 600, color: "var(--foreground)", lineHeight: 1.3 }}>
+                      {item.text}
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+          )}
 
           <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
-            {/* Skip link */}
             {!isLast && (
               <button
                 onClick={onSkip}
@@ -240,8 +258,8 @@ function TourCard({
                   padding: "10px 14px",
                   borderRadius: 14,
                   background: "transparent",
-                  border: "1px solid rgba(255,255,255,0.12)",
-                  color: "var(--muted-foreground, rgba(255,255,255,0.5))",
+                  border: "1px solid var(--border)",
+                  color: "var(--muted-foreground)",
                   fontSize: 13,
                   fontWeight: 500,
                   cursor: "pointer",
@@ -250,20 +268,19 @@ function TourCard({
                 Пропустить
               </button>
             )}
-            {/* Next / Done */}
             <button
               onClick={onNext}
               style={{
                 flex: 1,
                 padding: "12px 20px",
                 borderRadius: 14,
-                background: "linear-gradient(135deg, oklch(0.55 0.18 290), oklch(0.5 0.2 250))",
+                background: "var(--primary)",
                 border: "none",
-                color: "white",
+                color: "var(--primary-foreground)",
                 fontSize: 15,
                 fontWeight: 700,
                 cursor: "pointer",
-                boxShadow: "0 4px 16px oklch(0.55 0.18 290 / 0.4)",
+                boxShadow: "0 4px 14px rgba(0,0,0,0.15)",
               }}
             >
               {isLast ? "Начать работу →" : "Далее →"}
@@ -272,18 +289,18 @@ function TourCard({
         </div>
       </div>
 
-      {/* Arrow indicator */}
+      {/* Arrow */}
       {rect && (
         <div style={{
           position: "absolute",
-          [goAbove ? "bottom" : "top"]: goAbove ? -10 : -10,
+          [goAbove ? "bottom" : "top"]: -10,
           left: "50%",
           transform: "translateX(-50%)",
           width: 0, height: 0,
           borderLeft: "10px solid transparent",
           borderRight: "10px solid transparent",
-          [goAbove ? "borderTop" : "borderBottom"]: "10px solid var(--card, #1c1c1e)",
-          filter: "drop-shadow(0 2px 4px rgba(0,0,0,0.3))",
+          [goAbove ? "borderTop" : "borderBottom"]: "10px solid var(--card)",
+          filter: "drop-shadow(0 2px 4px rgba(0,0,0,0.15))",
         }} />
       )}
     </div>
@@ -310,10 +327,7 @@ export default function FeatureTour({ onFinish }: { onFinish: () => void }) {
 
   useEffect(() => {
     if (rafRef.current) cancelAnimationFrame(rafRef.current);
-    // slight delay so layout is settled
-    rafRef.current = requestAnimationFrame(() => {
-      measureRect();
-    });
+    rafRef.current = requestAnimationFrame(() => { measureRect(); });
     window.addEventListener("resize", measureRect);
     return () => {
       window.removeEventListener("resize", measureRect);
@@ -341,12 +355,11 @@ export default function FeatureTour({ onFinish }: { onFinish: () => void }) {
 
   return (
     <>
-      {/* Full-screen click blocker (not over spotlight area) */}
       {!rect && (
         <div
           style={{
             position: "fixed", inset: 0, zIndex: 49,
-            background: visible ? "rgba(0,0,0,0.78)" : "rgba(0,0,0,0)",
+            background: visible ? "rgba(0,0,0,0.6)" : "rgba(0,0,0,0)",
             transition: "background 0.2s ease",
             pointerEvents: "all",
           }}
@@ -354,10 +367,8 @@ export default function FeatureTour({ onFinish }: { onFinish: () => void }) {
         />
       )}
 
-      {/* Spotlight overlay */}
       {rect && <SpotlightHole rect={rect} visible={visible} />}
 
-      {/* Card */}
       <TourCard
         step={currentStep}
         stepIndex={step}
