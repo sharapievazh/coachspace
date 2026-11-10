@@ -218,12 +218,11 @@ const buildSmartParagraph = (d: SmartData) => {
 
 const NAV: NavEntry[] = [
   { type: "section", label: "ДЕЙСТВИЕ" },
-  { type: "tab",     id: "quiz",          label: "Тест",                    icon: ClipboardCheck },
+  { type: "tab",     id: "quiz",          label: "Тест к экзамену",         icon: ClipboardCheck },
   { type: "section", label: "МОДУЛЬ 1 · БАЗОВЫЕ МОДЕЛИ КОУЧИНГА" },
   { type: "tab",     id: "grow",          label: "GROW (макро + микро)",    icon: Target },
   { type: "tab",     id: "models",        label: "SCORE · SOAR · ABC",      icon: Compass },
   { type: "tab",     id: "micromodels",   label: "Микромодели GROW",        icon: LayoutGrid },
-  { type: "tab",     id: "techniques",    label: "33 техники коучинга",     icon: ListChecks },
   { type: "tab",     id: "competencies",  label: "Компетенции коуча",       icon: GraduationCap },
   { type: "tab",     id: "rapport",       label: "Раппорт и взаимодействие", icon: Heart },
   { type: "tab",     id: "merrill",       label: "Типология MERRILL",       icon: Fingerprint },
@@ -262,6 +261,7 @@ const NAV: NavEntry[] = [
   { type: "tab",     id: "symboldrama",   label: "Символдрама",             icon: Eye },
   { type: "tab",     id: "cak",           label: "Коучинговые карты (КАК)", icon: ImageIcon },
   { type: "section", label: "ИНСТРУМЕНТЫ" },
+  { type: "tab",     id: "techniques",    label: "Техники коучинга",        icon: ListChecks },
   { type: "tab", id: "hamburger", label: "Гамбургер", icon: MessageSquarePlus },
   { type: "tab", id: "glossary", label: "Глоссарий", icon: BookA },
   { type: "tab", id: "questions", label: "Коучинговые вопросы", icon: MessageSquarePlus },
@@ -279,7 +279,7 @@ const NAV: NavEntry[] = [
 ];
 
 const MODULE_META: { title: string; desc: string; color: string }[] = [
-  { title: "Базовые модели коучинга", desc: "GROW, SCORE, SOAR, 33 техники, компетенции, раппорт, этика", color: "oklch(0.6 0.15 290)" },
+  { title: "Базовые модели коучинга", desc: "GROW, SCORE, SOAR, компетенции, раппорт, этика", color: "oklch(0.6 0.15 290)" },
   { title: "Супервизия индивидуального коучинга", desc: "Супервизия, колесо жизни, стратегия, привычки", color: "oklch(0.6 0.12 190)" },
   { title: "Командный коучинг", desc: "Командная работа, «Кубик», командообразование", color: "oklch(0.62 0.15 250)" },
   { title: "Супервизия командного коучинга", desc: "Сенге, Коттер, Карпман, конфликты и медиация", color: "oklch(0.65 0.15 60)" },
@@ -305,7 +305,7 @@ const byId = (id: string) => {
   if (!item) throw new Error(`Unknown tool: ${id}`);
   return item;
 };
-const FEATURED_TOOLS = ["balance", "meditations", "quiz", "grow", "nlu", "spiral", "questions", "hamburger", "glossary"].map(byId);
+const FEATURED_TOOLS = ["balance", "meditations", "quiz", "techniques", "grow", "nlu", "spiral", "questions", "hamburger", "glossary"].map(byId);
 const OTHER_TOOLS = (() => {
   const i = NAV.findIndex((e) => e.type === "section" && e.label === "ИНСТРУМЕНТЫ");
   return NAV.slice(i + 1).filter((e) => e.type === "tab").map((e: any) => byId(e.id)).filter((t) => !FEATURED_TOOLS.includes(t));
@@ -314,7 +314,8 @@ const TOOL_IDS = new Set<string>([...FEATURED_TOOLS, ...OTHER_TOOLS].map((t) => 
 const TOOL_KEYWORDS: Record<string, string> = {
   balance:       "колесо жизни баланс сферы оценка удовлетворенность приоритеты самооценка 8 сфер",
   meditations:   "медитация практика осознанность релаксация присутствие успокоение внимание mindfulness",
-  quiz:          "тест проверка знания итог результат модули",
+  quiz:          "тест к экзамену проверка знания итог результат модули",
+  techniques:    "33 техники коучинга дернаковский предварительная беседа SMART GROW SWOT убеждения ценности миссия стресс ментор",
   grow:          "GROW цель реальность возможности действия план сессия коучинговая модель",
   nlu:           "пирамида дилтс нейрологические уровни идентичность убеждения поведение окружение миссия духовность",
   spiral:        "спиральная динамика уровни развития цвет бирюзовый мемы культура ценности",
@@ -448,7 +449,7 @@ function CoachSpace() {
   const parentTab = history.at(-1)?.tab;
   const parentLabel = parentTab ? (SCREEN_LABEL[parentTab]?.label ?? (parentTab === "session" ? "Сессия" : ALL_TABS.find((item) => item.id === parentTab)?.label)) : undefined;
   const activeModule = MODULES.find((module) => module.items.some((item) => item.id === tab));
-  const title = SCREEN_LABEL[tab]?.label ?? (tab === "session" ? "Сессия" : parentTab === "modules" ? activeModule?.title : undefined) ?? ({ grow: "GROW", balance: "Колесо баланса", quiz: "Тест" } as Record<string, string>)[tab] ?? ALL_TABS.find((item) => item.id === tab)?.label;
+  const title = SCREEN_LABEL[tab]?.label ?? (tab === "session" ? "Сессия" : parentTab === "modules" ? activeModule?.title : undefined) ?? ({ grow: "GROW", balance: "Колесо баланса", quiz: "Тест к экзамену" } as Record<string, string>)[tab] ?? ALL_TABS.find((item) => item.id === tab)?.label;
   const activeSection = tab === "session" ? "notes" : !SCREEN_LABEL[tab] && parentTab && SCREEN_LABEL[parentTab] ? parentTab as Section : sectionOf(tab);
 
   // Preload all lazy tab chunks after first render so tapping a tab never
@@ -994,7 +995,7 @@ ${notesRef.current || "—"}
                   })}
                   {head("Личное")}
                   {item("notes", "Заметки", NotebookPen)}
-                  {item("quiz", "Тест / Квиз", ClipboardCheck)}
+                  {item("quiz", "Тест к экзамену", ClipboardCheck)}
                 </>
               );
             })()}

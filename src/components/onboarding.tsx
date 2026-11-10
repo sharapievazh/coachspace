@@ -94,7 +94,7 @@ export default function Onboarding({ onFinish }: { onFinish: () => void }) {
           </div>
 
           <p className="text-sm text-muted-foreground max-w-[260px] leading-relaxed">
-            Инструменты, модули, заметки и подкасты. Готово к каждой сессии.
+            Инструменты, техники, модули, заметки и подкасты. Готово к каждой сессии.
           </p>
 
           <div className="w-full flex flex-col gap-3 mt-2">
