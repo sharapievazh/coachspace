@@ -144,32 +144,48 @@ function PlayerCard({ podcast }: { podcast: Podcast }) {
   );
 }
 
-function GroupSection({ groupId, emoji, label, podcasts }: {
-  groupId: string;
+function GroupSection({ emoji, label, color, podcasts }: {
   emoji: string;
   label: string;
+  color: string;
   podcasts: Podcast[];
 }) {
   const [open, setOpen] = useState(false);
+  const count = podcasts.length;
+  const countLabel = count === 1 ? "выпуск" : count < 5 ? "выпуска" : "выпусков";
 
   return (
-    <div className="rounded-2xl border border-border overflow-hidden">
+    <div className="rounded-2xl overflow-hidden shadow-sm" style={{ border: `1.5px solid ${color}30` }}>
       {/* Section header */}
       <button
         onClick={() => setOpen((v) => !v)}
-        className="w-full flex items-center gap-3 p-4 bg-card hover:bg-muted/50 transition-colors text-left"
+        className="w-full flex items-center gap-3 p-4 text-left active:opacity-80 transition-opacity"
+        style={{ background: `${color}12` }}
       >
-        <span className="text-2xl leading-none shrink-0">{emoji}</span>
-        <span className="flex-1 min-w-0">
-          <span className="block text-sm font-semibold text-foreground leading-snug">{label}</span>
-          <span className="block text-xs text-muted-foreground mt-0.5">{podcasts.length} {podcasts.length === 1 ? "выпуск" : podcasts.length < 5 ? "выпуска" : "выпусков"}</span>
+        {/* Color icon */}
+        <span
+          className="shrink-0 w-11 h-11 rounded-xl grid place-items-center text-xl shadow-sm"
+          style={{ background: color, boxShadow: `0 4px 12px ${color}40` }}
+        >
+          {emoji}
         </span>
-        {open ? <ChevronUp size={18} className="text-muted-foreground shrink-0" /> : <ChevronDown size={18} className="text-muted-foreground shrink-0" />}
+        <span className="flex-1 min-w-0">
+          <span className="block text-sm font-bold text-foreground leading-snug">{label}</span>
+          <span className="block text-xs mt-0.5 font-medium" style={{ color }}>{count} {countLabel}</span>
+        </span>
+        <span
+          className="shrink-0 w-7 h-7 rounded-full grid place-items-center"
+          style={{ background: `${color}18` }}
+        >
+          {open
+            ? <ChevronUp size={16} style={{ color }} />
+            : <ChevronDown size={16} style={{ color }} />}
+        </span>
       </button>
 
       {/* Episodes */}
       {open && (
-        <div className="p-4 pt-0 space-y-3 border-t border-border bg-background">
+        <div className="p-4 pt-3 space-y-3 bg-background" style={{ borderTop: `1px solid ${color}20` }}>
           {podcasts.map((p) => (
             <PlayerCard key={p.id} podcast={p} />
           ))}
@@ -193,9 +209,9 @@ export default function Podcasts() {
         return (
           <GroupSection
             key={group.id}
-            groupId={group.id}
             emoji={group.emoji}
             label={group.label}
+            color={group.color}
             podcasts={items}
           />
         );

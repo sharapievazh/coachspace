@@ -10,11 +10,11 @@ export interface Podcast {
 }
 
 export const PODCAST_GROUPS = [
-  { id: "chess",     emoji: "♟️", label: "Поддержка юного шахматиста" },
-  { id: "books",     emoji: "📚", label: "Разборы книг и концепций коучинга" },
-  { id: "tools",     emoji: "🛠️", label: "Инструменты, модели и психология" },
-  { id: "transform", emoji: "🌟", label: "Трансформация и метафоры" },
-  { id: "demo",      emoji: "🎙️", label: "Практическая демонстрация" },
+  { id: "chess",     emoji: "♟️", label: "Поддержка юного шахматиста",        color: "#7c3aed" },
+  { id: "books",     emoji: "📚", label: "Разборы книг и концепций коучинга", color: "#0369a1" },
+  { id: "tools",     emoji: "🛠️", label: "Инструменты, модели и психология",  color: "#059669" },
+  { id: "transform", emoji: "🌟", label: "Трансформация и метафоры",           color: "#d97706" },
+  { id: "demo",      emoji: "🎙️", label: "Практическая демонстрация",         color: "#db2777" },
 ];
 
 export const PODCASTS: Podcast[] = [
@@ -60,6 +60,17 @@ export const PODCASTS: Podcast[] = [
     file: "/audio/podcast-13.m4a",
     color: "#be185d",
     emoji: "💭",
+  },
+
+  {
+    id: "podcast-17",
+    group: "books",
+    title: "Почему вопросы эффективнее готовых советов",
+    description: "О природе коучинговых вопросов, силе открытых вопросов и почему вопрос открывает то, что совет закрывает",
+    duration: "~20 мин",
+    file: "/audio/podcast-17.m4a",
+    color: "#0369a1",
+    emoji: "❓",
   },
 
   // 🛠️ Инструменты, модели и психология
