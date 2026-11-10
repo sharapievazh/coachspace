@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
-import { Play, Pause, RotateCcw, FastForward, Rewind, Headphones } from "lucide-react";
-import { PODCASTS, type Podcast } from "@/lib/podcasts-data";
+import { Play, Pause, FastForward, Rewind, ChevronDown, ChevronUp, Headphones } from "lucide-react";
+import { PODCASTS, PODCAST_GROUPS, type Podcast } from "@/lib/podcasts-data";
 
 function formatTime(sec: number) {
   if (!isFinite(sec)) return "0:00";
@@ -79,42 +79,32 @@ function PlayerCard({ podcast }: { podcast: Podcast }) {
 
   return (
     <div
-      className="rounded-2xl p-5 space-y-4"
-      style={{ background: podcast.color + "14", border: `1.5px solid ${podcast.color}30` }}
+      className="rounded-2xl p-4 space-y-3"
+      style={{ background: podcast.color + "12", border: `1.5px solid ${podcast.color}28` }}
     >
       <audio ref={audioRef} src={podcast.file} preload="metadata" />
 
-      {/* Header */}
       <div className="flex items-start gap-3">
         <div
-          className="shrink-0 w-12 h-12 rounded-xl grid place-items-center text-2xl"
+          className="shrink-0 w-11 h-11 rounded-xl grid place-items-center text-xl"
           style={{ background: podcast.color + "22" }}
         >
           {podcast.emoji}
         </div>
         <div className="min-w-0">
-          {podcast.category === "session-demo" && (
-            <span className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-full mb-1" style={{ background: podcast.color + "22", color: podcast.color }}>
-              🎬 Пример сессии
-            </span>
-          )}
           <h3 className="font-semibold text-sm leading-snug">{podcast.title}</h3>
           <p className="text-xs text-muted-foreground mt-0.5 leading-relaxed">{podcast.description}</p>
+          <span className="text-xs text-muted-foreground/70 mt-1 inline-block">{podcast.duration}</span>
         </div>
       </div>
 
-      {/* Progress bar */}
+      {/* Progress */}
       <div className="space-y-1">
         <input
-          type="range"
-          min={0}
-          max={duration || 100}
-          value={current}
+          type="range" min={0} max={duration || 100} value={current}
           onChange={onSlider}
           className="w-full h-1.5 rounded-full appearance-none cursor-pointer"
-          style={{
-            background: `linear-gradient(to right, ${podcast.color} ${pct}%, var(--secondary) ${pct}%)`,
-          }}
+          style={{ background: `linear-gradient(to right, ${podcast.color} ${pct}%, var(--secondary) ${pct}%)` }}
         />
         <div className="flex justify-between text-xs text-muted-foreground">
           <span>{formatTime(current)}</span>
@@ -124,39 +114,67 @@ function PlayerCard({ podcast }: { podcast: Podcast }) {
 
       {/* Controls */}
       <div className="flex items-center justify-center gap-4">
-        <button
-          onClick={() => seek(-15)}
-          className="w-10 h-10 grid place-items-center rounded-full bg-background text-foreground hover:bg-secondary transition-colors"
-        >
+        <button onClick={() => seek(-15)} className="w-10 h-10 grid place-items-center rounded-full bg-background text-foreground hover:bg-secondary transition-colors">
           <Rewind size={18} />
         </button>
         <button
           onClick={toggle}
-          className="w-14 h-14 grid place-items-center rounded-full text-white shadow-md transition-opacity hover:opacity-90"
+          className="w-13 h-13 w-[52px] h-[52px] grid place-items-center rounded-full text-white shadow-md transition-opacity hover:opacity-90"
           style={{ background: podcast.color }}
         >
           {loading ? (
             <div className="w-5 h-5 border-2 border-white/40 border-t-white rounded-full animate-spin" />
           ) : playing ? (
-            <Pause size={22} />
+            <Pause size={20} />
           ) : (
-            <Play size={22} className="ml-0.5" />
+            <Play size={20} className="ml-0.5" />
           )}
         </button>
-        <button
-          onClick={() => seek(15)}
-          className="w-10 h-10 grid place-items-center rounded-full bg-background text-foreground hover:bg-secondary transition-colors"
-        >
+        <button onClick={() => seek(15)} className="w-10 h-10 grid place-items-center rounded-full bg-background text-foreground hover:bg-secondary transition-colors">
           <FastForward size={18} />
         </button>
         <button
           onClick={cycleSpeed}
           className="w-10 h-10 grid place-items-center rounded-full bg-background text-foreground hover:bg-secondary transition-colors text-xs font-bold tabular-nums"
-          title="Скорость воспроизведения"
         >
           {speed}x
         </button>
       </div>
+    </div>
+  );
+}
+
+function GroupSection({ groupId, emoji, label, podcasts }: {
+  groupId: string;
+  emoji: string;
+  label: string;
+  podcasts: Podcast[];
+}) {
+  const [open, setOpen] = useState(false);
+
+  return (
+    <div className="rounded-2xl border border-border overflow-hidden">
+      {/* Section header */}
+      <button
+        onClick={() => setOpen((v) => !v)}
+        className="w-full flex items-center gap-3 p-4 bg-card hover:bg-muted/50 transition-colors text-left"
+      >
+        <span className="text-2xl leading-none shrink-0">{emoji}</span>
+        <span className="flex-1 min-w-0">
+          <span className="block text-sm font-semibold text-foreground leading-snug">{label}</span>
+          <span className="block text-xs text-muted-foreground mt-0.5">{podcasts.length} {podcasts.length === 1 ? "выпуск" : podcasts.length < 5 ? "выпуска" : "выпусков"}</span>
+        </span>
+        {open ? <ChevronUp size={18} className="text-muted-foreground shrink-0" /> : <ChevronDown size={18} className="text-muted-foreground shrink-0" />}
+      </button>
+
+      {/* Episodes */}
+      {open && (
+        <div className="p-4 pt-0 space-y-3 border-t border-border bg-background">
+          {podcasts.map((p) => (
+            <PlayerCard key={p.id} podcast={p} />
+          ))}
+        </div>
+      )}
     </div>
   );
 }
@@ -166,25 +184,22 @@ export default function Podcasts() {
     <div className="space-y-5">
       <div>
         <h2 className="text-2xl font-semibold tracking-tight">Подкасты</h2>
-        <p className="text-sm text-muted-foreground mt-0.5">Слушайте материалы в формате аудио</p>
+        <p className="text-sm text-muted-foreground mt-0.5">{PODCASTS.length} аудиовыпусков · слушайте по темам</p>
       </div>
 
-      {PODCASTS.length === 0 ? (
-        <div className="rounded-2xl border border-border bg-card p-6 text-center text-sm text-muted-foreground">
-          <Headphones className="mx-auto mb-2 opacity-40" size={28} />
-          Подкасты появятся здесь
-        </div>
-      ) : (
-        <div className="space-y-4">
-          {PODCASTS.map((p) => (
-            <PlayerCard key={p.id} podcast={p} />
-          ))}
-        </div>
-      )}
-
-      <p className="text-xs text-muted-foreground text-center pb-2">
-        {PODCASTS.length} {PODCASTS.length === 1 ? "подкаст" : "подкаста"}
-      </p>
+      {PODCAST_GROUPS.map((group) => {
+        const items = PODCASTS.filter((p) => p.group === group.id);
+        if (items.length === 0) return null;
+        return (
+          <GroupSection
+            key={group.id}
+            groupId={group.id}
+            emoji={group.emoji}
+            label={group.label}
+            podcasts={items}
+          />
+        );
+      })}
     </div>
   );
 }
