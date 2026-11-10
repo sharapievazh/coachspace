@@ -10,11 +10,11 @@ export interface Podcast {
 }
 
 export const PODCAST_GROUPS = [
-  { id: "chess",     emoji: "♟️", label: "Поддержка юного шахматиста",        color: "#7c3aed" },
   { id: "books",     emoji: "📚", label: "Разборы книг и концепций коучинга", color: "#0369a1" },
   { id: "tools",     emoji: "🛠️", label: "Инструменты, модели и психология",  color: "#059669" },
   { id: "transform", emoji: "🌟", label: "Трансформация и метафоры",           color: "#d97706" },
   { id: "demo",      emoji: "🎙️", label: "Практическая демонстрация",         color: "#db2777" },
+  { id: "chess",     emoji: "♟️", label: "Поддержка юного шахматиста",        color: "#7c3aed" },
 ];
 
 export const PODCASTS: Podcast[] = [
