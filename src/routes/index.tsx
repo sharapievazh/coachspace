@@ -8,6 +8,7 @@ import { type SearchEntry } from "@/lib/content-search";
 import { pushNavigation, popNavigation, type NavigationFrame } from "@/lib/navigation-history";
 import Onboarding, { isOnboardingDone } from "@/components/onboarding";
 import FeatureTour, { isTourDone } from "@/components/feature-tour";
+import UpdatePrompt from "@/components/update-prompt";
 import { BottomBar, HomeScreen, ModulesScreen, ToolsScreen, NotesScreen, LAST_TAB_KEY, VISITED_KEY, loadVisited, loadNotes, type ModuleInfo, type Section, type ShellTab } from "@/components/shell";
 import {
   Play, Pause, Target, Heart, Triangle, Layers,
@@ -911,6 +912,7 @@ ${notesRef.current || "—"}
   return (
     <>
     {!tourDone && <FeatureTour onFinish={() => setTourDone(true)} />}
+    <UpdatePrompt />
     <div className="min-h-screen bg-background text-foreground">
       <header ref={headerRef} className="fixed top-0 inset-x-0 z-30 border-b border-border bg-card">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-[calc(env(safe-area-inset-top,0px)+0.5rem)] pb-3 flex items-center justify-between gap-4">
