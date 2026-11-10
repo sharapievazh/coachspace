@@ -95,14 +95,14 @@ const SHARE_CHANNELS = [
     label: "WhatsApp",
     color: "#25d366",
     icon: "💬",
-    href: (t: string) => `https://wa.me/?text=${encodeURIComponent(t)}`,
+    href: (t: string) => `whatsapp://send?text=${encodeURIComponent(t)}`,
   },
   {
     id: "telegram",
     label: "Telegram",
     color: "#229ED9",
     icon: "✈️",
-    href: (t: string) => `https://t.me/share/url?url=&text=${encodeURIComponent(t)}`,
+    href: (t: string) => `tg://msg?text=${encodeURIComponent(t)}`,
   },
   {
     id: "email",
